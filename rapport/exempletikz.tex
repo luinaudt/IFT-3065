@@ -1,0 +1,86 @@
+\begin{tikzpicture}[node font=\small, node distance = 0.3cm]
+	\node[] (start) {\texttt{sortie <= (s1 OR s2) AND \textquotesingle 1\textquotesingle;}};
+	\node[draw, text width = 5cm, text centered,below=of start] (lexical) {Analyse lexicale};
+	\node[below=of lexical] (lexicalRes) {\textlangle id,1\textrangle  = ( \textlangle id,2\textrangle OR \textlangle id,3\textrangle ) AND \textlangle 1\textrangle };
+	\node[draw, text width = 5cm, text centered,below=of lexicalRes] (Syntax) {Analyse Syntaxique};
+	
+	
+	\begin{scope}[node distance=0.2 and 0.2cm, inner sep=1pt]
+	\node[below left = 0.3cm and 0.8cm of Syntax.south] (SyntaxRes1) {=};
+	\node[below left =of SyntaxRes1] (SyntaxRes11) {\textlangle id,1\textrangle};
+	\node[below right =of SyntaxRes1] (SyntaxRes2) {AND};
+	\node[below right =of SyntaxRes2] (SyntaxRes3) {OR};
+	\node[below left =of SyntaxRes3] (SyntaxRes31) {\textlangle id,2\textrangle};
+	\node[below right =of SyntaxRes3] (SyntaxRes32) {\textlangle id,3\textrangle};
+	
+	\node[below left = of SyntaxRes2] (SyntaxRes4) {1};
+	
+	
+	\path[draw] (SyntaxRes1) -- (SyntaxRes2)
+	(SyntaxRes1) -- (SyntaxRes11)
+	(SyntaxRes2) -- (SyntaxRes3)
+	(SyntaxRes2) -- (SyntaxRes4)
+	(SyntaxRes3) -- (SyntaxRes31)
+	(SyntaxRes3) -- (SyntaxRes32)
+	;
+	\end{scope}
+	
+	\node[draw, text width = 5cm, text centered,right = 0.8cm of start] (Semantic) {Analyse S\'emantique};
+	%  \node[draw, text width = 5cm, text centered,anchor=north] (Semantic) at ($(Syntax.south |- SyntaxRes32.south) - (0,0.3cm)$) {Analyse S\'emantique};
+	
+	\begin{scope}[node distance=0.2 and 0.2cm, inner sep = 1pt]
+	\node[below left =  0.3cm and 0.8cm of Semantic.south] (SemanticRes1) {=};
+	\node[below left =of SemanticRes1] (SemanticRes11) {\textlangle id,1\textrangle};
+	\node[below right =of SemanticRes1] (SemanticRes2) {AND};
+	\node[below right =of SemanticRes2] (SemanticRes3) {OR};
+	\node[below left =of SemanticRes3] (SemanticRes31) {\textlangle id,2\textrangle};
+	\node[below right =of SemanticRes3] (SemanticRes32) {\textlangle id,3\textrangle};
+	
+	\node[below left = of SemanticRes2] (SemanticRes4) {std\_logic};
+	\node[below = of SemanticRes4] (SemanticRes5) {1};
+	
+	
+	\path[draw] (SemanticRes1) -- (SemanticRes2)
+	(SemanticRes1) -- (SemanticRes11)
+	(SemanticRes2) -- (SemanticRes3)
+	(SemanticRes2) -- (SemanticRes4)
+	(SemanticRes4) -- (SemanticRes5)
+	(SemanticRes3) -- (SemanticRes31)
+	(SemanticRes3) -- (SemanticRes32)
+	;
+	\end{scope}
+	\node[draw,text width = 5cm, text centered, anchor=north] (codeIntGen) at ($(Semantic.south |- SemanticRes5.south) - (0,0.3cm)$) {G\'en\'eration et optimisation du code interm\'ediaire};
+	\node[below=of codeIntGen] (codeIntGenRes) {\texttt{id1 = id2 OR id3}};
+	\node[draw,text width = 5cm, text centered, below=of codeIntGenRes] (codeDestGen) {G\'en\'eration du code de destination};
+	\node[below=of codeDestGen] (codeDestGenRes) {\texttt{sortie= entree1 \textbar ~entree2;}};
+	
+	
+	\path[->,>=stealth'] (start) edge (lexical)
+	(lexical) edge (lexicalRes)
+	(lexicalRes) edge (Syntax)
+	(Syntax) edge (Syntax.south |- SyntaxRes1.north)
+	(Semantic) edge (Semantic.south |- SemanticRes1.north)
+	(codeIntGen |- SemanticRes31.south) edge (codeIntGen)
+	(codeIntGen) edge (codeIntGenRes)
+	(codeIntGenRes) edge (codeDestGen)
+	(codeDestGen) edge (codeDestGenRes) 
+	;
+	\path[->,>=stealth', draw]    (Syntax.south |- SyntaxRes31.south) |- 
+	($(start.east |- SyntaxRes31.south) + (0.4,-0.5cm)$) |-
+	($(start.east |- Semantic.north) + (0.4,0.3cm) $) -| 
+	(Semantic.north)
+	;
+	\node[left=0.8cm of Syntax] (symbolTable) {
+		\begin{tabular}{c|c|c|}
+		\cline{2-3}
+		1 & \texttt{sortie} & \ldots \\
+		\cline{2-3}
+		2 & \texttt{s1} & \ldots \\
+		\cline{2-3}
+		3 & \texttt{s2} & \ldots \\
+		\cline{2-3}
+		\end{tabular}
+	};
+	\node[below=of symbolTable] {Table des symboles};
+	
+	\end{tikzpicture}

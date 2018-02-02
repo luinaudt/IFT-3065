@@ -1,0 +1,167 @@
+ %this file contains shape declaration and macro that define 
+ %basic computer science shape for Hardware design.
+ %this file should be include in the preamble
+ 
+ \catcode`@=11
+
+\pgfkeys{%
+  /pgf/logicalbloc io north/.initial=5,
+%  /pgf/logicalbloc io south/.initial=10,
+%  /pgf/logicalbloc io east/.initial=10,
+  /pgf/logicalbloc io west/.initial=10,
+  /pgf/logicalbloc io north spacing/.initial=0.15cm,
+%  /pgf/logicalbloc io south spacing/.initial=0.25cm,
+%  /pgf/logicalbloc io east spacing/.initial=0.25cm,
+  /pgf/logicalbloc io west spacing/.initial=0.20cm
+}
+\def\maxpins{100}
+
+
+%stdChip
+\pgfdeclareshape{logicalbloc}{
+	\savedanchor\centerpoint{% 
+		\pgf@x=.5\wd\pgfnodeparttextbox%
+		\pgf@y=.5\ht\pgfnodeparttextbox%
+		\advance\pgf@y by-.5\dp\pgfnodeparttextbox%
+	  }
+	  \anchor{center}{\centerpoint}
+	  
+	  \saveddimen\height{%
+		\pgfmathsetlength\pgf@x{(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}}%
+	  }
+	  \saveddimen\width{%
+		\pgfmathsetlength\pgf@y{(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}}%
+	  }
+	  \saveddimen{\yspacing}{\pgfmathsetlength\pgf@x{\pgfkeysvalueof{/pgf/logicalbloc io west spacing}}}	  
+	  \saveddimen{\xspacing}{\pgfmathsetlength\pgf@y{\pgfkeysvalueof{/pgf/logicalbloc io north  spacing}}}
+	  
+	  \backgroundpath{%
+		\pgfpathrectanglecorners{\pgfpointadd{\centerpoint}{\genbottomleftpoint}}%
+		{\pgfpointadd{\centerpoint}{\gentoprightpoint}}%
+	  }
+ 
+
+	  \pgfmathloop%
+	  \ifnum\pgfmathcounter>\maxpins\relax% 
+	  \else%
+		% Need to expand \pgfmathcounter
+		\edef\marshal{\noexpand\anchor{io east \pgfmathcounter}}%
+		\expandafter\marshal\expandafter{\expandafter\chippinanchorright\expandafter{\pgfmathcounter}}%
+	  \repeatpgfmathloop%
+	  
+	  \pgfmathloop%
+	  \ifnum\pgfmathcounter>\maxpins\relax% 
+	  \else%
+		% Need to expand \pgfmathcounter
+		\edef\marshal{\noexpand\anchor{io north \pgfmathcounter}}%
+		\expandafter\marshal\expandafter{\expandafter\chippinanchorupper\expandafter{\pgfmathcounter}}%
+	  \repeatpgfmathloop%
+	  
+	  \pgfmathloop%
+	  \ifnum\pgfmathcounter>\maxpins\relax% 
+	  \else%
+		% Need to expand \pgfmathcounter
+		\edef\marshal{\noexpand\anchor{io south \pgfmathcounter}}%
+		\expandafter\marshal\expandafter{\expandafter\chippinanchorbottom\expandafter{\pgfmathcounter}}%
+	  \repeatpgfmathloop%
+	  
+	  \pgfmathloop%
+	  \ifnum\pgfmathcounter>\maxpins\relax% 
+	  \else%
+		% Need to expand \pgfmathcounter
+		\edef\marshal{\noexpand\anchor{io west \pgfmathcounter}}%
+		\expandafter\marshal\expandafter{\expandafter\chippinanchorleft\expandafter{\pgfmathcounter}}%
+	  \repeatpgfmathloop%
+}
+
+\def\genbottomleftpoint{%
+%	\pgfmathsetlength{pgf@xb}{(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}}%
+%	\pgfmathsetlength{pgf@yb}{(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}}%
+%	\setlength{\pgf@xa}{1cm}
+%	\setlength{\pgf@ya}{1cm}
+%	\if \pgf@xb<\pgf@xa
+%		\if \pgf@yb<\pgf@ya
+%			\pgfpoint{-0.5cm}{-0.5cm}
+%		\else
+%			\pgfpoint{-0.5cm}{-(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}/2}
+%		\fi
+%	\else
+%		\if \pgf@yb<\pgf@ya
+%			\pgfpoint{-(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}/2}{-0.5cm}
+%		\else
+			\pgfpoint{-((\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing})/2}{-((\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing})/2}
+%		\fi
+%	\fi
+}
+\def\gentoprightpoint{%
+%	\if {\pgfkeysvalueof{/pgf/logicalbloc io west} < \pgfkeysvalueof{/pgf/logicalbloc io east}}
+%		\setlength{\pgf@xc}{1cm}
+%	\else
+%		\setlength{\pgf@xc}{1cm}
+%	\fi
+%	\if
+%		\setlength{\pgf@xc}{1cm}
+%	\else
+%		\setlength{\pgf@xc}{1cm}
+%	\fi
+%	\pgfmathsetlength{pgf@xb}{(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}}%
+%	\pgfmathsetlength{pgf@yb}{(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}}%
+%	\setlength{\pgf@xa}{1cm}
+%	\setlength{\pgf@ya}{1cm}
+%	\if \pgf@xb<\pgf@xa
+%		\if \pgf@yb<\pgf@ya
+%			\pgfpoint{0.5cm}{0.5cm}
+%		\else
+%			\pgfpoint{0.5cm}{(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}/2}
+%		\fi
+%	\else
+%		\if \pgf@yb<\pgf@ya
+%			\pgfpoint{(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}/2}{0.5cm}
+%		\else
+			\pgfpoint{((\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing})/2}{((\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing})/2}
+%		\fi
+%	\fi
+}
+
+
+\def\genpointbottom#1{
+\pgfpoint{(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}/2-#1*\xspacing}{-(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}/2}
+}
+
+\def\chippinanchorbottom#1{%
+	  % When this macro is called,
+	  % \centerpoint, \height and \chipspacing will be defined.
+	  %\pgfpointadd{\centerpoint}{\pgfpoint{\width/2-#1*\xspacing}{-\height/2}}%
+	  \pgfpointadd{\centerpoint}{\genpointbottom{#1}}%
+}
+
+\def\genpointupper#1{
+\pgfpoint{(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}/2-#1*\xspacing}{(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}/2}
+}
+
+\def\chippinanchorupper#1{%
+	  % When this macro is called,
+	  % \centerpoint, \height and \chipspacing will be defined.
+	  \pgfpointadd{\centerpoint}{\genpointupper{#1}}%
+}
+
+\def\genpointleft#1{
+\pgfpoint{-(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}/2}{(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}/2-#1*\yspacing}
+}
+
+\def\chippinanchorleft#1{%
+	  % When this macro is called,
+	  % \centerpoint, \height and \chipspacing will be defined.
+	  \pgfpointadd{\centerpoint}{\genpointleft{#1}}%
+}
+
+\def\genpointright#1{
+\pgfpoint{(\pgfkeysvalueof{/pgf/logicalbloc io north}+1)*\pgfkeysvalueof{/pgf/logicalbloc io north spacing}/2}{(\pgfkeysvalueof{/pgf/logicalbloc io west}+1)*\pgfkeysvalueof{/pgf/logicalbloc io west spacing}/2-#1*\yspacing}
+}
+\def\chippinanchorright#1{%
+	  % When this macro is called,
+	  % \centerpoint, \height and \chipspacing will be defined.
+	  \pgfpointadd{\centerpoint}{\genpointright{#1}}%
+}
+
+\catcode`@=12
