@@ -1,0 +1,16 @@
+	\begin{grammarC}{<digit> ::= '0' | '1' | '2' | '3' | '5' | '6' | '7' | '8' | '9'}
+		
+		<expression-ent> ::= '(' <expression> ')'
+		
+		<expression> ::= <expression-ent> | <opérateur> <entiers>
+		
+		<entiers> ::= <entier> <entiers>
+		
+		<entier> ::= <digit> <entier>
+		
+		<opérateur> ::= '+' | '-' | '*' | '='  
+		
+		<digit> ::= '0' | '1' | '2' | '3' | '5' | '6' | '7' | '8' | '9'
+		
+		
+	\end{grammarC}
