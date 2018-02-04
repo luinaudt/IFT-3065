@@ -1,18 +1,30 @@
-	\begin{grammar}%{<digit> ::= '0' | '1' | '2' | '3' | '5' | '6' | '7' | '8' | '9'}
+%commande \alt permet de mettre une | en début de ligne pour continuer une expression en mettant un retour à la ligne
+%grammarC permet de centrer le code le paramètre contient la plus longue ligne
+
+	\begin{grammarC}{<expression> ::= <expression-ent> | <opérateur> <entiers>}
 		
-		<expression-ent> ::= '(' <expression> ')'
+		<expression> ::= <procédure>
 		
-		<expression> ::= <expression-ent> | <opérateur> <entiers>
+		<procédure> ::= "(" <opérateur> (<valeurs> | <procédure>) ")"
+				
+		<opérateur> ::= "+" | "-" | "*" | "=" | "<" 
 		
-		<entierPosNeg> ::= '-' <entiers> | <entiers>
+		<données> ::= <valeurs> <données> | $\epsilon$
 		
-		<entiers> ::= <entier> <entiers>
+		<valeurs> ::= <signe> <entier>
 		
-		<entier> ::= <digit> <entier>
+ 		<entier> ::= <digit> ( <entier> | $\epsilon$ )
+
+		<signe> ::= "-" | $\epsilon$ 
 		
-		<opérateur> ::= '+' | '-' | '*' | '=' 
+		<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 		
-		<digit> ::= '0' | '1' | '2' | '3' | '5' | '6' | '7' | '8' | '9'
+		<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
+			    \alt "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
+				\alt "u" | "v" | "w" | "x" | "y" | "z"
 		
 		
-	\end{grammar}
+	\end{grammarC}
+
+\todo[inline]{support des constantes booléenne \#f \#t}
+\todo[inline]{voir pour le support des opération plus complexe, println quotient, modulo, if et let}
