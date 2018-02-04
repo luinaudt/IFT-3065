@@ -5,17 +5,23 @@
 		
 		<expression> ::= <procédure>
 		
-		<procédure> ::= "(" <opérateur> (<valeurs> | <procédure>) ")"
+		<procédure> ::= "(" <opérateur> <données> ")"
 				
 		<opérateur> ::= "+" | "-" | "*" | "=" | "<" 
 		
-		<données> ::= <valeurs> <données> | $\epsilon$
+		<données> ::= <donnée> <données> | <epsilon>
 		
-		<valeurs> ::= <signe> <entier>
+		<donnée> ::= <valeurs> | <procédure> | $\epsilon$
+		
+		<valeurs> ::= <valeurNeg> | <valeurPos>
+		
+		<valeurNeg> ::= "-" <entier>
+		
+		<valeurPos> ::= <signePos> <entier>
 		
  		<entier> ::= <digit> ( <entier> | $\epsilon$ )
 
-		<signe> ::= "-" | $\epsilon$ 
+		<signePos> ::= "+" | $\epsilon$ 
 		
 		<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 		
