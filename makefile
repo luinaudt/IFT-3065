@@ -4,7 +4,7 @@
 .SUFFIXES: .scm .s .o .exe
 
 all: stdio.o
-	./sc read-simple.scm
+
 .s.o:
 	gcc -c -o $*.o $*.s
 
