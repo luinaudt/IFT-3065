@@ -1,5 +1,5 @@
 #! /usr/bin/env gsi
 
-;(include "read-simple.scm")
+(include "codegen.scm")
 (include "parser.scm")
 (include "compiler.scm")

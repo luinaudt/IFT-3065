@@ -27,7 +27,7 @@
       (parse-exprs port))))
 
 ;(define (parse-exprs port)
- ; (let ((x (read port)))
+; (let ((x (read port)))
 ;    (if (eof-object? x)
 ;        '()
 ;        (cons x
@@ -47,20 +47,20 @@
         " mov $0, %rax\n"
         " ret\n"))
 
-(define (compile-expr expr)
-  (if (and (pair? expr)
-           (equal? (car expr) 'println)
-           (pair? (cdr expr))
-           (number? (cadr expr))
-           (null? (cddr expr)))
+;(define (compile-expr expr)
+;  (if (and (pair? expr)
+;           (equal? (car expr) 'println)
+;           (pair? (cdr expr))
+;           (number? (cadr expr))
+;           (null? (cddr expr)))
 
-      (let ((num (cadr expr)))
-        (list " push $" num "\n"
-              " call print_word_dec\n"
-              " push $10\n"
-              " call putchar\n"))
-
-      (error "unknown expression" expr)))
+;      (let ((num (cadr expr)))
+;        (list " push $" num "\n"
+;              " call print_word_dec\n"
+;              " push $10\n"
+;              " call putchar\n"))
+;
+;      (error "unknown expression" expr)))
 
 ;;;----------------------------------------------------------------------------
 
