@@ -19,18 +19,23 @@
 		
 		<valeurPos> ::= <signePos> <entier>
 		
- 		<entier> ::= <digit> ( <entier> | $\epsilon$ )
+		<entier> ::= <digit> <entier2>
+		
+ 		<entier2> ::= <digit> <entier2> | $\epsilon$
 
 		<signePos> ::= "+" | $\epsilon$ 
 		
-		<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+		<identificateur> ::= <letter> ( <identificateur> | $\epsilon$)
 		
-		<letter> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
-			    \alt "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
-				\alt "u" | "v" | "w" | "x" | "y" | "z"
+		<digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+		
+		<letter> ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j'
+			    \alt 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't'
+				\alt 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
 		
 		
 	\end{grammarC}
 
 \todo[inline]{support des constantes booléenne \#f \#t}
 \todo[inline]{voir pour le support des opération plus complexe, println quotient, modulo, if et let}
+\todo[inline]{Ajouter des identificateurs plus complets}

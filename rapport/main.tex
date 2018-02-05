@@ -1,4 +1,4 @@
-\documentclass[]{article}
+\documentclass[12pt]{article}
 
 %environnement
 \usepackage[letterpaper,margin=1in]{geometry}
@@ -38,36 +38,17 @@ On va bien travailler
 
 \subsection{Grammaire à supporter}
 
-\begin{figure}
+\begin{figure}[h!]
 	\input{grammaire.tex}
 	\caption{Représentation EBNF de la grammaire à supporter.}
 \end{figure}
 
-\subsection{exemple grammaire}
-\begin{figure}[]
-	\begin{grammarC}{<jeton> ::= <caractere> | '[' <liste de caractere> ']'}
-		
-		<regex> ::= <branche> \{ '|' <branche> \}
-		
-		<branche> ::= <particule> \{ <particule> \}
-		
-		<particule> ::= <atome>  [ <opérateur> ]
-		
-		<opérateur> ::= '*' | '+' | '?' 
-		\alt  '\{' <entier> '\}' 
-		\alt  '\{' <entier> ',' '\}' 
-		\alt '\{' <entier>','<entier>  '\}'
-		
-		<atome> ::= '(' <regex> ')' | <jeton>
-		
-		<jeton> ::= <caractère> | '[' <liste de caractères> ']'
-		
-	\end{grammarC}
-	\caption{Représentation EBNF d'une regex}
-\end{figure}
+\subsection{ensemble First de la grammaire}
+
+\subsection{ensemble Follow de la grammaire}
 
 
-\subsection{exemple tikz picture}
+\subsection{exemple tikzpicture}
 \begin{figure}
 	\input{exempletikz.tex}
 	\caption{exemple}
