@@ -1,5 +1,23 @@
 ;fichier pour la génération du code assembleur
 
+(define dict
+  (list (#f 1)
+        (#t 9)
+        ))
+
+
+(define (number? n)
+  (= 0 (modulo n 8)))
+
+(define (boolean? b)
+  (= 1 (modulo b 8)))
+
+(define (lookup key dict)
+  (let ((key-val (assoc key dict)))
+    (if key-val
+        (cdr key-val)
+        #f)))
+
 ;on compile un bloc complet
 (define (compile-expr expr)
   (if (pair? expr)
@@ -15,7 +33,7 @@
 	  )
   )
 
-					;fonction mettre les paramètres de fonction
+;fonction mettre les paramètres de fonction
 (define (analyse-param expr)
   (if (null? expr)
       '()
@@ -58,7 +76,6 @@
                                " mov  $9, %rbx\n"
                                " cmovz %rbx, %rax\n"
                                " push %rax\n"))))
-
 
 ;fonction pour analyser une opération (premier élément d'une parenthèse)
 (define (analyse-op expr)
