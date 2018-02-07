@@ -7,8 +7,8 @@ main:
  push $2
  pop %rbx
  pop %rax
-    add  %rbx, %rax
-    push %rax
+ add  %rbx, %rax
+ push %rax
  call print_word_dec
  push $10
  call putchar
@@ -16,8 +16,8 @@ main:
  push $2
  pop %rbx
  pop %rax
-    sub  %rbx, %rax
-    push %rax
+ sub  %rbx, %rax
+ push %rax
  call print_word_dec
  push $10
  call putchar
@@ -25,8 +25,8 @@ main:
  push $2
  pop %rbx
  pop %rax
-    mul  %rbx
-    push %rax
+ mul  %rbx
+ push %rax
  call print_word_dec
  push $10
  call putchar
@@ -34,9 +34,9 @@ main:
  push $2
  pop %rbx
  pop %rax
-    cqo
-    idiv %rbx
-    push %rax
+ cqo
+ idiv %rbx
+ push %rax
  call print_word_dec
  push $10
  call putchar
@@ -44,9 +44,9 @@ main:
  push $2
  pop %rbx
  pop %rax
-    cqo 
-    idiv %rbx
-    push %rdx
+ cqo 
+ idiv %rbx
+ push %rdx
  call print_word_dec
  push $10
  call putchar
@@ -55,17 +55,17 @@ main:
  push $6
  pop %rbx
  pop %rax
-    sub  %rbx, %rax
-    push %rax
+ sub  %rbx, %rax
+ push %rax
  pop %rbx
  pop %rax
-    add  %rbx, %rax
-    push %rax
+ add  %rbx, %rax
+ push %rax
  push $2
  pop %rbx
  pop %rax
-    mul  %rbx
-    push %rax
+ mul  %rbx
+ push %rax
  call print_word_dec
  push $10
  call putchar

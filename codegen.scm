@@ -27,18 +27,28 @@
   )
 
 
-(define op-table `((+        ,(string-append "    add  %rbx, %rax\n"
-                                             "    push %rax\n"))
-                   (-        ,(string-append "    sub  %rbx, %rax\n"
-                                             "    push %rax\n"))
-                   (*        ,(string-append "    mul  %rbx\n"
-                                             "    push %rax\n"))
-                   (quotient ,(string-append "    cqo\n"
-					     "    idiv %rbx\n"
-                                             "    push %rax\n"))
-                   (modulo   ,(string-append "    cqo \n"
-					     "    idiv %rbx\n"
-                                             "    push %rdx\n"))))
+(define op-table '((+         (" add  %rbx, %rax\n"
+                               " push %rax\n"))
+                   (-         (" sub  %rbx, %rax\n"
+                               " push %rax\n"))
+                   (*         (" mul  %rbx\n"
+                               " push %rax\n"))
+                   (quotient  (" cqo\n"
+                               " idiv %rbx\n"
+                               " push %rax\n"))
+                   (modulo    (" cqo \n"
+                               " idiv %rbx\n"
+                               " push %rdx\n"))
+                   (<         (" cmp  %rbx, %rax\n"
+                               " mov  $1, %rax\n"
+                               " mov  $9, %rbx\n"
+                               " cmovs %rbx, %rax\n"
+                               " push %rax\n"))
+                   (=         (" cmp  %rbx, %rax\n"
+                               " mov  $1, %rax\n"
+                               " mov  $9, %rbx\n"
+                               " cmovz %rbx, %rax\n"
+                               " push %rax\n"))))
 
 
 ;fonction pour analyser une opération (premier élément d'une parenthèse)
