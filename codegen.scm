@@ -1,10 +1,18 @@
 ;fichier pour la génération du code assembleur
 
+;on compile un bloc complet
 (define (compile-expr expr)
   (if (pair? expr)
-      (append (analyse-param (cdr expr))
-	      (analyse-op (car expr)))
+      (append (compile-fonc expr)
+	      "pop %rax\n")
       (error "unknown expression" expr))
+  )
+
+;on compile une fonction unique
+(define (compile-fonc expr)
+  (append (analyse-param (cdr expr))
+	  (analyse-op (car expr))
+	  )
   )
 
 
@@ -12,12 +20,12 @@
 (define (analyse-param expr)
   (if (pair? expr)
       (if (pair? (car expr))
-	  (append (compile-expr (car expr))
+	  (append (compile-fonc (car expr))
 		  (analyse-param (cdr expr)))
 	  (if (number? (car expr))
 	      (append (list " push $" (car expr) "\n")
 		      (analyse-param (cdr expr)))		  
-	  (error "unvalid param" expr)
+	  (error "parametre invalide" expr)
 	  ))
       (if (not (null? expr))
 	  (list "push $" expr "\n")
@@ -46,7 +54,8 @@
   (cond ((equal?  expr 'println)
          (list  " call print_word_dec\n"
                 " push $10\n"
-                " call putchar\n"))
+                " call putchar\n"
+		" push $0\n"))
         ((assoc expr op-table)
          (list " pop %rbx\n"
                " pop %rax\n"
