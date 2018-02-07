@@ -25,24 +25,45 @@
 	  '()
 	  )
       )
- )
+  )
+
+
+(define op-table `((+        ,(string-append "    add  %rax, %rbx\n"
+                                             "    push %rbx\n"))
+                   (-        ,(string-append "    sub  %rax, %rbx\n"
+                                             "    push %rbx\n"))
+                   (*        ,(string-append "    mul  %rbx\n"
+                                             "    push %rax\n"))
+                   (quotient ,(string-append "    idiv %rbx\n"
+                                             "    push %rax\n"))
+                   (modulo   ,(string-append "    idiv %rbx\n"
+                                             "    push %rdx\n"))))
+
 
 ;fonction pour analyser une opération (premier élément d'une parenthèse)
 (define (analyse-op expr)
-  (if (equal?  expr 'println)
-      (list  " call print_word_dec\n"
-             " push $10\n"
-             " call putchar\n")
-      (if (equal? expr '+)
-	  (list " pop %rax\n"
-		" pop %rbx \n "
-	        " add %rax, %rbx \n"
-		" push %rbx \n"
-		)
-	  (error "unknown operation" expr)
-	  )
-      )
-  )
+  (cond ((equal?  expr 'println)
+         (list  " call print_word_dec\n"
+                " push $10\n"
+                " call putchar\n"))
+        ((assoc expr op-table)
+         (list " pop %rax\n"
+               " pop %rbx\n"
+               (cadr (assoc expr op-table))))
+        (else
+         (error "unknown operation" expr))))
+      ;; (if (equal? expr '+)
+      ;;     (list " pop %rax\n"
+      ;;      	   " pop %rbx \n "
+      ;;           " add %rax, %rbx \n"
+      ;;   	   " push %rbx \n"
+      ;;   	)
+      ;;     (error "unknown operation" expr)
+      ;;     )
+      ;; )
+;;)
+
+
 ;(trace compile-expr)
 ;(trace analyse-op)
 ;(trace analyse-param)
