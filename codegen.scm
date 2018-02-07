@@ -27,15 +27,17 @@
   )
 
 
-(define op-table `((+        ,(string-append "    add  %rax, %rbx\n"
-                                             "    push %rbx\n"))
-                   (-        ,(string-append "    sub  %rax, %rbx\n"
-                                             "    push %rbx\n"))
+(define op-table `((+        ,(string-append "    add  %rbx, %rax\n"
+                                             "    push %rax\n"))
+                   (-        ,(string-append "    sub  %rbx, %rax\n"
+                                             "    push %rax\n"))
                    (*        ,(string-append "    mul  %rbx\n"
                                              "    push %rax\n"))
-                   (quotient ,(string-append "    idiv %rbx\n"
+                   (quotient ,(string-append "    cqo\n"
+					     "    idiv %rbx\n"
                                              "    push %rax\n"))
-                   (modulo   ,(string-append "    idiv %rbx\n"
+                   (modulo   ,(string-append "    cqo \n"
+					     "    idiv %rbx\n"
                                              "    push %rdx\n"))))
 
 
@@ -46,8 +48,8 @@
                 " push $10\n"
                 " call putchar\n"))
         ((assoc expr op-table)
-         (list " pop %rax\n"
-               " pop %rbx\n"
+         (list " pop %rbx\n"
+               " pop %rax\n"
                (cadr (assoc expr op-table))))
         (else
          (error "unknown operation" expr))))
