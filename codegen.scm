@@ -15,22 +15,22 @@
 	  )
   )
 
-
-;fonction mettre les paramètres de fonction
+					;fonction mettre les paramètres de fonction
 (define (analyse-param expr)
-  (if (pair? expr)
-      (if (pair? (car expr))
-	  (append (compile-fonc (car expr))
-		  (analyse-param (cdr expr)))
-	  (if (number? (car expr))
-	      (append (list " push $" (car expr) "\n")
-		      (analyse-param (cdr expr)))		  
-	  (error "parametre invalide" expr)
-	  ))
-      (if (not (null? expr))
-	  (list "push $" expr "\n")
-	  '()
-	  )
+  (if (null? expr)
+      '()
+      (cons
+       (cond ((pair? (car expr))
+	      (compile-fonc (car expr)))
+	     ((number? (car expr))
+	      (list " push $" (car expr) "\n"))
+	     ((equal? (car expr) (string->symbol "#f"))
+	      (list "push $9 \n"))
+	     ((equal? (car expr) (string->symbol "#t"))
+	      (list "push $1 \n"))
+	     (else (error "parametre invalide" expr)))
+       (analyse-param (cdr expr))
+       )
       )
   )
 
