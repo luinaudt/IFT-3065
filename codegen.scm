@@ -1,12 +1,10 @@
 ;fichier pour la génération du code assembleur
 
 (define (compile-expr expr)
-  (if (and (pair? expr))
-     ; (if (pair? (cadr expr))
-;	  (compile-expr (cadr expr))
-	  (append (analyse-param (cdr expr))
-		  (analyse-op (car expr)))
-	  (error "unknown expression" expr))
+  (if (pair? expr)
+      (append (analyse-param (cdr expr))
+	      (analyse-op (car expr)))
+      (error "unknown expression" expr))
   )
 
 
@@ -14,11 +12,12 @@
 (define (analyse-param expr)
   (if (pair? expr)
       (if (pair? (car expr))
-	  (compile-expr (car expr))
+	  (append (compile-expr (car expr))
+		  (analyse-param (cdr expr)))
 	  (if (number? (car expr))
 	      (append (list " push $" (car expr) "\n")
 		      (analyse-param (cdr expr)))		  
-	  (error "unvalide param" expr)
+	  (error "unvalid param" expr)
 	  ))
       (if (not (null? expr))
 	  (list "push $" expr "\n")
