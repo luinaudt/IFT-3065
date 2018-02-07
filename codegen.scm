@@ -53,17 +53,6 @@
                (cadr (assoc expr op-table))))
         (else
          (error "unknown operation" expr))))
-      ;; (if (equal? expr '+)
-      ;;     (list " pop %rax\n"
-      ;;      	   " pop %rbx \n "
-      ;;           " add %rax, %rbx \n"
-      ;;   	   " push %rbx \n"
-      ;;   	)
-      ;;     (error "unknown operation" expr)
-      ;;     )
-      ;; )
-;;)
-
 
 ;(trace compile-expr)
 ;(trace analyse-op)
