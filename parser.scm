@@ -1,5 +1,6 @@
 ;fichier pour le parsage
 
+;get a non whitesace
 (define (peek-char-non-whitespace port)
   (let ((c (peek-char port)))
     (if (or (eof-object? c)
@@ -60,8 +61,35 @@
     )
   )
 
+;gestion du #
+(define (read-hashtag port)
+  (let ((c (peek-char port)))
+    (cond ((char=? c #\t)
+	   (begin
+	     (read-char port)
+	     9
+	     )
+	   )
+	  ((char=? c #\f)
+	   (begin
+	     (read-char port)
+	     1
+	     )
+	   )
+	  ((char=? c #\\)
+	   (begin
+	     (read-char port)
+	     (read-char port)
+	     )
+	   )
+	  (else
+	   (error "expected #f #t or #\\ character")
+	   )
+	  )
+    )
+  )
 
-
+;token
 (define (read port)
   (let ((c (peek-char-non-whitespace port)))
     (cond ((eof-object? c)
@@ -76,6 +104,15 @@
 	  ((char=? c #\")
 	   (read-char port) ;; skip "
 	   (list->string(read-string port))
+	   )
+	  ((char=? c #\') ; quote
+	   (error "le quote n'est pas encore supporté")
+	   )
+	  ((char=? c #\#) ;#
+	   (begin
+	     (read-char port)
+	     (read-hashtag port)
+	     )
 	   )
           (else
            (read-char port) ;; skip first char
@@ -97,6 +134,7 @@
   (let ((c (peek-char port)))
     (if (or (eof-object? c)
 	    (char=? c #\()
+	    (char=? c #\')
             (char=? c #\))
             (char<=? c #\space))
 	'()
