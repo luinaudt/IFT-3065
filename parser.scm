@@ -13,10 +13,43 @@
     ))
 
 (define (ignore-line port)
-  (let ((c (read-char port)))
+  (let ((c (peek-char port)))
     (if (not (char=? c #\newline))
-	(read-line port))
+	(begin
+	  (read-char port) 
+	  (read-line port))
+	)
     '()
+    )
+  )
+
+;lecture d'une chaîne de caractères
+(define (read-string port)
+  (let ((c (peek-char port)))
+    (if (eof-object? c)
+	(error "manque un \" ")
+	(cond ((char=? c #\")
+	       (begin
+		 (read-char port)
+		 '()
+		 ))
+	      ((char=? c #\\)
+	       (begin
+		 (read-char port)
+		 (let ((x (peek-char port)))
+		   (cond ((or (char=? x #\")
+			     (char=? x #\\))
+			 (read-char port)
+			 (cons x (read-string port)))
+			 (else
+			  (error "caractère échappé invalide #\\" c)
+			  )))))
+	      (else
+	       (begin
+		 (read-char port)
+		 (cons c (read-string port))))
+	      )
+	)
     )
   )
 
@@ -30,6 +63,10 @@
 	  ((char=? c #\;)   ;; commentaire
 	   (ignore-line port)
 	   (read port)
+	   )
+	  ((char=? c #\")
+	   (read-char port) ;; skip "
+	   (list->string(read-string port))
 	   )
           (else
            (read-char port) ;; skip first char
@@ -57,14 +94,14 @@
 	(begin
 	  (read-char port)
 	  (cons c (read-symbol port)))
-     ))
-)
+	))
+  )
 
-;(trace read)
-;(trace peek-char-non-whitespace)
-;(trace read-symbol)
-;(trace read-list)
- 
+					;(trace read)
+					;(trace peek-char-non-whitespace)
+					;(trace read-symbol)
+					;(trace read-list)
+
 (define (parse-exprs port)
   (let ((x (read port)))
     (if (eof-object? x)
