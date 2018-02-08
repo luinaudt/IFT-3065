@@ -1,16 +1,16 @@
 ;fichier pour la génération du code assembleur
 
-(define dict
-  (list (#f 1)
-        (#t 9)
-        ))
+;(define dict
+;  (list (#f 1)
+;        (#t 9)
+;        ))
 
 
-(define (number? n)
-  (= 0 (modulo n 8)))
+;(define (number? n)
+;  (= 0 (modulo n 8)))
 
-(define (boolean? b)
-  (= 1 (modulo b 8)))
+;(define (boolean? b)
+;  (= 1 (modulo b 8)))
 
 (define (lookup key dict)
   (let ((key-val (assoc key dict)))
