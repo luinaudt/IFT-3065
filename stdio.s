@@ -575,7 +575,9 @@ string_r13: .asciz "r13"
 string_r14: .asciz "r14"
 string_r15: .asciz "r15"
 string_rip: .asciz "rip"
-
+string_true:	.asciz "#t"
+string_false:	.asciz "#f"
+	
 
 # The print_regs function sends a hexadecimal integer representation
 # of the content of all the registers to the standard output (stdout).
