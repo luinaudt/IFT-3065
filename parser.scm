@@ -33,25 +33,34 @@
 		 (read-char port)
 		 '()
 		 ))
-	      ((char=? c #\\)
-	       (begin
-		 (read-char port)
-		 (let ((x (peek-char port)))
-		   (cond ((or (char=? x #\")
-			     (char=? x #\\))
-			 (read-char port)
-			 (cons x (read-string port)))
-			 (else
-			  (error "caractère échappé invalide #\\" c)
-			  )))))
 	      (else
 	       (begin
-		 (read-char port)
+		 (read-string-element port)
 		 (cons c (read-string port))))
 	      )
 	)
     )
   )
+;get a string element
+(define (read-string-element port)
+  (let ((c (peek-char port)))
+    (if (eof-object? c)
+	(error "fin de lecture pour chaîne")
+	(if (char=? c #\\)
+	    (begin
+	      (read-char port)
+	      (let ((c (peek-char port)))
+		(if (not (or (char=? c #\")
+			     (char=? c #\\)))
+		    (error "caractère échappé invalide #\\" c)
+		    )
+		))
+	    (read-char port))
+	)
+    )
+  )
+
+
 
 (define (read port)
   (let ((c (peek-char-non-whitespace port)))
