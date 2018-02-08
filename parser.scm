@@ -12,7 +12,7 @@
 	)
     ))
 
-(define (ignore-line port)
+(define (read-comment port)
   (let ((c (peek-char port)))
     (if (not (char=? c #\newline))
 	(begin
@@ -70,7 +70,7 @@
            (read-char port) ;; skip "("
            (read-list port))
 	  ((char=? c #\;)   ;; commentaire
-	   (ignore-line port)
+	   (read-comment port)
 	   (read port)
 	   )
 	  ((char=? c #\")
