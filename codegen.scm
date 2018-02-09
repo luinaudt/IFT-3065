@@ -21,26 +21,32 @@
 ;on compile un bloc complet
 (define (compile-expr expr)
   (if (pair? expr)
-      (append (compile-fonc expr)
+      (cons (analyse-expr expr)
 	      "pop %rax\n")
       (error "unknown expression" expr))
   )
 
 ;on compile une fonction unique
-(define (compile-fonc expr)
-  (append (analyse-param (cdr expr))
+(define (analyse-expr expr)
+  (cons   (analyse-operand (cdr expr))
 	  (analyse-op (car expr))
 	  )
   )
 
-;fonction mettre les paramètres de fonction
-(define (analyse-param expr)
+;analyse d'une condition (if)
+(define (analyse-conditional expr)
+  (error "conditionnal structure not supported yet")
+  )
+ 
+
+;fonction analyser les opérande d'une fonction
+(define (analyse-operand expr)
   (if (null? expr)
       '()
       (let ((first (car expr)))
 	(cons
 	 (cond ((pair? first)
-		(compile-fonc first))
+		(analyse-expr first))
 	       ((number? first)
 		(list "mov $" first ",%rax\n"
 		      "mov $8, %rbx\n"
@@ -51,7 +57,7 @@
 	       ((equal? first (string->symbol "#t"))
 		(list "push $9 \n"))
 	       (else (error "parametre invalide" expr)))
-	 (analyse-param (cdr expr))
+	 (analyse-operand (cdr expr))
 	 )
 	))
   )
