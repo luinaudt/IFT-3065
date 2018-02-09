@@ -55,12 +55,11 @@
 			     (char=? c #\\)))
 		    (error "caractère échappé invalide #\\" c)
 		    )
-		))
-	    (read-char port))
+		))))
+	    (read-char port)
 	)
     )
-  )
-
+  
 ;gestion du #
 (define (read-hashtag port)
   (let ((c (peek-char port)))
@@ -103,7 +102,7 @@
 	   )
 	  ((char=? c #\")
 	   (read-char port) ;; skip "
-	   (list->string(read-string port))
+	   (list->string (read-string port))
 	   )
 	  ((char=? c #\') ; quote
 	   (error "le quote n'est pas encore supporté")
@@ -144,10 +143,12 @@
 	))
   )
 
-					;(trace read)
-					;(trace peek-char-non-whitespace)
-					;(trace read-symbol)
-					;(trace read-list)
+;(trace read-string-element)
+;(trace read-string)
+;(trace read)
+;(trace peek-char-non-whitespace)
+;(trace read-symbol)
+;(trace read-list)
 
 (define (parse-exprs port)
   (let ((x (read port)))
