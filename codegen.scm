@@ -28,14 +28,35 @@
 
 ;on compile une fonction unique
 (define (analyse-expr expr)
-  (cons   (analyse-operand (cdr expr))
-	  (analyse-op (car expr))
-	  )
+  (if (pair? expr)
+      (cond ((equal? 'if (car expr))
+	     (analyse-conditional (cdr expr)))
+	    ((equal? 'let (car expr))
+	     (analyse-let (cdr expr)))
+	    (else
+	     (analyse-proc expr)
+	     )
+	    )
+      (analyse-operand expr)
+      )
+  )
+
+
+;analyse du let
+(define (analyse-let expr)
+  (error "let not supported yet")
   )
 
 ;analyse d'une condition (if)
 (define (analyse-conditional expr)
-  (error "conditionnal structure not supported yet")
+  (if (= (length expr) 3)
+  (cons	(cons (analyse-expr (car expr))
+	       (analyse-expr (cadr expr)))
+	(analyse-expr (caddr expr))
+       )
+      (error "unvalid construct for if")
+      )
+  (error "if not supported yet")
   )
  
 
@@ -43,25 +64,33 @@
 (define (analyse-operand expr)
   (if (null? expr)
       '()
-      (let ((first (car expr)))
-	(cons
-	 (cond ((pair? first)
-		(analyse-expr first))
-	       ((number? first)
-		(list "mov $" first ",%rax\n"
-		      "mov $8, %rbx\n"
-		      "mul %rbx\n"
-		      "push %rax \n"))
-	       ((equal? first (string->symbol "#f"))
-		(list "push $1 \n"))
-	       ((equal? first (string->symbol "#t"))
-		(list "push $9 \n"))
-	       (else (error "parametre invalide" expr)))
-	 (analyse-operand (cdr expr))
-	 )
-	))
+  (if (pair? expr)
+      (analyse-expr expr)
+      (cond ((number? expr)
+	     (list "mov $" expr ",%rax\n"
+		   "mov $8, %rbx\n"
+		   "mul %rbx\n"
+		   "push %rax \n"))
+	    ((equal? expr (string->symbol "#f"))
+	     (list "push $1 \n"))
+	    ((equal? expr (string->symbol "#t"))
+	     (list "push $9 \n"))
+	    (else (error "parametre invalide" expr)))
+      ))
   )
 
+;analyse procedure
+(define (analyse-proc expr)
+  (if (= (length expr) 2)
+      (cons (analyse-operand (cadr expr))
+	    (analyse-op (car expr)))
+      (if (= (length expr) 3)
+	  (cons  (cons (analyse-operand (cadr expr))
+		 (analyse-operand (caddr expr)))
+		 (analyse-op (car expr)))
+	  (error "expression non valide" expr))
+      )
+  )
 
 (define op-table '((+         (" add  %rbx, %rax\n"
                                " push %rax\n"))
@@ -89,7 +118,6 @@
                                " push %rax\n"))))
 
 ;fonction pour analyser une opération (premier élément d'une parenthèse)
-
 (define (analyse-op expr)
   (cond ((equal?  expr 'println)
          (list  " call print_ln\n"
@@ -105,7 +133,9 @@
 
 ;(trace compile-expr)
 ;(trace analyse-op)
-;(trace analyse-param)
+;(trace analyse-operand)
+;(trace analyse-proc)
+;(trace analyse-expr)
 (define (compile-program exprs)
   (list " .text\n"
         " .globl _main\n"
