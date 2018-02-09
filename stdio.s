@@ -312,7 +312,16 @@ print_ln:
 	push	%rax
 	call	print_word_dec
 	jmp	print_ln_end
-print_bool:	
+print_bool:
+	and	$8, %rax
+	jnz	print_bool_true
+	lea	string_false(%rip), %rax
+	jmp	print_bool_end
+print_bool_true:	
+	lea	string_true(%rip), %rax
+print_bool_end:	
+	push	%rax
+	call	print_string
 	
 	
 print_ln_end:	

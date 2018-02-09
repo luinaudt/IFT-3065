@@ -67,13 +67,13 @@
     (cond ((char=? c #\t)
 	   (begin
 	     (read-char port)
-	     9
+	     (string->symbol "#t")
 	     )
 	   )
 	  ((char=? c #\f)
 	   (begin
 	     (read-char port)
-	     1
+	     (string->symbol "#f")
 	     )
 	   )
 	  ((char=? c #\\)
