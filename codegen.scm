@@ -42,7 +42,10 @@
 	 (cond ((pair? first)
 		(compile-fonc first))
 	       ((number? first)
-		(list " push $" first "\n"))
+		(list "mov $" first ",%rax\n"
+		      "mov $8, %rbx\n"
+		      "mul %rbx\n"
+		      "push %rax \n"))
 	       ((equal? first (string->symbol "#f"))
 		(list "push $1 \n"))
 	       ((equal? first (string->symbol "#t"))
@@ -58,10 +61,12 @@
                                " push %rax\n"))
                    (-         (" sub  %rbx, %rax\n"
                                " push %rax\n"))
-                   (*         (" mul  %rbx\n"
+                   (*         (" sar  $3, %rbx\n"
+			       " mul  %rbx\n"
                                " push %rax\n"))
                    (quotient  (" cqo\n"
                                " idiv %rbx\n"
+			       " sal $3, %rax\n"
                                " push %rax\n"))
                    (modulo    (" cqo \n"
                                " idiv %rbx\n"
@@ -78,9 +83,10 @@
                                " push %rax\n"))))
 
 ;fonction pour analyser une opération (premier élément d'une parenthèse)
+
 (define (analyse-op expr)
   (cond ((equal?  expr 'println)
-         (list  " call print_word_dec\n"
+         (list  " call print_ln\n"
                 " push $10\n"
                 " call putchar\n"
 		" push $0\n"))
