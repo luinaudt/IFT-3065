@@ -31,6 +31,8 @@
   (if (pair? expr)
       (cond ((equal? 'if (car expr))
 	     (analyse-conditional (cdr expr)))
+	    ((equal? 'set! (car expr))
+	     (analyse-set! (cdr expr)))
 	    ((equal? 'let (car expr))
 	     (analyse-let (cdr expr)))
 	    (else
@@ -41,11 +43,37 @@
       )
   )
 
+;analyse du set!
+(define (analyse-set! expr)
+  (error "set! not supported yet")
+  )
 
 ;analyse du let
 (define (analyse-let expr)
-  (error "let not supported yet")
-  )
+  (cond ((pair? (car expr))
+	 (analyse-binding-let (car expr))
+	 )
+	((null? (car expr))
+	 (pp "reussi")
+	 )
+	(else (error "illegal form for let expression " expr))
+	)
+   )
+  
+;analyse du premier paramètre de let
+(define (analyse-binding-let expr)
+  (if (null? expr)
+      '()
+      (if (or (pair? (car expr))
+	      (= (length (car expr)) 2 ))
+	  (cons (analyse-expr (car expr))
+		(analyse-binding-let (cdr expr)))
+	  (error "illegal form for let expression" expr)
+	  )
+      )
+ )
+
+
 
 ;analyse d'une condition (if)
 (define (analyse-conditional expr)
@@ -143,7 +171,10 @@
 ;(trace analyse-op)
 ;(trace analyse-operand)
 ;(trace analyse-proc)
-;(trace analyse-expr)
+(trace analyse-expr)
+(trace analyse-binding-let)
+(trace analyse-let)
+
 (define (compile-program exprs)
   (list " .text\n"
         " .globl _main\n"
