@@ -50,14 +50,22 @@
 ;analyse d'une condition (if)
 (define (analyse-conditional expr)
   (if (= (length expr) 3)
-  (cons	(cons (analyse-expr (car expr))
-	       (analyse-expr (cadr expr)))
-	(analyse-expr (caddr expr))
-       )
+      (cons
+	(cons (analyse-expr (car expr))
+	      (list " pop %rax \n"
+		    " cmp $9, %rax \n"
+		    " jne label1if \n"))
+	(cons (cons (analyse-expr (cadr expr))
+		    (list "jmp fin \n"
+			  "label1if:\n"))
+	      (cons (analyse-expr (caddr expr))
+		    "fin: \n"))
+	)
       (error "unvalid construct for if")
-      )
-  (error "if not supported yet")
+	)
+        ;(error "if not supported yet")
   )
+      
  
 
 ;fonction analyser les opérande d'une fonction
@@ -67,14 +75,14 @@
   (if (pair? expr)
       (analyse-expr expr)
       (cond ((number? expr)
-	     (list "mov $" expr ",%rax\n"
-		   "mov $8, %rbx\n"
-		   "mul %rbx\n"
-		   "push %rax \n"))
+	     (list " mov $" expr ",%rax\n"
+		   " mov $8, %rbx\n"
+		   " mul %rbx\n"
+		   " push %rax \n"))
 	    ((equal? expr (string->symbol "#f"))
-	     (list "push $1 \n"))
+	     (list " push $1 \n"))
 	    ((equal? expr (string->symbol "#t"))
-	     (list "push $9 \n"))
+	     (list " push $9 \n"))
 	    (else (error "parametre invalide" expr)))
       ))
   )
