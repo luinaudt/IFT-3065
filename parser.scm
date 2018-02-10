@@ -1,23 +1,17 @@
-;; fichier pour le parsage
+;; fichier contenant les fonctions pour le parsing
 
-;; token
 (define (read port)
   (let ((c (peek-char-non-whitespace port)))
     (cond ((eof-object? c)
            c)
-          ((char=? c #\()        ;; list
-           (read-char port)      ;; skip "("
+          ((char=? c #\()   ;; list
+           (read-char port) ;; skip "("
            (read-list port))
-	  ((char=? c #\")        ;; string
+	  ((char=? c #\")   ;; string
            (read-string port))
-	  ((char=? c #\;)        ;; comment
-	   (read-line port)      ;; skip to next line
+	  ((char=? c #\;)   ;; comment
+	   (read-line port) ;; skip to next line
 	   (read port))
-	  ;; ((char=? c #\') ;; quote
-	  ;;  (error "le quote n'est pas encore supporté"))
-	  ;; ((char=? c #\#) ;; #
-	  ;;  (read-char port)
-	  ;;  (read-hashtag port))
           (else
            (read-char port) ;; skip first char
            (let ((s (list->string (cons c (read-symbol port)))))
@@ -51,33 +45,15 @@
            (read-char port) ;; skip closing quote
            '())
           ((char=? c #\\)
-           (read-char port) ;; advance
+           (read-char port) ;; consume "\"
            (let ((esc-c (peek-char port)))
              (if (or (char=? esc-c #\")
                      (char=? esc-c #\\))
                  (cons (read-char port) (read-string2 port))
                  (cons c (read-string2 port)))))
           (else
-           (read-char port) ;; advance
+           (read-char port) ;; consume char
            (cons c (read-string2 port))))))
-  
-;; gestion du #
-(define (read-hashtag port)
-  (let ((c (peek-char port)))
-    (cond ((char=? c #\t)
-	   (begin
-	     (read-char port)
-	     (string->symbol "#t")))
-	  ((char=? c #\f)
-	   (begin
-	     (read-char port)
-	     (string->symbol "#f")))
-	  ((char=? c #\\)
-	   (begin
-	     (read-char port)
-	     (read-char port)))
-	  (else
-	   (error "expected #f #t or #\\ character")))))
 
 (define (read-symbol port)
   (let ((c (peek-char port)))
@@ -91,7 +67,6 @@
 	  (read-char port)
 	  (cons c (read-symbol port))))))
 
-;; get a non whitespace
 (define (peek-char-non-whitespace port)
   (let ((c (peek-char port)))
     (if (or (eof-object? c)
