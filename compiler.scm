@@ -26,6 +26,13 @@
     (lambda (port)
       (parse-exprs port))))
 
+(define (parse-exprs port)
+  (let ((x (read port)))
+    (if (eof-object? x)
+	'() ;; fin du programme
+	(cons x
+	      (parse-exprs port)))))
+
 ;;;----------------------------------------------------------------------------
 
 (define gcc-link-option
