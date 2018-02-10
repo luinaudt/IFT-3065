@@ -1,23 +1,39 @@
 ;; fichier pour la génération du code assembleur
 
-;; (define dict
-;;  (list (#f 1)
-;;        (#t 9)
-;;        ))
-
-
-;; (define (number? n)
-;;  (= 0 (modulo n 8)))
-
-;; (define (boolean? b)
-;;  (= 1 (modulo b 8)))
-
+(define dict
+  (list (#f 1)
+        (#t 9)
+        ))
 
 (define (lookup key dict)
   (let ((key-val (assoc key dict)))
     (if key-val
-        (cdr key-val)
+        (cadr key-val)
         #f)))
+
+
+;; (define (list? lst)
+;;   (or (null? lst)
+;;       (list? (cdr lst))))
+
+;; (define (pair? p)
+;;   (and (not (null? p))
+;;        (list? p)))
+
+;; (define (number? n)
+;;   (and (not (null? n))
+;;        (not (pair? n))
+;;        (= (modulo n 8) 0)))
+
+;; (define (boolean? b)
+;;   (and (not (null? b))
+;;        (not (pair? b))
+;;        (= (modulo b 8) 1)))
+
+;; (define (char? c)
+;;   (and (not (null? c))
+;;        (not (pair? c))
+;;        (= (modulo c 8) 2)))
 
 
 ;; on compile un bloc complet
@@ -156,9 +172,9 @@
 ;; (trace analyse-op)
 ;; (trace analyse-operand)
 ;; (trace analyse-proc)
-(trace analyse-expr)
-(trace analyse-binding-let)
-(trace analyse-let)
+;; (trace analyse-expr)
+;; (trace analyse-binding-let)
+;; (trace analyse-let)
 
 (define (compile-program exprs)
   (list " .text\n"

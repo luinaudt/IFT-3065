@@ -52,7 +52,7 @@
                  (cons (read-char port) (read-string2 port))
                  (cons c (read-string2 port)))))
           (else
-           (read-char port) ;; consume char
+           (read-char port) ;; consume c
            (cons c (read-string2 port))))))
 
 (define (read-symbol port)
