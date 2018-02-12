@@ -1,9 +1,26 @@
+(define-macro (begin . exprs)
+  (if (not (null? exprs))
+      (if (null? (cdr exprs))
+          (car exprs)
+          `((lambda ()
+              ,(car exprs)
+              ,(cons 'begin
+                     (cdr exprs)))))))
+
+(define-macro (cond . clauses)
+  (if (not (null? clauses))
+      `(if ,(caar clauses)
+           (begin
+             ,@(cdar clauses))
+           ,(cons 'cond
+                  (cdr clauses)))))
+
 (define-macro (or . exprs)
   (cond ((null? exprs)
          '#f)
         ((null? (cdr exprs))
          (car exprs))
-        (else
+        (#t
          `(let ((first ,(car exprs)))
             (if first
                 first
@@ -14,7 +31,7 @@
          '#t)
         ((null? (cdr exprs))
          (car exprs))
-        (else
+        (#t
          `(if ,(car exprs)
               ,(cons 'and (cdr exprs))
               #f))))
@@ -34,19 +51,7 @@
         ((null? (cdr bindings))
          `(let (,(car bindings))
             ,@body))
-        (else
+        (#t
          `(let (,(car bindings))
             (let* ,(cdr bindings)
               ,@body)))))
-
-(define-macro (begin . exprs)
-  (if (not (null? exprs))
-      (if (null? (cdr exprs))
-          (car exprs)
-          `((lambda ()
-              ,(car exprs)
-              ,(cons 'begin
-                     (cdr exprs)))))))
-
-;; (define-macro (cond . clauses)
-  
