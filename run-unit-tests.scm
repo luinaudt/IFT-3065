@@ -110,9 +110,10 @@
 
    (lambda (mode)
      (let ((result (test-using-mode file mode)))
-
-       (if (= 0 (car result))
-           (set! nb-good (+ nb-good 1))
+       (if (or (and (not (= 0 (car result)))
+		    (string=? (substring file 0 17) "unit-tests/crash-"))
+	       (= 0 (car result)))
+	   (set! nb-good (+ nb-good 1))
            (begin
              (set! nb-fail (+ nb-fail 1))
              (print "\n")
