@@ -264,9 +264,9 @@
                  (list " mov $" expr ",%rax\n"
                        " sal $3, %rax\n"
                        " push %rax \n"))
-                ((equal? expr (string->symbol "#f"))
+                ((equal? expr '#f)
                  (list " push $1 \n"))
-                ((equal? expr (string->symbol "#t"))
+                ((equal? expr '#t)
                  (list " push $9 \n"))
                 (else (error "parametre invalide" expr))))))
 
