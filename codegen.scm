@@ -131,12 +131,14 @@
 	  (gen " mov $9, %rax\n"
 	       " push %rax\n"))))
 
+;;liste de littéraux
 (define (gen-list lst)
   (error "gen-list not yet implemented"))
 
 (define (gen-pair p)
   (error "gen-pair not yet implemented"))
 
+;;comilation d'un if
 (define (compile-if exprs)
   (cond ((= (length exprs) 3)
          (let ((jmp-false (symbol->string (gensym)))
@@ -162,6 +164,7 @@
         (else
          (error "invalid construct: if"))))
 
+;;compilation pour le let
 (define (compile-let exprs)
   (if (< (length exprs) 2)
       (error "invalid construct: let")
@@ -175,6 +178,7 @@
         ;; retourne l'environnement à son état original
         (set! env old-env))))
 
+;; traitement des bindings du let 
 (define (compile-bindings bindings let-env)
   (if (not (null? bindings))
       (let ((first (car bindings)) (rest (cdr bindings)))
@@ -191,7 +195,7 @@
               (else
                (error "invalid binding construct: let"))))))
 
-
+;;assignation des variables
 (define (compile-set! exprs)
   (error "set! not supported yet"))
 
