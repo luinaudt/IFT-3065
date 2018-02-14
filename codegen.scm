@@ -57,7 +57,7 @@
         (cadr key-val)
         #f)))
 
-(define gen string-append)
+(define gen list)
 
 ;; (define (list? lst)
 ;;   (or (null? lst)
@@ -90,14 +90,22 @@
       (error "unknown expression" exprs)))
 
 (define (compile-expr expr)
-  (cond ((number? expr)
-         (gen-literal (* expr 8)))
+  (cond ((or (number? expr)
+	     (equal? expr (string->symbol "#f"))
+	     (equal? expr (string->symbol "#t")))
+         (gen-literal expr))
         ((list? expr)
          (if (null? expr)
              (gen-list expr)
              (let ((first (car expr)) (rest (cdr expr)))
-               (cond ((assoc first prims)
-                      ((lookup first prims) rest))
+               (cond ((equal? first 'if)
+		      (compile-if rest))
+		     ((equal? first 'let)
+		      (compile-let rest))
+		     ((equal? first 'set!)
+		      (compile-set! rest))
+		     ;;((assoc first prims)
+		     ;; ((string->symbol (lookup first prims)) rest))
                      ((assoc first env)
                       ((lookup first env) rest))
                      ((or (assoc first op-table)
@@ -113,8 +121,15 @@
          (error "unknown expression" expr))))
 
 (define (gen-literal n)
-  (gen " mov $" (number->string n) ", %rax\n"
-       " push %rax\n"))
+  (cond ((number? n)
+	 (gen " mov $" (number->string (* 8 n)) ", %rax\n"
+	      " push %rax\n"))
+	((equal? n (string->symbol "#f"))
+	 (gen " mov $1, %rax\n"
+	      " push %rax\n"))
+	 ((equal? n (string->symbol "#t"))
+	  (gen " mov $9, %rax\n"
+	       " push %rax\n"))))
 
 (define (gen-list lst)
   (error "gen-list not yet implemented"))
@@ -126,20 +141,23 @@
   (cond ((= (length exprs) 3)
          (let ((jmp-false (gensym)) (jmp-endif (gensym)))
            (gen (compile-expr (car exprs))
-                " cmp $9, 4(%rsp)\n"
-                " jne " jmp-false "\n"
+		" pop %rax\n"
+		" and $8, %rax\n"
+		" cmp $8, %rax\n"
+		;; " cmp $9, 4(%rsp)\n"
+                " jne " (symbol->string jmp-false) "\n"
                 (compile-expr (cadr exprs))
-                " jmp " jmp-endif "\n"
-                jmp-false ":\n"
+                " jmp " (symbol->string jmp-endif) "\n"
+                (symbol->string jmp-false) ":\n"
                 (compile-expr (caddr exprs))
-                jmp-endif ":\n")))
+                (symbol->string jmp-endif) ":\n")))
         ((= (length exprs) 2)
          (let ((jmp-endif (gensym)))
            (gen (compile-expr (car exprs))
                 " cmp $9, 4(%rsp)\n"
-                " jne " jmp-endif "\n"
+                " jne " (symbol->string jmp-endif) "\n"
                 (compile-expr (cadr exprs))
-                jmp-endif ":\n")))
+                (symbol->string jmp-endif) ":\n")))
         (else
          (error "invalid construct: if"))))
 
@@ -148,7 +166,7 @@
       (error "invalid construct: let")
       (let ((old-env env))
         ;; ajoute à l'environnement les nouveaux bindings
-        (compile-bindings (car expr) '())
+        (compile-bindings (car exprs) '())
 
         ;; compile le corps du let
         (map compile-expr exprs)
@@ -158,7 +176,7 @@
 
 (define (compile-bindings bindings let-env)
   (if (not (null? bindings))
-      (let ((first (car expr)) (rest (cdr expr)))
+      (let ((first (car bindings)) (rest (cdr bindings)))
         (cond ((assoc (car first) let-env)
                (error "duplicate variable in let bindings"))
               ((or (pair? first) (= (length first) 2))
@@ -272,7 +290,7 @@
 ;; (trace analyse-expr)
 ;; (trace analyse-binding-let)
 ;; (trace analyse-let)
-
+;; (trace compile-if)
 (define (compile-program exprs)
   (list " .text\n"
         " .globl _main\n"
