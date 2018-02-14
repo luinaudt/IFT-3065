@@ -91,8 +91,8 @@
 
 (define (compile-expr expr)
   (cond ((or (number? expr)
-	     (equal? expr '#f)
-	     (equal? expr '#t))
+	     (equal? expr (string->symbol "#f"))
+	     (equal? expr (string->symbol "#t")))
          (gen-literal expr))
         ((list? expr)
          (if (null? expr)
@@ -124,12 +124,12 @@
   (cond ((number? n)
 	 (gen " mov $" (number->string (* 8 n)) ", %rax\n"
 	      " push %rax\n"))
-	((equal? n '#f)
+	((equal? n (string->symbol "#f"))
 	 (gen " mov $1, %rax\n"
 	      " push %rax\n"))
-        ((equal? n '#t)
-         (gen " mov $9, %rax\n"
-              " push %rax\n"))))
+	 ((equal? n (string->symbol "#t"))
+	  (gen " mov $9, %rax\n"
+	       " push %rax\n"))))
 
 (define (gen-list lst)
   (error "gen-list not yet implemented"))
@@ -139,26 +139,25 @@
 
 (define (compile-if exprs)
   (cond ((= (length exprs) 3)
-         (let ((jmp-false (symbol->string (gensym)))
-               (jmp-endif (symbol->string (gensym))))
+         (let ((jmp-false (gensym)) (jmp-endif (gensym)))
            (gen (compile-expr (car exprs))
 		" pop %rax\n"
 		" and $8, %rax\n"
 		" cmp $8, %rax\n"
 		;; " cmp $9, 4(%rsp)\n"
-                " jne " jmp-false "\n"
+                " jne " (symbol->string jmp-false) "\n"
                 (compile-expr (cadr exprs))
-                " jmp " jmp-endif "\n"
-                jmp-false ":\n"
+                " jmp " (symbol->string jmp-endif) "\n"
+                (symbol->string jmp-false) ":\n"
                 (compile-expr (caddr exprs))
-                jmp-endif ":\n")))
+                (symbol->string jmp-endif) ":\n")))
         ((= (length exprs) 2)
-         (let ((jmp-endif (symbol->string (gensym))))
+         (let ((jmp-endif (gensym)))
            (gen (compile-expr (car exprs))
                 " cmp $9, 4(%rsp)\n"
-                " jne " jmp-endif "\n"
+                " jne " (symbol->string jmp-endif) "\n"
                 (compile-expr (cadr exprs))
-                jmp-endif ":\n")))
+                (symbol->string jmp-endif) ":\n")))
         (else
          (error "invalid construct: if"))))
 
@@ -264,9 +263,9 @@
                  (list " mov $" expr ",%rax\n"
                        " sal $3, %rax\n"
                        " push %rax \n"))
-                ((equal? expr '#f)
+                ((equal? expr (string->symbol "#f"))
                  (list " push $1 \n"))
-                ((equal? expr '#t)
+                ((equal? expr (string->symbol "#t"))
                  (list " push $9 \n"))
                 (else (error "parametre invalide" expr))))))
 
