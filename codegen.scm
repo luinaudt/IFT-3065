@@ -81,7 +81,7 @@
 (define (compile-bloc exprs)
   (if (pair? exprs)
       (cons (compile-expr exprs)
-            " pop %rax\n")
+            " pop %rax\n\n\n")
       (error "unknown expression" exprs)))
 
 (define (compile-expr expr)
@@ -157,13 +157,18 @@
       (error "invalid construct: let")
       (let ((old-env env))
         ;; ajoute à l'environnement les nouveaux bindings
-        (compile-bindings (car exprs) '())
+;;        (compile-bindings (car exprs) '())
 
         ;; compile le corps du let
-        (map compile-expr (cdr exprs))
-
+	;; on sauvegarde l'environnement en mettant le rsp et en gardant rbp
+	;; TODO: ajouter la sauvegarde de l'environnement avec des registres ?
+	(cons (cons " push %rbp \n mov %rsp, %rbp\n"
+		    (compile-bindings (car exprs) '()))
+	      (cons (map compile-expr (cdr exprs))
+		    " mov %rbp, %rsp \n pop %rbp\n push %rax\n" ))
         ;; retourne l'environnement à son état original
-        (set! env old-env))))
+        ;;(set! env old-env)
+	)))
 
 (define stack 0)
 
@@ -175,16 +180,20 @@
                (error "duplicate variable in let bindings"))
               ((or (pair? first) (= (length first) 2))
                (let ((new-bind (list (car first)
-                                     (+ 4 stack))))
-                 (set! stack (+ 4 stack))
-                 (compile-expr (cadr first))
-                 (compile-bindings rest
-                                   (cons new-bind let-env))
+                                     (+ 8 stack))))
+                ;; (set! stack (+ 4 stack))
+                 (cons (compile-expr (cadr first))
+		       (compile-bindings rest
+                                   (cons new-bind let-env)))
                  ;; on modifie l'environnement à la fin car un binding
                  ;; ne doit pas influencer les autres bindings
-                 (set! env (cons new-bind env))))
+		 ;;(set! env (cons new-bind env))))
+		 ))
               (else
-               (error "invalid binding construct: let"))))))
+               (error "invalid binding construct: let"))))
+      (begin (set! env let-env)
+      '())
+      ))
 
 ;;assignation des variables
 (define (compile-set! exprs)
@@ -264,7 +273,7 @@
                 ((equal? expr '#t)
                  (list " push $9 \n"))
                 ((assoc expr env)
-                 (lookup expr env))
+                 (list " mov -" (number->string (lookup expr env)) "(%rbp), %rax \n push %rax\n" ))
                 (else
                  (error "parametre invalide" expr))))))
 
@@ -286,10 +295,10 @@
 ;; (trace analyse-op)
 ;; (trace analyse-operand)
 ;; (trace analyse-proc)
-;; (trace analyse-expr)
-;; (trace analyse-binding-let)
-;; (trace analyse-let)
+;; (trace compile-bindings)
+;; (trace compile-let)			
 ;; (trace compile-if)
+
 (define (compile-program exprs)
   (list " .text\n"
         " .globl _main\n"
