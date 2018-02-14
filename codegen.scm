@@ -105,9 +105,14 @@
         ((pair? expr)
          (gen-pair expr))
         ((assoc expr env)
-         (gen-literal (lookup expr env)))
+         (gen-var (lookup expr env)))
         (else
          (error "unknown expression" expr))))
+
+(define (gen-var n)
+  (gen " mov -" (number->string n) "(%rbp), %rax\n"
+       " push %rax\n")
+  )
 
 (define (gen-literal n)
   (cond ((number? n)
@@ -298,6 +303,7 @@
 ;; (trace compile-bindings)
 ;; (trace compile-let)			
 ;; (trace compile-if)
+;; (trace gen-literal)
 
 (define (compile-program exprs)
   (list " .text\n"
