@@ -43,8 +43,7 @@
 ;; #f et #t n'ont pas leur place dans l'environnement, on devra implanter
 ;; des macros éventuellement pour les substituer par leur valeur
 (define env
-  '((#f  1)
-    (#t  9)
+  '(
     ))
 
 (define (lookup key dict)
@@ -166,6 +165,8 @@
         ;; retourne l'environnement à son état original
         (set! env old-env))))
 
+(define stack 0)
+
 ;; traitement des bindings du let 
 (define (compile-bindings bindings let-env)
   (if (not (null? bindings))
@@ -174,9 +175,11 @@
                (error "duplicate variable in let bindings"))
               ((or (pair? first) (= (length first) 2))
                (let ((new-bind (list (car first)
-                                     (compile-expr (cadr first)))))
+                                     (+ 4 stack))))
+                 (set! stack (+ 4 stack))
+                 (compile-expr (cadr first))
                  (compile-bindings rest
-                                (cons new-bind let-env))
+                                   (cons new-bind let-env))
                  ;; on modifie l'environnement à la fin car un binding
                  ;; ne doit pas influencer les autres bindings
                  (set! env (cons new-bind env))))
@@ -260,7 +263,10 @@
                  (list " push $1 \n"))
                 ((equal? expr '#t)
                  (list " push $9 \n"))
-                (else (error "parametre invalide" expr))))))
+                ((assoc expr env)
+                 (lookup expr env))
+                (else
+                 (error "parametre invalide" expr))))))
 
 ;; fonction pour analyser une opération (premier élément d'une parenthèse)
 (define (analyse-op expr)
