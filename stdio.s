@@ -281,7 +281,67 @@ print_word_hex_loop:
         pop     %rax
         popf
         ret     $1*8
+	.globl print_ln
+print_ln:
+	pushf
+        push    %rax
+        push    %rbx
+        push    %rcx
+        push    %rdx
+        push    %rsi
+        push    %rdi
+        push    %rbp
+#       push    %rsp
+        push    %r8
+        push    %r9
+        push    %r10
+        push    %r11
+        push    %r12
+        push    %r13
+        push    %r14
+        push    %r15
 
+	mov     17*8(%rsp), %rax   # get value
+	mov	%rax,%rbx
+	and	$0x07,%rbx	   #mask to get type
+	cmp	$0, %rbx
+        jnz     print_bool
+	sar	$3, %rax
+	push	%rax
+	call	print_word_dec
+	jmp	print_ln_end
+print_bool:
+	and	$8, %rax
+	jnz	print_bool_true
+	lea	string_false(%rip), %rax
+	jmp	print_bool_end
+print_bool_true:	
+	lea	string_true(%rip), %rax
+print_bool_end:	
+	push	%rax
+	call	print_string
+	
+	
+print_ln_end:	
+	pop     %r15
+        pop     %r14
+        pop     %r13
+        pop     %r12
+        pop     %r11
+        pop     %r10
+        pop     %r9
+        pop     %r8
+#       pop     %rsp
+        pop     %rbp
+        pop     %rdi
+        pop     %rsi
+        pop     %rdx
+        pop     %rcx
+        pop     %rbx
+        pop     %rax
+        popf
+        ret     $1*8
+	
 # The print_word_dec function sends a decimal integer
 # representation of a word to the standard output (stdout).
 # The calling convention is to push to the stack the word (64 bits)
@@ -308,9 +368,9 @@ print_word_dec:
         push    %r13
         push    %r14
         push    %r15
-
+	
         mov     17*8(%rsp), %rax   # get the number to print
-        cmp     $0, %rax
+	cmp     $0, %rax
         jns     print_word_dec_pos
 print_word_dec_neg:
         push    $'-'  # -
@@ -318,7 +378,7 @@ print_word_dec_neg:
         mov     17*8(%rsp), %rax   # negate the number to print
         neg     %rax
 print_word_dec_pos:
-
+	
         mov     $0, %rdx
         mov     $10, %rbx
         div     %rbx        # rax = rdx::rax / 10, rdx = rdx::rax % 10
@@ -575,7 +635,9 @@ string_r13: .asciz "r13"
 string_r14: .asciz "r14"
 string_r15: .asciz "r15"
 string_rip: .asciz "rip"
-
+string_true:	.asciz "#t"
+string_false:	.asciz "#f"
+	
 
 # The print_regs function sends a hexadecimal integer representation
 # of the content of all the registers to the standard output (stdout).
