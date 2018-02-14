@@ -95,7 +95,7 @@
              (gen-list expr)
              (let ((first (car expr)) (rest (cdr expr)))
                (cond ((assoc first prims)
-		      (cons (lookup first prims) rest))
+		      ((lookup first prims) rest))
                      ((assoc first env)
                       ((lookup first env) rest))
                      ((or (assoc first op-table)
@@ -135,7 +135,7 @@
                (jmp-endif (symbol->string (gensym))))
            (gen (compile-expr (car exprs))
 		" pop %rax\n"
-		" cmp $1, 4(%rsp)\n"
+		" cmp $1, %rax\n"
                 " je " jmp-false "\n"
                 (compile-expr (cadr exprs))
                 " jmp " jmp-endif "\n"
