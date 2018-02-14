@@ -135,10 +135,8 @@
                (jmp-endif (symbol->string (gensym))))
            (gen (compile-expr (car exprs))
 		" pop %rax\n"
-		" and $8, %rax\n"
-		" cmp $8, %rax\n"
-		;; " cmp $9, 4(%rsp)\n"
-                " jne " jmp-false "\n"
+		" cmp $1, 4(%rsp)\n"
+                " je " jmp-false "\n"
                 (compile-expr (cadr exprs))
                 " jmp " jmp-endif "\n"
                 jmp-false ":\n"
