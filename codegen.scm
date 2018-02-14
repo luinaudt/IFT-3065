@@ -139,25 +139,26 @@
 
 (define (compile-if exprs)
   (cond ((= (length exprs) 3)
-         (let ((jmp-false (gensym)) (jmp-endif (gensym)))
+         (let ((jmp-false (symbol->string (gensym)))
+               (jmp-endif (symbol->string (gensym))))
            (gen (compile-expr (car exprs))
 		" pop %rax\n"
 		" and $8, %rax\n"
 		" cmp $8, %rax\n"
 		;; " cmp $9, 4(%rsp)\n"
-                " jne " (symbol->string jmp-false) "\n"
+                " jne " jmp-false "\n"
                 (compile-expr (cadr exprs))
-                " jmp " (symbol->string jmp-endif) "\n"
-                (symbol->string jmp-false) ":\n"
+                " jmp " jmp-endif "\n"
+                jmp-false ":\n"
                 (compile-expr (caddr exprs))
-                (symbol->string jmp-endif) ":\n")))
+                jmp-endif ":\n")))
         ((= (length exprs) 2)
-         (let ((jmp-endif (gensym)))
+         (let ((jmp-endif (symbol->string (gensym))))
            (gen (compile-expr (car exprs))
                 " cmp $9, 4(%rsp)\n"
-                " jne " (symbol->string jmp-endif) "\n"
+                " jne " jmp-endif "\n"
                 (compile-expr (cadr exprs))
-                (symbol->string jmp-endif) ":\n")))
+                jmp-endif ":\n")))
         (else
          (error "invalid construct: if"))))
 
