@@ -18,8 +18,19 @@
                 " idiv %rbx\n"
                 " sal $3, %rax\n"
                 " push %rax\n"))
-    (modulo    (" cqo \n"
-                " idiv %rbx\n"
+    (modulo    (" sar $3, %rax\n"
+		" sar $3, %rbx\n"
+		" cqo\n"
+		" idiv %rbx\n"
+		" mov %rbx, %r8\n"
+		" mov %rdx, %r9\n"
+		" shr $63, %r8\n"
+		" shr $63, %r9\n"
+		" cmp %r8, %r9\n"
+		" mov $0, %r8\n"
+		" cmovne %rbx, %r8\n"
+		" add %r8, %rdx\n"
+		" sal $3, %rdx\n"
                 " push %rdx\n"))
     (<         (" cmp  %rbx, %rax\n"
                 " mov  $1, %rax\n"
@@ -75,7 +86,7 @@
 (define (compile-bloc exprs)
   (if (pair? exprs)
       (cons (compile-expr exprs)
-            "pop %rax\n")
+            " pop %rax\n")
       (error "unknown expression" exprs)))
 
 (define (compile-expr expr)
@@ -232,8 +243,7 @@
           (compile-expr expr)
           (cond ((number? expr)
                  (list " mov $" expr ",%rax\n"
-                       " mov $8, %rbx\n"
-                       " mul %rbx\n"
+                       " sal $3, %rax\n"
                        " push %rax \n"))
                 ((equal? expr (string->symbol "#f"))
                  (list " push $1 \n"))

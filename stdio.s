@@ -306,9 +306,7 @@ print_ln:
 	and	$0x07,%rbx	   #mask to get type
 	cmp	$0, %rbx
         jnz     print_bool
-	mov	$8, %rbx
-	cqo
-	idiv	%rbx
+	sar	$3, %rax
 	push	%rax
 	call	print_word_dec
 	jmp	print_ln_end
