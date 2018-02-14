@@ -1,10 +1,6 @@
 ;; fichier pour la génération du code assembleur
 
-(define prims
-  '((if       ,compile-if)
-    (let      ,compile-let)
-    (set!     ,compile-set!)
-    ))
+
 
 (define op-table
   '((+         (" add  %rbx, %rax\n"
@@ -98,14 +94,8 @@
          (if (null? expr)
              (gen-list expr)
              (let ((first (car expr)) (rest (cdr expr)))
-               (cond ((equal? first 'if)
-		      (compile-if rest))
-		     ((equal? first 'let)
-		      (compile-let rest))
-		     ((equal? first 'set!)
-		      (compile-set! rest))
-		     ;;((assoc first prims)
-		     ;; ((string->symbol (lookup first prims)) rest))
+               (cond ((assoc first prims)
+		      (cons (lookup first prims) rest))
                      ((assoc first env)
                       ((lookup first env) rest))
                      ((or (assoc first op-table)
@@ -301,3 +291,9 @@
         (map compile-bloc exprs)
         " mov $0, %rax\n"
         " ret\n"))
+
+(define prims
+  `((if       ,compile-if)
+    (let      ,compile-let)
+    (set!     ,compile-set!)
+    ))
