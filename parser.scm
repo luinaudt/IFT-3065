@@ -12,6 +12,9 @@
 	  ((char=? c #\;)   ;; comment
 	   (read-line port) ;; skip to next line
 	   (read port))
+	  ((char=? c #\#)
+	   (begin (read-char port)
+		  (read-hashtag port)))
           (else
            (read-char port) ;; skip first char
            (let ((s (list->string (cons c (read-symbol port)))))
@@ -66,6 +69,24 @@
 	(begin
 	  (read-char port)
 	  (cons c (read-symbol port))))))
+
+;; gestion du #
+(define (read-hashtag port)
+  (let ((c (peek-char port)))
+    (cond ((char=? c #\t)
+	   (begin
+	     (read-char port)
+	     '#t))
+	  ((char=? c #\f)
+	   (begin
+	     (read-char port)
+	     '#f))
+	  ((char=? c #\\)
+	   (begin
+	     (read-char port)
+	     (read-char port)))
+	  (else
+	   (error "expected #f #t or #\\ character")))))
 
 (define (peek-char-non-whitespace port)
   (let ((c (peek-char port)))

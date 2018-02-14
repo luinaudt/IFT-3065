@@ -91,8 +91,8 @@
 
 (define (compile-expr expr)
   (cond ((or (number? expr)
-	     (equal? expr (string->symbol "#f"))
-	     (equal? expr (string->symbol "#t")))
+	     (equal? expr '#f)
+	     (equal? expr '#t))
          (gen-literal expr))
         ((list? expr)
          (if (null? expr)
@@ -124,10 +124,10 @@
   (cond ((number? n)
 	 (gen " mov $" (number->string (* 8 n)) ", %rax\n"
 	      " push %rax\n"))
-	((equal? n (string->symbol "#f"))
+	((equal? n '#f)
 	 (gen " mov $1, %rax\n"
 	      " push %rax\n"))
-	 ((equal? n (string->symbol "#t"))
+	 ((equal? n '#t)
 	  (gen " mov $9, %rax\n"
 	       " push %rax\n"))))
 
