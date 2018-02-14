@@ -158,7 +158,7 @@
       (let ((old-env env))
         ;; ajoute à l'environnement les nouveaux bindings
 ;;        (compile-bindings (car exprs) '())
-
+	(set! stack 0)
         ;; compile le corps du let
 	;; on sauvegarde l'environnement en mettant le rsp et en gardant rbp
 	;; TODO: ajouter la sauvegarde de l'environnement avec des registres ?
@@ -181,7 +181,7 @@
               ((or (pair? first) (= (length first) 2))
                (let ((new-bind (list (car first)
                                      (+ 8 stack))))
-                ;; (set! stack (+ 4 stack))
+		 (set! stack (+ 8 stack))
                  (cons (compile-expr (cadr first))
 		       (compile-bindings rest
                                    (cons new-bind let-env)))
