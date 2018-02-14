@@ -161,7 +161,7 @@
         (compile-bindings (car exprs) '())
 
         ;; compile le corps du let
-        (map compile-expr exprs)
+        (map compile-expr (cdr exprs))
 
         ;; retourne l'environnement à son état original
         (set! env old-env))))
@@ -174,8 +174,8 @@
                (error "duplicate variable in let bindings"))
               ((or (pair? first) (= (length first) 2))
                (let ((new-bind (list (car first)
-                                     (compile-expr (cdr first)))))
-                 (comp-bindings rest
+                                     (compile-expr (cadr first)))))
+                 (compile-bindings rest
                                 (cons new-bind let-env))
                  ;; on modifie l'environnement à la fin car un binding
                  ;; ne doit pas influencer les autres bindings
