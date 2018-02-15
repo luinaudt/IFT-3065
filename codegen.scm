@@ -338,5 +338,5 @@
   `((if       ,compile-if)
     (let      ,compile-let)
     (set!     ,compile-set!)
-    (quote    ,compile-quote)
+    (quote    ,gen-literal)
     ))
