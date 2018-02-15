@@ -6,6 +6,30 @@
     ( #\,)
      ))
 
+(define (read-list port)
+  (let ((c (peek-char port)))
+    (cond ((char=? c #\()
+	   (read-char port) ;; skip
+	   (if ((char=? (peek-char-non-whitespace port) #\))) ;;test parenthèse fermante	
+	       '()
+	       (begin (read port)
+		      (let ((c (peek-char-non-whitespace port))
+			    (cond ((char=? c #\.)
+				   (read-char port)
+				   (if (char=? (peek-char-non-whitespace port) #\))
+				       (error "datum expected"))
+				   (read port)
+				   (if (char=? (peek-char-non-whitespace port) #\))
+				       retour
+				       (error "missing parenthesis")))
+				  ((char=? c #\))
+				   (read-char port)
+				   retour)
+				  (else (error "missing parenthesis"))))))))
+	  ((assoc abbrev c)
+	   (read-abbrec port))
+	  (else (error "shouldn't get here")))))
+
 (define (read port)
   (let ((c (peek-char-non-whitespace port)))
     (cond ((eof-object? c)
