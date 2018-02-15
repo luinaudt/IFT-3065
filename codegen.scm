@@ -82,8 +82,9 @@
 
 (define (compile-bloc exprs)
   (if (pair? exprs)
-      (cons (compile-expr exprs)
-            " pop %rax\n\n\n")
+      (cons (cons " mov %rsp, %rbp\n"
+	     (compile-expr exprs))
+            " mov %rbp, %rsp \n")
       (error "unknown expression" exprs)))
 
 (define (compile-expr expr)
@@ -176,7 +177,7 @@
 			       (cons (map compile-expr (cdr exprs))
 				     (if (= 0 old-stack)
 					 " mov %rbp, %rsp \n pop %rbp\n push %rax\n"
-					 ""))))
+					 (list " mov %rax, -" (+ old-stack 8) "(%rbp)\n") ))))
 	       ;; retourne l'environnement à son état original
 	       (set! env old-env)
 	       (set! stack old-stack)
@@ -195,13 +196,17 @@
         (cond ((assoc (car first) let-env)
                (error "duplicate variable in let bindings"))
               ((or (pair? first) (= (length first) 2))
-               (let ((new-bind (list (car first)
-                                     (+ 8 stack))))
-		 (set! stack (+ 8 stack))
-		 (set! env (if (null? env) (cons new-bind '()) (cons new-bind env)))
-                 (cons (compile-expr (cadr first))
-		       (compile-bindings rest
-                                   (cons new-bind let-env)))
+               (let ((ret '()) (new-bind '()))
+		 (begin (set! ret (compile-expr (cadr first)))
+			(set! new-bind (list (car first)
+					     (+ 8 stack)))
+			(set! stack (+ 8 stack))
+
+			(set! env (if (null? env) (cons new-bind '()) (cons new-bind env)))
+			(set! ret (cons ret (compile-bindings rest
+							  (cons new-bind let-env))))
+			ret)
+
                  ;; on modifie l'environnement à la fin car un binding
                  ;; ne doit pas influencer les autres bindings
 		 ;;(set! env (cons new-bind env))))
@@ -298,8 +303,7 @@
   (cond ((equal?  expr 'println)
          (list  " call print_ln\n"
                 " push $10\n"
-                " call putchar\n"
-		" push $0\n"))
+                " call putchar\n"))
         ((lookup expr op-table)
          (list " pop %rbx\n"
                " pop %rax\n"
