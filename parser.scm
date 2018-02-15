@@ -4,7 +4,7 @@
   '(( #\')
     ( #\`)
     ( #\,)
-     ))
+    ))
 
 (define (read port)
   (let ((c (peek-char-non-whitespace port)))
@@ -38,23 +38,47 @@
 	  ((char=? c #\`)
 	   (error "quasiquote not supported yet")) ;;quasiquote
  	  ((char=? c #\,)
-	    (error ", not supported yet")) ;; , et , @
+           (error ", not supported yet")) ;; , et ,@
 	  )))
 
 (define (read-list port)
   (let ((c (peek-char-non-whitespace port)))
     (cond ((char=? c #\))
-           (read-char port) ;; skip ")"
+           (read-char port)  ;; skip ")"
            '())
           ((char=? c #\")
            (read-string port))
           ((char=? c #\;)
-           (read-line port) ;; skip comment
+           (read-line port)  ;; skip comment
            (read-list port))
+          ((char=? c #\.)    ;; improper list
+           (read-char port)  ;; consume "."
+           (read-pair port))
           (else
            (let ((first (read port)))
              (let ((rest (read-list port)))
                (cons first rest)))))))
+
+(define (read-pair port)
+  (let ((c (peek-char-non-whitespace port)))
+    (cond ((char=? c #\")
+           (read-string port))
+          ((char=? c #\;)
+           (read-line port) ;; skip comment
+           (read-list port))
+          ((char=? c #\))
+           (error "Datum expected"))
+          (else
+           (let ((first (read port)))
+             (let ((c (peek-char-non-whitespace port)))
+               (if (char=? c #\))
+                   first
+                   (error "Closing parenthesis expected, got: " c))))))))
+
+
+
+
+
 
 (define (read-string port)
   (read-char port) ;; skip opening quote
@@ -81,14 +105,14 @@
 (define (read-symbol port)
   (let ((c (peek-char port)))
     (if (or (eof-object? c)
-	    (char=? c #\()
-	    (char=? c #\')
+            (char=? c #\()
+            (char=? c #\')
             (char=? c #\))
             (char<=? c #\space))
-	'()
-	(begin
-	  (read-char port)
-	  (cons c (read-symbol port))))))
+        '()
+        (begin
+          (read-char port)
+          (cons c (read-symbol port))))))
 
 ;; gestion du #
 (define (read-hashtag port)
@@ -96,14 +120,14 @@
     (cond ((char=? c #\t)
            (read-char port)
            '#t)
-	  ((char=? c #\f)
+          ((char=? c #\f)
            (read-char port)
            '#f)
-	  ((char=? c #\\)
+          ((char=? c #\\)
            (read-char port)
            (read-char port))
-	  (else
-	   (error "expected #f #t or #\\ character")))))
+          (else
+           (error "expected #f #t or #\\ character")))))
 
 (define (peek-char-non-whitespace port)
   (let ((c (peek-char port)))
@@ -112,7 +136,7 @@
         c
         (begin
           (read-char port)
-	  (peek-char-non-whitespace port)))))
+          (peek-char-non-whitespace port)))))
 
 ;; (trace read-string-element)
 ;; (trace read-string)
