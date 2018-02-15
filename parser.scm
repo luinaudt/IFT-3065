@@ -1,5 +1,11 @@
 ;; fichier contenant les fonctions pour le parsing
 
+(define abbrev
+  '(( #\')
+    ( #\`)
+    ( #\,)
+     ))
+
 (define (read port)
   (let ((c (peek-char-non-whitespace port)))
     (cond ((eof-object? c)
@@ -12,6 +18,8 @@
 	  ((char=? c #\;)   ;; comment
 	   (read-line port) ;; skip to next line
 	   (read port))
+	  ((assoc c abbrev)
+	   (read-abbrev port))
 	  ((char=? c #\#)
 	   (read-char port)
            (read-hashtag port))
@@ -20,6 +28,18 @@
            (let ((s (list->string (cons c (read-symbol port)))))
              (or (string->number s)
                  (string->symbol s)))))))
+
+;;support des abbrevation
+(define (read-abbrev port)
+  (let ((c (peek-char port)))
+    (cond ((char=? c #\') ;;quote on le remplace par quote
+	   (read-char port)
+	   (cons 'quote (read port)))
+	  ((char=? c #\`)
+	   (error "quasiquote not supported yet")) ;;quasiquote
+ 	  ((char=? c #\,)
+	    (error ", not supported yet")) ;; , et , @
+	  )))
 
 (define (read-list port)
   (let ((c (peek-char-non-whitespace port)))

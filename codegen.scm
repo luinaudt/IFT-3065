@@ -104,7 +104,7 @@
                           (equal? first 'println))
                       (analyse-proc expr))
                      (else
-                      (gen-list expr))))))
+		      (error "unknown expression " expr))))))
         ((pair? expr)
          (gen-pair expr))
         ((assoc expr env)
@@ -218,6 +218,9 @@
 ;;assignation des variables
 (define (compile-set! exprs)
   (error "set! not supported yet"))
+
+(define (compile-quote exprs)
+  (error "quote not supported yet"))
 
 
 
@@ -335,4 +338,5 @@
   `((if       ,compile-if)
     (let      ,compile-let)
     (set!     ,compile-set!)
+    (quote    ,compile-quote)
     ))
