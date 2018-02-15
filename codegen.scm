@@ -82,9 +82,9 @@
 
 (define (compile-bloc exprs)
   (if (pair? exprs)
-      (cons (cons " mov %rsp, %rbp\n"
+      (cons (cons " push %rbp\n mov %rsp, %rbp\n"
 	     (compile-expr exprs))
-            " mov %rbp, %rsp \n")
+            " mov %rbp, %rsp \n pop %rbp\n")
       (error "unknown expression" exprs)))
 
 (define (compile-expr expr)
