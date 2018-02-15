@@ -4,53 +4,7 @@
   '(( #\')
     ( #\`)
     ( #\,)
-<<<<<<< HEAD
      ))
-=======
-    ))
-
-(define (read-list port)
-  (let ((c (peek-char-non-whitespace port)))
-    (cond ((char=? c #\))
-           (read-char port) ;; consume ")"
-           '())
-          ((char=? c #\.)
-           (error "Improperly placed dot"))
-          (else
-           (read-list-helper port)))))
-
-(define (read-list-helper port)
-  (let* ((datum (read port))
-         (c (peek-char-non-whitespace port)))
-    (cond ((char=? c #\))
-           (read-char port) ;; consume ")"
-           '())
-          ((char=? c #\.)
-           (read-char port) ;; consume "."
-           (read-list-last port))
-          (else
-           (cons datum (read-list-helper port))))))
-
-
-
-
-(define (read-list-last port)
-  (let ((c (peek-char-non-whitespace port)))
-    (cond ((char=? c #\")
-           (read-string port))
-          ((char=? c #\;)
-           (read-line port) ;; skip comment
-           (read-list port))
-          ((char=? c #\))
-           (error "Datum expected"))
-          (else
-           (let ((first (read port)))
-             (let ((c (peek-char-non-whitespace port)))
-               (if (char=? c #\))
-                   first
-                   (error "Closing parenthesis expected, got: " c))))))))
-
->>>>>>> 5b8053214cc592f112e86c1f94f3786d5c460920
 
 (define (read port)
   (let ((c (peek-char-non-whitespace port)))
@@ -87,7 +41,6 @@
 	    (error ", not supported yet")) ;; , et , @
 	  )))
 
-<<<<<<< HEAD
 (define (read-list port)
   (let ((c (peek-char-non-whitespace port)))
     (cond ((char=? c #\))
@@ -102,30 +55,6 @@
            (let ((first (read port)))
              (let ((rest (read-list port)))
                (cons first rest)))))))
-=======
-;; (define (read-list port)
-;;   (let ((c (peek-char-non-whitespace port)))
-;;     (cond ((char=? c #\))
-;;            (read-char port)  ;; skip ")"
-;;            '())
-;;           ((char=? c #\")
-;;            (read-string port))
-;;           ((char=? c #\;)
-;;            (read-line port)  ;; skip comment
-;;            (read-list port))
-;;           ((char=? c #\.)    ;; improper list
-;;            (read-char port)  ;; consume "."
-;;            (read-pair port))
-;;           (else
-;;            (let ((first (read port)))
-;;              (let ((rest (read-list port)))
-;;                (cons first rest)))))))
-
-
-
-
-
->>>>>>> 5b8053214cc592f112e86c1f94f3786d5c460920
 
 (define (read-string port)
   (read-char port) ;; skip opening quote
@@ -165,7 +94,6 @@
 (define (read-hashtag port)
   (let ((c (peek-char port)))
     (cond ((char=? c #\t)
-<<<<<<< HEAD
            (read-char port)
            '#t)
 	  ((char=? c #\f)
@@ -176,24 +104,6 @@
            (read-char port))
 	  (else
 	   (error "expected #f #t or #\\ character")))))
-=======
-           (read-char port)  ;; consume "t"
-           '#t)              ;; return symbol #t
-          ((char=? c #\f)
-           (read-char port)  ;; consume "f"
-           '#f)              ;; return symbol #f
-          ((char=? c #\\)
-           (read-char port)  ;; consume "\"
-           (read-char port)) ;; return a char
-          ((char=? c #\()
-           (read-char port)  ;; consume "("
-           (read-vector))
-          (else
-           (error "Ill-formed hashtag expression, got: " c)))))
-
-(define (read-vector port)
-  (error "vectors not yet supported"))
->>>>>>> 5b8053214cc592f112e86c1f94f3786d5c460920
 
 (define (peek-char-non-whitespace port)
   (let ((c (peek-char port)))
@@ -204,6 +114,7 @@
           (read-char port)
 	  (peek-char-non-whitespace port)))))
 
+;; (trace read-string-element)
 ;; (trace read-string)
 ;; (trace read)
 ;; (trace peek-char-non-whitespace)
