@@ -11,7 +11,12 @@
 
 ;;datum
 (define (read port)
-  
+  (let ((c (peek-char-nws port))
+	(cond ((delimiter c)
+	       )
+	      )
+	)
+    )
   )
 
 ;;simple datum
