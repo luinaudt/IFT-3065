@@ -288,7 +288,8 @@
                 ((equal? expr '#t)
                  (list " push $9 \n"))
                 ((assoc expr env)
-                 (list " mov -" (number->string (lookup expr env)) "(%rbp), %rax \n push %rax\n" ))
+                 (list "# " expr "\n"
+		       " mov -" (number->string (lookup expr env)) "(%rbp), %rax \n push %rax\n" ))
                 (else
                  (error "parametre invalide" expr))))))
 
