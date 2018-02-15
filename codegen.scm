@@ -45,6 +45,8 @@
 (define env
   '(
     ))
+(define stack 0)
+
 
 (define (lookup key dict)
   (let ((key-val (assoc key dict)))
@@ -160,22 +162,31 @@
 (define (compile-let exprs)
   (if (< (length exprs) 2)
       (error "invalid construct: let")
-      (let ((old-env env))
+      (let ((old-env env) (old-stack stack) (ret '()))
         ;; ajoute à l'environnement les nouveaux bindings
 ;;        (compile-bindings (car exprs) '())
-	(set! stack 0)
+	
         ;; compile le corps du let
 	;; on sauvegarde l'environnement en mettant le rsp et en gardant rbp
 	;; TODO: ajouter la sauvegarde de l'environnement avec des registres ?
-	(cons (cons " push %rbp \n mov %rsp, %rbp\n"
-		    (compile-bindings (car exprs) '()))
-	      (cons (map compile-expr (cdr exprs))
-		    " mov %rbp, %rsp \n pop %rbp\n push %rax\n" ))
-        ;; retourne l'environnement à son état original
-        ;;(set! env old-env)
+	(begin (set! ret (cons (cons (if (= 0 old-stack)
+					 " push %rbp \n mov %rsp, %rbp\n"
+					 "")
+				     (compile-bindings (car exprs) '()))
+			       (cons (map compile-expr (cdr exprs))
+				     (if (= 0 old-stack)
+					 " mov %rbp, %rsp \n pop %rbp\n push %rax\n"
+					 ""))))
+	       ;; retourne l'environnement à son état original
+	       (set! env old-env)
+	       (set! stack old-stack)
+	       ret )
 	)))
 
-(define stack 0)
+
+
+;; Pour le let on doit avoir une stack au demarrage.
+;; cela implique un partage de l'environnement. Doit on faire une structure env pour une meilleur evolution
 
 ;; traitement des bindings du let 
 (define (compile-bindings bindings let-env)
@@ -187,6 +198,7 @@
                (let ((new-bind (list (car first)
                                      (+ 8 stack))))
 		 (set! stack (+ 8 stack))
+		 (set! env (if (null? env) (cons new-bind '()) (cons new-bind env)))
                  (cons (compile-expr (cadr first))
 		       (compile-bindings rest
                                    (cons new-bind let-env)))
@@ -196,9 +208,7 @@
 		 ))
               (else
                (error "invalid binding construct: let"))))
-      (begin (set! env let-env)
-      '())
-      ))
+        '() ))
 
 ;;assignation des variables
 (define (compile-set! exprs)
@@ -296,14 +306,15 @@
         (else
          (error "unknown operation" expr))))
 
-;; (trace compile-expr)
-;; (trace analyse-op)
-;; (trace analyse-operand)
-;; (trace analyse-proc)
-;; (trace compile-bindings)
-;; (trace compile-let)			
-;; (trace compile-if)
-;; (trace gen-literal)
+ ;; (trace compile-expr)
+ ;; (trace analyse-op)
+ ;; (trace analyse-operand)
+ ;; (trace analyse-proc)
+ ;; (trace compile-bindings)
+ ;; (trace compile-let)			
+ ;; (trace compile-bloc)
+ ;; (trace compile-if)
+ ;; (trace gen-literal)
 
 (define (compile-program exprs)
   (list " .text\n"
