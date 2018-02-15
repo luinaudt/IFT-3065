@@ -40,11 +40,10 @@
                 " push %rax\n"))
     ))
 
-;; #f et #t n'ont pas leur place dans l'environnement, on devra implanter
-;; des macros éventuellement pour les substituer par leur valeur
+
 (define env
-  '(
-    ))
+  '())
+
 (define stack 0)
 
 
@@ -124,9 +123,11 @@
 	((equal? n '#f)
 	 (gen " mov $1, %rax\n"
 	      " push %rax\n"))
-	 ((equal? n '#t)
-	  (gen " mov $9, %rax\n"
-	       " push %rax\n"))))
+        ((equal? n '#t)
+         (gen " mov $9, %rax\n"
+              " push %rax\n"))
+        (else
+         (error "unsupported literal" n))))
 
 ;;liste de littéraux
 (define (gen-list lst)
@@ -165,7 +166,7 @@
       (error "invalid construct: let")
       (let ((old-env env) (old-stack stack) (ret '()))
         ;; ajoute à l'environnement les nouveaux bindings
-;;        (compile-bindings (car exprs) '())
+        ;;        (compile-bindings (car exprs) '())
 	
         ;; compile le corps du let
 	;; on sauvegarde l'environnement en mettant le rsp et en gardant rbp
@@ -204,7 +205,7 @@
 
 			(set! env (if (null? env) (cons new-bind '()) (cons new-bind env)))
 			(set! ret (cons ret (compile-bindings rest
-							  (cons new-bind let-env))))
+                                                              (cons new-bind let-env))))
 			ret)
 
                  ;; on modifie l'environnement à la fin car un binding
@@ -213,7 +214,7 @@
 		 ))
               (else
                (error "invalid binding construct: let"))))
-        '() ))
+      '() ))
 
 ;;assignation des variables
 (define (compile-set! exprs)
@@ -222,53 +223,6 @@
 (define (compile-quote exprs)
   (error "quote not supported yet"))
 
-
-
-;; ;; on compile une fonction unique
-;; (define (analyse-expr expr)
-;;   (if (pair? expr)
-;;       (cond ((equal? 'if (car expr))
-;; 	     (analyse-conditional (cdr expr)))
-;; 	    ((equal? 'set! (car expr))
-;; 	     (analyse-set! (cdr expr)))
-;; 	    ((equal? 'let (car expr))
-;; 	     (analyse-let (cdr expr)))
-;; 	    (else
-;; 	     (analyse-proc expr)))
-;;       (analyse-operand expr)))
-
-
-;; ;; analyse d'une condition (if)
-;; (define (analyse-conditional expr)
-;;   (if (= (length expr) 3)
-;;       (cons (cons (analyse-expr (car expr))
-;;                   (list " pop %rax \n"
-;;                         " cmp $9, %rax \n"
-;;                         " jne label1if \n"))
-;;             (cons (cons (analyse-expr (cadr expr))
-;;                         (list "jmp fin \n"
-;;                               "label1if:\n"))
-;;                   (cons (analyse-expr (caddr expr))
-;;                         "fin: \n")))
-;;       (error "unvalid construct for if")))
-
-;; ;; analyse du let
-;; (define (analyse-let expr)
-;;   (cond ((pair? (car expr))
-;; 	 (analyse-binding-let (car expr)))
-;; 	((null? (car expr))
-;; 	 (pp "reussi"))
-;; 	(else (error "illegal form for let expression " expr))))
-
-;; ;; analyse du premier paramètre de let
-;; (define (analyse-binding-let expr)
-;;   (if (null? expr)
-;;       '()
-;;       (if (or (pair? (car expr))
-;; 	      (= (length (car expr)) 2))
-;; 	  (cons (analyse-expr (car expr))
-;; 		(analyse-binding-let (cdr expr)))
-;; 	  (error "illegal form for let expression" expr))))
 
 ;; analyse procedure
 (define (analyse-proc expr)
@@ -314,15 +268,15 @@
         (else
          (error "unknown operation" expr))))
 
- ;; (trace compile-expr)
- ;; (trace analyse-op)
- ;; (trace analyse-operand)
- ;; (trace analyse-proc)
- ;; (trace compile-bindings)
- ;; (trace compile-let)			
- ;; (trace compile-bloc)
- ;; (trace compile-if)
- ;; (trace gen-literal)
+;; (trace compile-expr)
+;; (trace analyse-op)
+;; (trace analyse-operand)
+;; (trace analyse-proc)
+;; (trace compile-bindings)
+;; (trace compile-let)			
+;; (trace compile-bloc)
+;; (trace compile-if)
+;; (trace gen-literal)
 
 (define (compile-program exprs)
   (list " .text\n"
