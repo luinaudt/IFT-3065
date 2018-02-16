@@ -41,20 +41,48 @@
 	    (error ", not supported yet")) ;; , et , @
 	  )))
 
+;; (define (read-list port)
+;;   (let ((c (peek-char-non-whitespace port)))
+;;     (cond ((char=? c #\))
+;;            (read-char port) ;; skip ")"
+;;            '())
+;;           ((char=? c #\.)
+;;            )
+;;           (else
+;;            (cons (read port) (read-list port))))))
+
 (define (read-list port)
   (let ((c (peek-char-non-whitespace port)))
     (cond ((char=? c #\))
-           (read-char port) ;; skip ")"
+           (read-char port) ;; consume ")"
            '())
-          ((char=? c #\")
-           (read-string port))
-          ((char=? c #\;)
-           (read-line port) ;; skip comment
-           (read-list port))
           (else
-           (let ((first (read port)))
-             (let ((rest (read-list port)))
-               (cons first rest)))))))
+           (let ((datum (read port)))
+             (if (eq? datum '|.|)
+                 (error "Improperly placed dot!!!!!")
+                 (cons datum (read-list-mid port))))))))
+
+(define (read-list-mid port)
+  (let ((c (peek-char-non-whitespace port)))
+    (cond ((char=? c #\))
+           (read-char port) ;; consume ")"
+           '())
+          (else
+           (let ((datum (read port)))
+             (if (eq? datum '|.|)
+                 (read-list-end port)
+                 (cons datum (read-list-mid port))))))))
+
+
+(define (read-list-end port)
+  (let ((c (peek-char-non-whitespace port)))
+    (cond ((char=? c #\))
+           (error "Datum expected"))
+          (else
+           (let ((datum (read port)))
+             (if (char=? (peek-char-non-whitespace port) #\))
+                 (list datum)
+                 (error "End of list expected")))))))
 
 (define (read-string port)
   (read-char port) ;; skip opening quote
@@ -114,9 +142,10 @@
           (read-char port)
 	  (peek-char-non-whitespace port)))))
 
-;; (trace read-string-element)
 ;; (trace read-string)
 ;; (trace read)
 ;; (trace peek-char-non-whitespace)
 ;; (trace read-symbol)
 ;; (trace read-list)
+;; (trace read-list-mid)
+;; (trace read-list-end)
