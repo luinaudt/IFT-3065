@@ -14,7 +14,7 @@
            (read-char port) ;; skip "("
            (read-list port))
 	  ((char=? c #\")   ;; string
-           (read-string port))
+	   (read-string port))
 	  ((char=? c #\;)   ;; comment
 	   (read-line port) ;; skip to next line
 	   (read port))
@@ -46,11 +46,6 @@
     (cond ((char=? c #\))
            (read-char port) ;; skip ")"
            '())
-          ((char=? c #\")
-           (read-string port))
-          ((char=? c #\;)
-           (read-line port) ;; skip comment
-           (read-list port))
           (else
            (let ((first (read port)))
              (let ((rest (read-list port)))
@@ -58,7 +53,7 @@
 
 (define (read-string port)
   (read-char port) ;; skip opening quote
-  (println (list->string (read-string2 port))))
+  (list->string (read-string2 port)))
 
 (define (read-string2 port)
   (let ((c (peek-char port)))
@@ -114,9 +109,9 @@
           (read-char port)
 	  (peek-char-non-whitespace port)))))
 
-;; (trace read-string-element)
-;; (trace read-string)
-;; (trace read)
+;;(trace read-string-element)
+;;(trace read-string)
+;;(trace read)
 ;; (trace peek-char-non-whitespace)
 ;; (trace read-symbol)
 ;; (trace read-list)
