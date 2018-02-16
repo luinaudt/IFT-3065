@@ -76,12 +76,15 @@
 
 (define (read-list-end port)
   (let ((c (peek-char-non-whitespace port)))
-    (cond ((char=? c #\))
-           (error "Datum expected"))
-          (else
-           (let ((datum (read port)))
-             (if (char=? (peek-char-non-whitespace port) #\))
-                 (list datum)
+    (if (char=? c #\))
+        (error "Datum expected")
+        (let* ((datum (read port))
+               (c (peek-char-non-whitespace port)))
+          (cond ((eq? datum '|.|)
+                 (error "Datum expected"))
+                ((char=? c #\))
+                 (list datum))
+                (else
                  (error "End of list expected")))))))
 
 (define (read-string port)
