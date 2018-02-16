@@ -58,7 +58,7 @@
            '())
           (else
            (let ((datum (read port)))
-             (if (eq? datum '|.|)
+             (if (eq? datum (string->symbol "."))
                  (error "Improperly placed dot!!!!!")
                  (cons datum (read-list-mid port))))))))
 
