@@ -3,37 +3,34 @@
 
 	\begin{grammarC}{<expression> ::= <expression-ent> | <opérateur> <entiers>}
 		
-		<expression> ::= <procédure>
+		<datum> ::= <datum simple> | <procédure> | <abréviation>
 		
-		<procédure> ::= "(" <opérateur> <données> ")"
+		<abréviation> ::= <abrev> <datum>
+		
+		<abrev> ::= "'" | \space "\`" | ","
+		
+		<procédure> ::= ( <opérateur> <données> )
 				
-		<opérateur> ::= "+" | "-" | "*" | "=" | "<" 
+		<datum simple> ::= <booléen> | <nombre> | <symbole> | <string>
 		
-		<données> ::= <donnée> <données> | <epsilon>
+		<booléen> ::= \#t | \#f
 		
-		<donnée> ::= <valeurs> | <procédure> | $\epsilon$
+		<string> ::= \verb|"| <element string>* \verb|"|
 		
-		<valeurs> ::= <valeurNeg> | <valeurPos>
+		<element string> ::= <tout caractère différent de \verb|" \|  > | 	\verb|\"| | \verb|\\|
+		
+		<opérateur> ::= "+" | "-" | "*" | "=" | "<" | <symbol>
+		
+		<nombre> ::= <valeurNeg> | <valeurPos>
 		
 		<valeurNeg> ::= "-" <entier>
 		
 		<valeurPos> ::= <signePos> <entier>
 		
 		<entier> ::= <digit> <entier> | <digit>
-
+		
 		<signePos> ::= "+" | $\epsilon$ 
 		
-		<identificateur> ::= <letter> ( <identificateur> | $\epsilon$)
-		
-		<digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-		
-		<letter> ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j'
-			    \alt 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't'
-				\alt 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
-		
+		<digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'		
 		
 	\end{grammarC}
-
-\todo[inline]{support des constantes booléenne \#f \#t}
-\todo[inline]{voir pour le support des opération plus complexe, println quotient, modulo, if et let}
-\todo[inline]{Ajouter des identificateurs plus complets}
