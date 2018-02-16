@@ -89,7 +89,7 @@
 
 (define (read-string port)
   (read-char port) ;; skip opening quote
-  (println (list->string (read-string2 port))))
+  (list->string (read-string2 port)))
 
 (define (read-string2 port)
   (let ((c (peek-char port)))
