@@ -34,7 +34,7 @@
   (let ((c (peek-char port)))
     (cond ((char=? c #\') ;;quote on le remplace par quote
 	   (read-char port)
-	   (cons 'quote (read port)))
+	   (list 'quote (read port)))
 	  ((char=? c #\`)
 	   (error "quasiquote not supported yet")) ;;quasiquote
  	  ((char=? c #\,)
@@ -83,7 +83,7 @@
           (cond ((eq? datum (string->symbol "."))
                  (error "Datum expected"))
                 ((char=? c #\))
-                 (list datum))
+                 datum)
                 (else
                  (error "End of list expected")))))))
 

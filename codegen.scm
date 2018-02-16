@@ -116,6 +116,12 @@
        " push %rax\n")
   )
 
+(define (compile-quote expr)
+  (if (= 1 (length expr))
+      (gen-literal (car expr))
+      (error ("Ill form expression quote")
+	     )))
+
 (define (gen-literal n)
   (cond ((number? n)
 	 (gen " mov $" (number->string (* 8 n)) ", %rax\n"
@@ -131,6 +137,7 @@
 
 ;;liste de littéraux
 (define (gen-list lst)
+  (pp lst)
   (error "gen-list not yet implemented"))
 
 (define (gen-pair p)
@@ -220,10 +227,6 @@
 (define (compile-set! exprs)
   (error "set! not supported yet"))
 
-(define (compile-quote exprs)
-  (error "quote not supported yet"))
-
-
 ;; analyse procedure
 (define (analyse-proc expr)
   (if (= (length expr) 2)
@@ -292,5 +295,5 @@
   `((if       ,compile-if)
     (let      ,compile-let)
     (set!     ,compile-set!)
-    (quote    ,gen-literal)
+    (quote    ,compile-quote)
     ))
