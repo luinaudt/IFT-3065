@@ -69,7 +69,7 @@
            '())
           (else
            (let ((datum (read port)))
-             (if (eq? datum '|.|)
+             (if (eq? datum (string->symbol "."))
                  (read-list-end port)
                  (cons datum (read-list-mid port))))))))
 
@@ -80,7 +80,7 @@
         (error "Datum expected")
         (let* ((datum (read port))
                (c (peek-char-non-whitespace port)))
-          (cond ((eq? datum '|.|)
+          (cond ((eq? datum (string->symbol "."))
                  (error "Datum expected"))
                 ((char=? c #\))
                  (list datum))
