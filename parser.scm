@@ -52,9 +52,30 @@
            (read-line port) ;; skip comment
            (read-list port))
           (else
+<<<<<<< HEAD
            (let ((first (read port)))
              (let ((rest (read-list port)))
                (cons first rest)))))))
+=======
+           (let ((datum (read port)))
+             (if (eq? datum '|.|)
+                 (read-list-end port)
+                 (cons datum (read-list-mid port))))))))
+
+
+(define (read-list-end port)
+  (let ((c (peek-char-non-whitespace port)))
+    (if (char=? c #\))
+        (error "Datum expected")
+        (let* ((datum (read port))
+               (c (peek-char-non-whitespace port)))
+          (cond ((eq? datum '|.|)
+                 (error "Datum expected"))
+                ((char=? c #\))
+                 (list datum))
+                (else
+                 (error "End of list expected")))))))
+>>>>>>> f01e6f2281e5a7fb07289fe3c0a00ceb9211a5cc
 
 (define (read-string port)
   (read-char port) ;; skip opening quote
