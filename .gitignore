@@ -9,4 +9,5 @@
 *.run.xml
 *.synctex.gz
 *.*~
+.*.scm
 rapport/main-blx.bib
