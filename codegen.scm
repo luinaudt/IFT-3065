@@ -88,6 +88,7 @@
 
 (define (compile-expr expr)
   (cond ((or (number? expr)
+	     (string? expr)
 	     (equal? expr '#f)
 	     (equal? expr '#t))
          (gen-literal expr))
