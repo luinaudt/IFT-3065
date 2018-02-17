@@ -106,9 +106,37 @@ Bien que les listes propres ne nous aient causé aucun problème, il n'en fut po
 
 
 \section{Résultats des tests unitaires}
+Tous les tests fournis pour l'étape 1 fonctionnent à merveille. De plus, les tests que nous avons conçus pour tester les différentes fonctionnalités passent non seulement correctement lors du \texttt{make ut}, ils nous ont aussi été d'une grande aide tout au long du développement de notre compilateur. Comme vous pourrez le constater, certains tests unitaires échouent malgré ce qui vient d'être mentionné, mais ces échecs sont normaux au point où nous en sommes. En effet, certains d'entre eux visent à tester le parseur alors que les expressions qu'ils contiennent ne sont pas encore supportées au niveau de la génération de code, expliquantque les erreurs surviennent uniquement dans le fichier \texttt{codegen.scm} et non pas dans \texttt{parser.scm}. C'est le cas par exemple des tests suivants, qui testent le parseur sur les chaînes de caractères, la quotation et les listes, propres et impropres :
+
+\begin{itemize}
+\item \texttt{let-string-println.scm}
+\item \texttt{let-string-println-number.scm}
+\item \texttt{list-impropre-comp.scm}
+\item \texttt{list-proper1.scm}
+\item \texttt{list-proper2.scm}
+\item \texttt{list-proper-empty.scm}
+\item \texttt{println-let-strings.scm}
+\item \texttt{println-list-impropre1.scm}
+\item \texttt{println-list-proper1.scm}
+\item \texttt{println-quote.scm}
+\item \texttt{println-string.scm}
+\end{itemize}
+
+De plus, nous avons aussi écrit des tests dont le but est d'échouer afin de nos assurer que des expressions invalides entraînent effectivement des erreurs. C'est le cas des tests qui débutent par \texttt{crash}, tels que les suivants :
+
+\begin{itemize}
+\item \texttt{crash-let.scm} $\rightarrow$ \texttt{let} sans \textit{binding}
+\item \texttt{crash-println-if-let-multi.scm} $\rightarrow$ contient l'expression \texttt{(\#t 156)}
+\item \texttt{crash-quote-double.scm} $\rightarrow$ \texttt{quote} suivi de deux arguments
+\item \texttt{crash-vide.scm} $\rightarrow$ liste vide sans quote (sans \texttt{'} au début)
+\end{itemize}
 
 \section{Atteinte des objectifs}
+Au final, nous sommes très satisfaits du travail accompli. Au meilleur de nos connaissances, nous avons réussi à faire fonctionner complètement ce qui était demandé et avons même pris un peu d'avance sur les prochaines étapes. Nous avons hâte de voir comment gérer l'allocation dynamique de façon à pouvoir supporter le \texttt{define} et représenter les listes en mémoire.
 
+Enfin, l'idée d'atteindre le stade où notre compilateur sera autogène nous anime et nous attendons impatiemment de voir les fonctionnalités supplémentaires que nous aurons à supporter au terme de la prochaine étape.
+
+\newpage
 
 \section{Annexes}
 
