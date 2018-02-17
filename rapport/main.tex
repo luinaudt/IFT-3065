@@ -74,12 +74,12 @@ Le générateur de code est l'élément central du compilateur. Une fois produit
 
 Cette tâche est cependant plus compliquée qu'il n'y paraît. En effet, le générateur se charge non seulement de la génération de code, mais aussi de s'assurer que les expressions reçues sont syntaxiquement correctes. Cela nécessite entre autres de vérifier que les procédures contenues dans les expressions ont le nombre d'arguments attendu ou que les variables apparaissant dans les expressions ont bien été initialisées antérieurement à leur utilisation. En outre, c'est au générateur de code qu'il revient de gérer les fermetures lors de la présence de \texttt{let} et de s'assurer que l'accès au contenu d'une variable ayant ainsi été redéfinie renvoie la valeur attendue. Ces difficultés ne font que s'accumuler lorsque le programme à compiler contient de multiples \texttt{let} imbriqués, requérant une gestion de la pile appropriée à ces constructions syntaxiques qui sont tout à fait correctes.
 
-Comme dernières complications liées au générateur de code assembleur, la gestion des symboles et des énoncés conditionnels. Au niveau de l'énoncé conditionnel \texttt{if}, la génération des étiquettes servant à sauter les blocs ne devant pas être exécutés doit être gérée de façon particulière car plusieurs \texttt{if} peuvent se trouver dans un même programme. Il est important que chacun d'eux n'effectue pas de sauts vers des portions de code des autres \texttt{if}. En lien direct avec les énoncés conditionnels, certains symboles sont particulièrement importants. Nous parlons bien entendu ici des symboles \texttt{\#t} et \texttt{\#f} qui doivent être reconnus par le générateur de code car, ne se trouvant pas dans l'environnement comme ceux associés aux variables ou référant à des procédures, une recherche dans l'environnement engendrerait la détection d'une variable non initialisée.
+Comme dernières complications liées au générateur de code assembleur, la gestion des symboles et des énoncés conditionnels. Au niveau de l'énoncé conditionnel \texttt{if}, la génération des étiquettes servant à sauter les blocs ne devant pas être exécutés doit être gérée de façon particulière car plusieurs \texttt{if} peuvent se trouver dans un même programme. Il est important que chacun d'eux n'effectue pas de saut vers des portions de code des autres \texttt{if}. En lien direct avec les énoncés conditionnels, certains symboles sont particulièrement importants. Nous parlons bien entendu ici des symboles \texttt{\#t} et \texttt{\#f} qui doivent être reconnus par le générateur de code car, ne se trouvant pas dans l'environnement comme ceux associés aux variables ou référant à des procédures, une recherche dans l'environnement engendrerait la détection d'une variable non initialisée.
 
 Toutes ces difficultés seront donc à prendre en considération tout au long de l'implémentation du générateur de code afin de s'éviter d'avoir de mauvaises surprises nécessitant de recoder le corps de plusieurs fonctions, et ce possiblement à de multiples occasions.
 
 \subsection{Tests unitaires}
-Le dernier élément du travail à réaliser était la conception de tests unitaires pertinents servant à vérifier le bon fonctionnement des différents éléments de notre compilateur, principalement du parseur et du générateur de code. En plus des 27 tests fournis, nous devions en produire entre 30 et 50 tests supplémentaires pour bien vérifier chaque fonctionnalité. Les résultats des tests seront présentés dans une section subséquente de ce rapport.
+Enfin, le dernier élément du travail à réaliser était la conception de tests unitaires pertinents servant à vérifier le bon fonctionnement des différents éléments de notre compilateur, principalement du parseur et du générateur de code. En plus des 27 tests fournis, nous devions en produire entre 30 et 50 tests supplémentaires pour bien vérifier chaque fonctionnalité. Les résultats des tests seront présentés dans une section subséquente de ce rapport.
 
 
 \section{Méthodologie}
@@ -122,7 +122,7 @@ Tous les tests fournis pour l'étape 1 fonctionnent à merveille. De plus, les t
 \item \texttt{println-string.scm}
 \end{itemize}
 
-De plus, nous avons aussi écrit des tests dont le but est d'échouer afin de nous assurer que des expressions invalides entraînent effectivement des erreurs. C'est le cas des tests qui débutent par \texttt{crash}, tels que les suivantes :
+De plus, nous avons aussi écrit des tests dont le but est d'échouer afin de nous assurer que des expressions invalides entraînent effectivement des erreurs. C'est le cas des tests qui débutent par \texttt{crash}, tels que les suivants :
 
 \begin{itemize}
 \item \texttt{crash-let.scm} $\rightarrow$ \texttt{let} sans \textit{binding}
