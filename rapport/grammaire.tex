@@ -1,36 +1,42 @@
 %commande \alt permet de mettre une | en début de ligne pour continuer une expression en mettant un retour à la ligne
 %grammarC permet de centrer le code le paramètre contient la plus longue ligne
 
-\begin{grammarC}{<expression> ::= <expression-ent> | <opérateur> <entiers>}
+\begin{grammarC}{<simple datum> ::= <booleen> | <number> | <character> | <symbole> | <string>}
+
+  <expression> ::= <datum> | <procedure>
   
-  <datum> ::= <datum simple> | <procédure> | <abréviation>
+  <datum> ::= <simple datum> | <list> | <abbreviation>
   
-  <abréviation> ::= <abrev> <datum>
+  <simple datum> ::= <booleen> | <number> | <character> | <symbol> | <string>
   
-  <abrev> ::= "'" | \space "\`" | ","
+  <booleen> ::= \verb|#|t | \verb|#|f
   
-  <procédure> ::= ( <opérateur> <données> )
+  <number> ::= <explicit sign> <integer> | <integer>
   
-  <datum simple> ::= <booléen> | <nombre> | <symbole> | <string>
+  <explicit sign> ::= \verb|+| | \verb|-|
   
-  <booléen> ::= \#t | \#f
+  <integer> ::= <digit> <integer> | <digit>
+  
+  <digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+  <character> ::= \#\textbackslash <any character>
+
+  <symbol> ::= <any character other than \textlangle delimiter \textrangle>$^+$
+
+  <delimiter> ::= <whitespace> | <vertical line> | \verb|(| | \verb|)| | \verb|"| | \verb|;|
+
+  <whitespace> ::=  \verb|#\|space | <newline>
   
   <string> ::= \verb|"| <element string>* \verb|"|
   
-  <element string> ::= <tout caractère différent de \verb|" \|  > | \verb|\"| | \verb|\\|
+  <element string> ::= <any character other than \verb|"| or \verb|\|> | \verb|\"| | \verb|\\|
+
+  <list> ::= \verb|(| <datum>* \verb|)| | \verb|(| <datum>$^+$ . <datum> \verb|)|
   
-  <opérateur> ::= "+" | "-" | "*" | "=" | "<" | <symbol>
+  <abbreviation> ::= <abbrev> <datum>
   
-  <nombre> ::= <valeurNeg> | <valeurPos>
-  
-  <valeurNeg> ::= "-" <entier>
-  
-  <valeurPos> ::= <signePos> <entier>
-  
-  <entier> ::= <digit> <entier> | <digit>
-  
-  <signePos> ::= "+" | $\epsilon$ 
-  
-  <digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'		
+  <abbrev> ::= \verb|'| | \verb|`| | \verb|,| | \verb|,@|
+
+  <procedure> ::= \verb|(| <symbol> <datum>* \verb|)|	
   
 \end{grammarC}
