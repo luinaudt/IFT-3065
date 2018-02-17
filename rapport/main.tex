@@ -14,9 +14,9 @@
 \usepackage{todonotes}
 \usepackage[section]{placeins}
 \hypersetup{
-	pdftitle={},
-	pdfborder={0 0 0}, %epaisseur box
-	pdfauthor={Thomas LUINAUD},
+  pdftitle={},
+  pdfborder={0 0 0}, %epaisseur box
+  pdfauthor={Thomas LUINAUD},
 }
 \input{drawPackages.tex}
 
@@ -27,34 +27,99 @@
 
 \begin{document}
 \begin{titlepage}
-	\maketitle
+  \maketitle
 \end{titlepage}
 
 
-\section{Introdution}
-On va bien travailler
+\section{Spécification du problème}
+Le but à atteindre au terme du projet sera de réaliser un compilateur pour un sous-ensemble sélectionné du langage de programmation Scheme. Le travail à réaliser étant divisé en trois étapes, nous devrons chaque fois étendre notre support à un plus grand sous-ensemble du langage, en construisant à partir du point où nous nous étions arrêté lors de l'étape précédente. À terme, le compilateur résultant se devra d'être autogène, c'est-à-dire d'être en mesure de se compiler lui-même, de façon à garantir son autosuffisance en éliminant les dépendances aux compilateurs Scheme existants. Cela implique inévitablement que le sous-ensemble que nous chercherons à supporter au terme de la troisième étape devra être suffisamment étendu afin d'offrir la puissance nécessaire à l'atteinte de cet objectif.
+
+\subsection{Sous-ensemble de Scheme à supporter}
+Au terme de l'étape 1 du projet, il est attendu de nous que le parseur produit soit habilité à supporter les constructions syntaxiques suivantes :
+
+\begin{itemize}
+\item Nombres entiers positifs et négatifs
+\item Booléens \texttt{\#t} et \texttt{\#f}
+\item Caractères, qui débutent par \texttt{\#\textbackslash}
+\item Chaînes de caractères et caractère d'échappement ``\texttt{\textbackslash}"
+\item Symboles
+\item Listes propres et impropres
+\item Commentaires
+\end{itemize}
+
+De son côté, le générateur de code devra permettre la compilation des expressions suivantes en se limitant pour l'instant simplement à la manipulation d'entiers et de booléens :
+
+\begin{itemize}
+\item Constantes entières
+\item Constantes booléennes
+\item \texttt{(println} $expr$\texttt{)}
+\item \texttt{(+} $expr_1$ $expr_2$\texttt{)}
+\item \texttt{(-} $expr_1$ $expr_2$\texttt{)}
+\item \texttt{(*} $expr_1$ $expr_2$\texttt{)}
+\item \texttt{(quotient} $expr_1$ $expr_2$\texttt{)}
+\item \texttt{(modulo} $expr_1$ $expr_2$\texttt{)}
+\item \texttt{(=} $expr_1$ $expr_2$\texttt{)}
+\item \texttt{(<} $expr_1$ $expr_2$\texttt{)}
+\item \texttt{(if} $expr_1$ $expr_2$ $expr_3$\texttt{)}
+\item \texttt{(let ((}$var_1$ $expr_1$\texttt{) ...)} $expr_0$\texttt{)}
+\end{itemize}
+
+\subsection{Analyseur lexical (parseur)}
+En ce qui concerne la première étape du projet, il nous était demandé d'être en mesure de compiler et exécuter des fichiers Scheme simples ne comportant que les constructions syntaxiques du sous-ensemble de Scheme à supporter pour le moment. Cela implique que notre compilateur doit inclure un analyseur lexical (parseur) et syntaxique (générateur de code) utilisant l'approche par descente récursive, dont les rôles seront respectivement d'effectuer la lecture des fichiers à compiler, caractère par caractère, afin d'en extraire les différents éléments et de produire le code machine résultant. En plus d'extraire les éléments pertinents lors de se traversée (lecture), le parseur doit aussi effectuer le regrouppement des éléments extraits en expressions (listing), simplifiant ainsi le travail du générateur de code assembleur qui n'aura donc nul besoin de retraverser ces fichiers à la suite du parseur.
+
+Afin d'illustrer le travail du parseur, supposons que le contenu du fichier à compiler est le suivant : ``Hello World!''. Le parseur, lors de sa traversée dudit fichier, reconnaîtra le guillemet se trouvant au début et, sachant alors qu'il se trouve dans une chaîne de caractères, lira successivement les caractères suivants jusqu'à ce qu'il tombe sur le guillemet fermant à la suite duquel cet élément \textit{chaîne de caractère} sera ajouté à une liste servant à représenter le sens du programme. Cette étape est très importante car, dans le cas présent, le caractère d'espacement au centre de la chaîne n'a ici pas d'autre sens que celui d'un simple caractère, mais il aurait signifié la délimitation entre deux éléments distincts s'il ne s'était pas trouvé entouré d'une paire de guillements. De nombreux caractères ayant ainsi plusieurs sens, et ce dans tous les langages de programmation, un générateur de code devant effectuer cette tâche parallèlement à la production du code machine paraît quasi irréalisable, l'implantation d'un simple parseur représentant déjà un défi non négligeable.
+
+\subsection{Analyseur syntaxique (générateur de code)}
+Le générateur de code est l'élément central du compilateur. Une fois produit le \textit{listing} des expressions, le générateur de code a tout ce dont il a besoin pour effectuer sa tâche. Cela s'explique par le fait que la représentation sous forme de \textit{listing} des expressions du programme correspond au sens de celui-ci, de manière dissociée de la chaîne de caractères dont il provient. Le travaille du générateur de code se résume donc à parcourir le listing reçu et d'en traiter les éléments de la façon appropriée, ce pour en générer le code machine dont l'exécution produira les résultats correspondant au programme originel.
+
+Cette tâche est cependant plus compliquée qu'il n'y paraît. En effet, le générateur se charge non seulement de la génération de code, mais aussi de s'assurer que les expressions reçues sont syntaxiquement correctes. Cela nécessite entre autres de vérifier que les procédures contenues dans les expressions ont le nombre d'arguments attendu ou que les variables apparaissant dans les expressions ont bien été initialisées antérieurement à leur utilisation. En oûtre, c'est au générateur de code qu'il revient de gérer les fermetures lors de la présence de \texttt{let} et de s'assurer que l'accès au contenu d'une variable ayant ainsi été redéfinie renvoie la valeur attendue. Ces difficultés ne font que s'accumuler lorsque le programme à compiler contient de multiples \texttt{let} imbriqués, requérant une gestion de la pile appropriée à ces constructions syntaxiques qui sont tout à fait correctes.
+
+Comme dernières complications liées au générateur de code assembleur, la gestion des symboles et des énoncés conditionnels. Au niveau de l'énoncé conditionnel \texttt{if}, la génération des étiquettes servant à sauter les blocs ne devant pas être exécutés doit être gérée de façon particulière car plusieurs \texttt{if} peuvent se trouver dans un même programme est il est important que chacun d'eux n'effectue pas de sauts vers des portions de code des autres \texttt{if}. En lien direct avec les énoncés conditionnels, certains symboles sont particulièrement importants. Nous parlons bien entendu ici des symboles \texttt{\#t} et \texttt{\#f} qui doivent être reconnus par le générateur de code car, ne se trouvant pas dans l'environnement comme ceux associés aux variables ou référant à des procédures, une recherche dans l'environnement engendrerait la détection d'une variable non initialisée.
+
+Toutes ces difficultés seront donc à prendre en considération tout au long de l'implémentation du générateur de code afin de s'éviter d'avoir de mauvaises surprises nécessitant de recoder le corps de plusieurs fonctions, et ce possiblement à de multiples occasions.
+
+\subsection{Tests unitaires}
+Enfin, le dernier élément du travail à réaliser était la conception de tests unitaires pertinents servant à vérifiant le bon fonctionnement des différents éléments de notre compilateur, principalement du parseur et du générateur de code. En plus des 27 tests fournis, nous devions en produire entre 30 et 50 tests supplémentaires pour bien vérifier chaque fonctionnalité. Les résultats des tests seront présentés dans une section subséquente de ce rapport.
+
+
+\section{Méthodologie}
+En ce qui a trait à la méthodologie adoptée pour l'attente des objectifs, nous avons débuté par l'analyse des fichiers fournis afin de nous faire une certaine idée de la direction dans laquelle nous lancer. Nous avons testé de façon extensive la fonction \texttt{read} afin de bien comprendre ce qui était attendu comme résultat de la traversée d'un fichier par notre futur parseur. Ce faisant, nous avons aussi constaté les manques de cette fonction, nous donnant donc une idée assez claire sur ce qu'il restait à y implémenter.
+
+Autrement, nous avons testé les différentes commandes offertes par le \texttt{makefile} fourni, ce qui nous permit rapidement de comprendre comment lancer le compilateur pour exécuter les tests unitaires. Nous avons donc rapidement pu écrire des tests supplémentaires, ce qui nous aida grandement au débogage lorsque nous tentions d'implanter de nouvelles fonctionnalités et encore plus grandement lorsqu'il nous était nécessaire de réimplémenter une fonction après avoir constaté un problème.
+
+Par ailleurs, nous nous sommes fréquemment référés à la documentation du langage Scheme telle que présentée dans les fichiers PDF \texttt{r5rs.pdf} et \texttt{r7rs.pdf} que nous avons téléversés sur notre répertoire GitHub. Bien que nous n'ayons pas suivi à la lettre ce que nous y avons lu sur la structure lexicale et la représentation externe du langage, cela nous a grandement guidé lors de la construction de notre grammaire pour l'implantation de la fonction \texttt{read} de notre parseur.
+
+\section{Problèmes rencontré}
+
+\section{Résultats des tests unitaires}
+
+\section{Atteinte des objectifs}
+
+\section{Conclusion}
+
 
 \section{Analyse lexicale et syntaxique}
 
 \subsection{Grammaire à supporter}
 
 \begin{figure}[h!]
-	\input{grammaire.tex}
-	\caption{Représentation EBNF de la grammaire à supporter.}
+  \input{grammaire.tex}
+  \caption{Représentation EBNF de la grammaire à supporter.}
 \end{figure}
 
 \subsection{ensemble First de la grammaire}
 
 \subsection{ensemble Follow de la grammaire}
 
-
+\iffalse
 \subsection{exemple tikzpicture}
 \begin{figure}
-	\input{exempletikz.tex}
-	\caption{exemple}
+  \input{exempletikz.tex}
+  \caption{exemple}
 \end{figure}
 
 \todo[inline]{Mettre des trucs utiles}
+\fi
 
 \section{Conclusion}
 On a bien travaillé
