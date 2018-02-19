@@ -125,7 +125,7 @@ Tous les tests fournis pour l'étape 1 fonctionnent à merveille. De plus, les t
 De plus, nous avons aussi écrit des tests dont le but est d'échouer afin de nous assurer que des expressions invalides entraînent effectivement des erreurs. C'est le cas des tests qui débutent par \texttt{crash}, tels que les suivants :
 
 \begin{itemize}
-\item \texttt{crash-let.scm} $\rightarrow$ \texttt{let} sans \textit{binding}
+\item \texttt{crash-let.scm} $\rightarrow$ \texttt{let} sans \textit{body}
 \item \texttt{crash-println-if-let-multi.scm} $\rightarrow$ contient l'expression \texttt{(\#t 156)}
 \item \texttt{crash-quote-double.scm} $\rightarrow$ \texttt{quote} suivi de deux arguments
 \item \texttt{crash-vide.scm} $\rightarrow$ liste vide sans quote (sans \texttt{'} au début)
