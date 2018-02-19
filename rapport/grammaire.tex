@@ -1,36 +1,43 @@
 %commande \alt permet de mettre une | en début de ligne pour continuer une expression en mettant un retour à la ligne
 %grammarC permet de centrer le code le paramètre contient la plus longue ligne
 
-	\begin{grammarC}{<expression> ::= <expression-ent> | <opérateur> <entiers>}
-		
-		<datum> ::= <datum simple> | <procédure> | <abréviation>
-		
-		<abréviation> ::= <abrev> <datum>
-		
-		<abrev> ::= "'" | \space "\`" | ","
-		
-		<procédure> ::= ( <opérateur> <données> )
-				
-		<datum simple> ::= <booléen> | <nombre> | <symbole> | <string>
-		
-		<booléen> ::= \#t | \#f
-		
-		<string> ::= \verb|"| <element string>* \verb|"|
-		
-		<element string> ::= <tout caractère différent de \verb|" \|  > | 	\verb|\"| | \verb|\\|
-		
-		<opérateur> ::= "+" | "-" | "*" | "=" | "<" | <symbol>
-		
-		<nombre> ::= <valeurNeg> | <valeurPos>
-		
-		<valeurNeg> ::= "-" <entier>
-		
-		<valeurPos> ::= <signePos> <entier>
-		
-		<entier> ::= <digit> <entier> | <digit>
-		
-		<signePos> ::= "+" | $\epsilon$ 
-		
-		<digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'		
-		
-	\end{grammarC}
+\begin{grammarC}{<simple datum> ::= <booleen> | <number> | <character> | <symbole> | <string>}
+
+  <expression> ::= <datum> | <procedure>
+  
+  <datum> ::= <simple datum> | <list> | <abbreviation>
+  
+  <simple datum> ::= <booleen> | <number> | <character> | <symbol> | <string>
+  
+  <booleen> ::= \verb|#|t | \verb|#|f
+  
+  <number> ::= <explicit sign> <integer> | <integer>
+  
+  <explicit sign> ::= \verb|+| | \verb|-|
+  
+  <integer> ::= <digit> <integer> | <digit>
+  
+  <digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+  <character> ::= \#\textbackslash <any character>
+
+  <symbol> ::= <any character other than \textlangle delimiter \textrangle>$^+$
+
+  <delimiter> ::= <whitespace> | <vertical line> | \verb|(| | \verb|)| | \verb|"| | \verb|;|
+
+  <whitespace> ::=  \verb|#\|space | <newline>
+  
+  <string> ::= \verb|"| <element string>* \verb|"|
+  
+  <element string> ::= <any character other than \verb|"| or \verb|\|> | \verb|\"| | \verb|\\|
+
+  <list> ::= \verb|(| <datum>* \verb|)| | \verb|(| <datum>$^+$ . <datum> \verb|)|
+  
+  <abbreviation> ::= <abbrev> <datum>
+  
+  <abbrev> ::= \verb|'| | \verb|`| | \verb|,| | \verb|,@|
+
+  <procedure> ::= \verb|(| <symbol> <datum>* \verb|)|	
+  
+\end{grammarC}
+

@@ -14,19 +14,19 @@
                 " idiv %rbx\n"
                 " sal $3, %rax\n"
                 " push %rax\n"))
-    (modulo    (" sar $3, %rax\n"
-		" sar $3, %rbx\n"
-		" cqo\n"
-		" idiv %rbx\n"
-		" mov %rbx, %r8\n"
-		" mov %rdx, %r9\n"
-		" shr $63, %r8\n"
-		" shr $63, %r9\n"
-		" cmp %r8, %r9\n"
-		" mov $0, %r8\n"
-		" cmovne %rbx, %r8\n"
-		" add %r8, %rdx\n"
-		" sal $3, %rdx\n"
+    (remainder (" cqo\n"
+                " idiv %rbx\n"
+                " push %rdx\n"))
+    (modulo    (" cqo\n"
+                " mov  %rax, %r8\n"
+                " mov  %rbx, %r9\n"
+                " shr  $63, %r8\n"
+                " shr  $63, %r9\n"
+                " cmp  %r8, %r9\n"
+                " mov  $0, %r8\n"
+                " cmovne %rbx, %r8\n"
+                " idiv %rbx\n"
+                " add  %r8, %rdx\n"
                 " push %rdx\n"))
     (<         (" cmp  %rbx, %rax\n"
                 " mov  $1, %rax\n"
@@ -88,6 +88,7 @@
 
 (define (compile-expr expr)
   (cond ((or (number? expr)
+	     (string? expr)
 	     (equal? expr '#f)
 	     (equal? expr '#t))
          (gen-literal expr))
