@@ -85,7 +85,7 @@
                (append ($cdr x) y)))))
 
 (define reverse
-  (lambda (lst)
+  (lambda (x)
     (let loop ((x x) (acc '()))
       (if (null? x)
           acc
@@ -143,7 +143,8 @@
           (($string? x)
            (and ($string? y)
                 (string=? x y)))
-          (eqv? x y))))
+          (else
+           (eqv? x y)))))
 
 (define read
   (lambda ()
