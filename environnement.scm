@@ -34,13 +34,13 @@
 
 	 (,var when (variable? var)
 	       (let ((pos (cte-lookup cte var)))
-		 (rte-lookup rte pos))
+		 (rte-lookup rte pos)))
 
-	 ((lambda ,param ,body)
+	 ((lambda ,params ,body)
 	  (lambda args (ev body (cte-extend cte params)
-			        (rte-extend rte args))))
+			   (rte-extend rte args))))
 
-	 ((,fun . ,exprs)
+	 ((,fun  ,exprs) ;;(,fun . ,exprs) invlaide comprendre pourquoi
 	  (apply (ev fun cte rte)
 		 (map (lambda (x) (ev x cte rte))
 		      exprs)))))
