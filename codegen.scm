@@ -3,21 +3,21 @@
 
 
 (define op-table
-  '((+         (" add  %rbx, %rax\n"
+  '(($+         (" add  %rbx, %rax\n"
                 " push %rax\n"))
-    (-         (" sub  %rbx, %rax\n"
+    ($-         (" sub  %rbx, %rax\n"
                 " push %rax\n"))
-    (*         (" sar  $3, %rbx\n"
+    ($*         (" sar  $3, %rbx\n"
                 " mul  %rbx\n"
                 " push %rax\n"))
-    (quotient  (" cqo\n"
+    ($quotient  (" cqo\n"
                 " idiv %rbx\n"
                 " sal $3, %rax\n"
                 " push %rax\n"))
-    (remainder (" cqo\n"
+    ($remainder (" cqo\n"
                 " idiv %rbx\n"
                 " push %rdx\n"))
-    (modulo    (" cqo\n"
+    ($modulo    (" cqo\n"
                 " mov  %rax, %r8\n"
                 " mov  %rbx, %r9\n"
                 " shr  $63, %r8\n"
@@ -28,12 +28,12 @@
                 " idiv %rbx\n"
                 " add  %r8, %rdx\n"
                 " push %rdx\n"))
-    (<         (" cmp  %rbx, %rax\n"
+    ($<         (" cmp  %rbx, %rax\n"
                 " mov  $1, %rax\n"
                 " mov  $9, %rbx\n"
                 " cmovs %rbx, %rax\n"
                 " push %rax\n"))
-    (=         (" cmp  %rbx, %rax\n"
+    ($=         (" cmp  %rbx, %rax\n"
                 " mov  $1, %rax\n"
                 " mov  $9, %rbx\n"
                 " cmovz %rbx, %rax\n"
