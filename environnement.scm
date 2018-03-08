@@ -40,7 +40,7 @@
 	  (lambda args (ev body (cte-extend cte params)
 			   (rte-extend rte args))))
 
-	 ((,fun  ,exprs) ;;(,fun . ,exprs) invlaide comprendre pourquoi
+	 ((,fun . ,exprs) 
 	  (apply (ev fun cte rte)
 		 (map (lambda (x) (ev x cte rte))
 		      exprs)))))

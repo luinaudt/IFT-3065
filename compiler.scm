@@ -43,6 +43,7 @@
 (define (compile filename)
 
   (let* ((ast (parse-program filename)) ;; parse program
+	 
          (code (compile-program ast)))  ;; generate code
 
     (let* ((base-filename (path-strip-extension filename))
