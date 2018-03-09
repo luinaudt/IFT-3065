@@ -1,3 +1,5 @@
+(include "match.scm")
+
 (define-macro (begin . exprs)
   (if (not (null? exprs))
       (if (null? (cdr exprs))
@@ -31,21 +33,22 @@
                (cond ,@rest)))))
 
 (define-macro (or . exprs)
-  (if (null? exprs)
-      '#f)
-       (if (null? (cdr exprs))
-           (car exprs)
-           `(let ((first ,(car exprs)))
-              (if first
-                  first
-                  ,(cons 'or (cdr exprs))))))
+  (cond ((null? exprs)
+         '#f)
+        ((null? (cdr exprs))
+         (car exprs))
+        (else
+         `(let ((first ,(car exprs)))
+            (if first
+                first
+                ,(cons 'or (cdr exprs)))))))
 
 (define-macro (and . exprs)
   (cond ((null? exprs)
          '#t)
         ((null? (cdr exprs))
          (car exprs))
-        (#t
+        (else
          `(if ,(car exprs)
               ,(cons 'and (cdr exprs))
               #f))))
