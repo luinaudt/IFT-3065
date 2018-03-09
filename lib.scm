@@ -61,7 +61,7 @@
 
 (define member
   (lambda (x lst)
-    (cond ((null? lst)
+    (cond (($eq? lst '())
            #f)
           ((equal? x ($car lst))
            lst)
@@ -70,7 +70,7 @@
 
 (define assoc
   (lambda (k lst)
-    (cond ((null? lst)
+    (cond (($eq? lst '())
            #f)
           ((equal? k ($car ($car lst)))
            ($car lst))
@@ -79,7 +79,7 @@
 
 (define append
   (lambda (x y)
-    (if (null? x)
+    (if ($eq? x '())
         y
         ($cons ($car x)
                (append ($cdr x) y)))))
@@ -87,20 +87,20 @@
 (define reverse
   (lambda (x)
     (let loop ((x x) (acc '()))
-      (if (null? x)
+      (if ($eq? x '())
           acc
           (loop ($cdr x)
                 ($cons ($car x) acc))))))
 
 (define length
   (lambda (x)
-    (if (null? x)
+    (if ($eq? x '())
         0
         ($+ 1 (length ($cdr x))))))
 
 (define map
   (lambda (f lst)
-    (if (null? lst)
+    (if ($eq? lst '())
         '()
         ($cons (f ($car lst))
                (map f ($cdr lst))))))

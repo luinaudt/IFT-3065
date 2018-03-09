@@ -1,6 +1,6 @@
 ;; fichier pour la génération du code assembleur
 
-
+(include "match.scm")
 
 (define op-table
   '((+         (" add  %rbx, %rax\n"
@@ -85,6 +85,130 @@
 	     (compile-expr exprs))
             " mov %rbp, %rsp \n pop %rbp\n")
       (error "unknown expression" exprs)))
+
+
+(define (compile-expr expr)
+  (match expr
+         
+         ((println ,expr)
+
+          (if (number? expr)
+              (append (compile-expr expr)
+                      (list " call print_word_dec\n"
+                            " push $10  # newline\n"
+                            " call putchar\n"))
+              (append
+               (cond ((eq? expr '#f)
+                      (list " push '#'\n"
+                            " call putchar\n"
+                            " push 'f'\n"
+                            " call putchar\n"))
+                     ((eq? expr '#t)
+                      (list " push '#'\n"
+                            " call putchar\n"
+                            " push 't'\n"
+                            " call putchar\n"))
+                     ((eq? expr '())
+                      (list " push '('\n"
+                            " call putchar\n"
+                            " push ')'\n"
+                            " call putchar\n"))
+                     ((string? expr)
+                      (let ((len (string-length expr)))
+                        (let loop ((i 0) (code '()))
+                          (if (< i len)
+                              (loop (+ i 1)
+                                    (append code
+                                            (list " push $"
+                                                  (char->integer (string-ref expr i))
+                                                  "\n"
+                                                  " call putchar\n")))
+                              code)))))
+               (list " push $10  # newline\n"
+                     " call putchar\n"))))
+
+         ((+ ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list " pop  %rax\n"
+                        " add  %rax,(%rsp)\n")))
+
+         ((- ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list " pop  %rax\n"
+                        " sub  %rax,(%rsp)\n")))
+
+         ((* ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list " pop  %rax\n"
+                        " sar  $3,$rax\n"
+                        " imul (%rsp)\n")))
+
+         ((quotient ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list " pop  %rbx\n"
+                        " pop  %rax\n"
+                        " cqo\n"
+                        " idiv %rbx\n"
+                        " sal  $3,%rax\n"
+                        " push %rax\n")))
+
+         ((remainder ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list " pop  %rbx\n"
+                        " pop  %rax\n"
+                        " cqo\n"
+                        " idiv %rbx\n"
+                        " push %rdx\n")))
+
+         ((modulo ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list " pop  %rbx\n"
+                        " pop  %rax\n"
+                        " mov  %rax,%r8\n"
+                        " mov  $0,%r9\n"
+                        " cqo\n"
+                        " idiv %rbx\n"
+                        " xor  %rbx,%r8\n"
+                        " cmovns %r9,%rbx\n"
+                        " add  %rdx,%rbx\n"
+                        " push %rdx\n")))
+
+         ((< ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list (" pop  %rbx\n"
+                         " pop  %rax\n"
+                         " cmp  %rax,%rbx\n"
+                         " mov  $1,%rax  # false\n"
+                         " mov  $9,%rbx  # true\n"
+                         " cmovs %rbx,%rax\n" 
+                         " push %rax\n"))))
+         
+         ((= ,expr1 ,expr2)
+
+          (append (compile-expr expr1)
+                  (compile-expr expr2)
+                  (list (" pop  %rbx\n"
+                         " pop  %rax\n"
+                         " cmp  %rax,%rbx\n"
+                         " mov  $1,%rax  # false\n"
+                         " mov  $9,%rbx  # true\n"
+                         " cmovz %rbx,%rax\n"
+                         " push %rax\n"))))))
+         
 
 (define (compile-expr expr)
   (cond ((or (number? expr)

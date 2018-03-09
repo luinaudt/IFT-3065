@@ -8,23 +8,37 @@
                      (cdr exprs)))))))
 
 (define-macro (cond . clauses)
-  (if (not (null? clauses))
-      `(if ,(caar clauses)
-           (begin
-             ,@(cdar clauses))
-           ,(cons 'cond
-                  (cdr clauses)))))
+  (match (cons 'cond clauses)
+         ((cond)
+          `#f)
+         ((cond (else ,e1 . ,es))
+          `(begin ,e1 ,@es))
+         ((cond (else . ,es) . ,rest)
+          (error "improper else clause"))
+         ((cond (,test) . ,rest)
+          `(or ,test (cond ,@rest)))
+         ((cond (,test => ,fn) . ,rest)
+          (let ((v (gensym)))
+            `(let ((,v ,test))
+               (if ,v
+                   (,fn ,v)
+                   (cond ,@rest)))))
+         ((cond (,test => . ,es) . ,rest)
+          (error "improper => clause"))
+         ((cond (,test ,e1 . ,es) . ,rest)
+          `(if ,test
+               (begin ,e1 ,@es)
+               (cond ,@rest)))))
 
 (define-macro (or . exprs)
-  (cond ((null? exprs)
-         '#f)
-        ((null? (cdr exprs))
-         (car exprs))
-        (#t
-         `(let ((first ,(car exprs)))
-            (if first
-                first
-                ,(cons 'or (cdr exprs)))))))
+  (if (null? exprs)
+      '#f)
+       (if (null? (cdr exprs))
+           (car exprs)
+           `(let ((first ,(car exprs)))
+              (if first
+                  first
+                  ,(cons 'or (cdr exprs))))))
 
 (define-macro (and . exprs)
   (cond ((null? exprs)

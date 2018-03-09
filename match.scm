@@ -177,7 +177,7 @@
   ;; #t
   ;; (= x 42)
   ;; ((lambda (g3) (if g3 (= y 55) g3)) (= x 42))
-  ;; ((lambda (g4) (if g4 ((lambda (g5) (if g5 (= z 99) g5)) (= y 55)) g4))
+  ;; ((lambda (g4) (if g4 ((lambda (g5) (if g5 (= z 99) g5)) (= y 55)) g4)) (= x 42))
 
 )
 
