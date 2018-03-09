@@ -38,10 +38,9 @@
         ((null? (cdr exprs))
          (car exprs))
         (else
-         `(let ((first ,(car exprs)))
-            (if first
-                first
-                ,(cons 'or (cdr exprs)))))))
+         (let ((v (gensym)))
+         `(let ((,v ,(car exprs)))
+            (if ,v ,v ,(cons 'or (cdr exprs))))))))
 
 (define-macro (and . exprs)
   (cond ((null? exprs)
