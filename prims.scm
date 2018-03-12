@@ -27,5 +27,4 @@
     ('$set-cdr!)
     ('$pair?)
     ('$procedure?)
-    ('$eq?)
-    ))
+    ('$eq?)))
