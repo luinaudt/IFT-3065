@@ -38,20 +38,16 @@
 		\node[draw, right=of parser] (intermediate) {Intermediate.scm};
 		\node[draw, right=of intermediate] (codegen) {Codegen.scm};
 		\node[right=of codegen] (asm) {asm.s};
+		\node[below =0.3cm of codegen,ellipse, draw](prims) {Primitives};
 		
-		\node[below = 0.5cm of intermediate,ellipse, draw](env) {Environnement};
-		\node[below = of codegen,ellipse, draw](prims) {Primitives};
-		
-		\path[draw, ->] (env) -- (intermediate);
-		\path[draw, ->] (env) -| ($(codegen.south) - (0.8cm, 0)$);
 		\path[draw, ->] (prims) -- (codegen);
 		\path[->] (file) edge node [above] {txt} (parser)
 				  (parser) edge node [above] {AST} (intermediate)
 				  (intermediate) edge node (outIR)  [above] {AST} (codegen)
 				  (codegen) edge node [above] {txt} (asm);
-		\node[above =0.1cm of outIR, ellipse, draw](symbTable) {Symboles};
+		\node[above =0.1cm of outIR, ellipse, draw, inner sep=2pt](symbTable) {Environnement};
 		\path[draw, ->] (symbTable) -| (intermediate);
-		\path[draw, ->] (symbTable) -| (codegen);
+		\path[draw, ->] (symbTable) -| (codegen.north -| symbTable.east);
 	\end{tikzpicture}
 	\caption{structure du compilateur}
 \end{figure}
