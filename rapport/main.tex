@@ -30,7 +30,30 @@
   \maketitle
 \end{titlepage}
 
+\section{Structure logicielle}
+\begin{figure}[h]
+	\begin{tikzpicture}
+		\node[](file) {fichier.scm};
+		\node[draw, right=of file] (parser) {Parser.scm};
+		\node[draw, right=of parser] (intermediate) {Intermediate.scm};
+		\node[draw, right=of intermediate] (codegen) {Codegen.scm};
+		\node[right=of codegen] (asm) {asm.s};
+		\node[below =0.3cm of codegen,ellipse, draw](prims) {Primitives};
+		
+		\path[draw, ->] (prims) -- (codegen);
+		\path[->] (file) edge node [above] {txt} (parser)
+				  (parser) edge node [above] {AST} (intermediate)
+				  (intermediate) edge node (outIR)  [above] {AST} (codegen)
+				  (codegen) edge node [above] {txt} (asm);
+		\node[above =0.1cm of outIR, ellipse, draw, inner sep=2pt](symbTable) {Environnement};
+		\path[draw, ->] (symbTable) -| (intermediate);
+		\path[draw, ->] (symbTable) -| (codegen.north -| symbTable.east);
+	\end{tikzpicture}
+	\caption{structure du compilateur}
+\end{figure}
 
+\newpage
+\section{ancien rapport}
 \section{Spécification du problème}
 Le but du projet est de réaliser un compilateur pour un sous-ensemble sélectionné du langage de programmation Scheme. Le travail à réaliser étant divisé en trois étapes, nous devrons chaque fois étendre notre support à un plus grand sous-ensemble du langage, en construisant à partir du point où nous nous étions arrêté lors de l'étape précédente. À terme, le compilateur résultant devra être autogène, c'est-à-dire d'être en mesure de se compiler lui-même, de façon à garantir son autosuffisance en éliminant les dépendances aux compilateurs Scheme existants. Cela implique inévitablement que le sous-ensemble que nous chercherons à supporter au terme de la troisième étape devra être suffisamment étendu afin d'offrir la puissance nécessaire à l'atteinte de cet objectif mais également d'écrire le compilateur en prenant en compte les éléments que nous supporterons.
 
