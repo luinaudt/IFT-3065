@@ -52,6 +52,27 @@
 	\caption{structure du compilateur}
 \end{figure}
 
+\section{Code intermédiaire}
+Cette section présente les choix pour le code intermédiaire.
+
+\begin{table}[h]
+	\begin{tabular}{|c|l|}
+		\hline
+		code intermediaire & description \\ \hline
+		\texttt{println} & affiche un élément \\ \hline
+		\texttt{push\_lit} \emph{val}& ajoute un litteral sur la pile\\ \hline
+		\texttt{push\_glo} \emph{name} & ajouter la valeur d'une variable\\ \hline
+		\texttt{push\_loc} \emph{i} & empiler la valeur d'une variable locale. \emph{i} est l'index sur la pile\\ \hline
+		\texttt{add}	& depiler deux valeurs et les ajouter \\ \hline
+		\texttt{sub}	& depiler deux valeurs et les soustraire \\ \hline
+		\texttt{mul}	& depiler deux valeurs et les multiplier \\ \hline
+		\texttt{div}	& depiler deux valeurs et les diviser \\ \hline
+		\texttt{call} \emph{nargs} & appeler une fonction avec \emph{nargs} argument\\ \hline
+		\texttt{ret} \emph{i} & retourne la valeur à l'index \emph{i} de la pile\\  \hline
+		
+	\end{tabular}
+\end{table}
+
 \newpage
 \section{ancien rapport}
 \section{Spécification du problème}

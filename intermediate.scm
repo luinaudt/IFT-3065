@@ -8,7 +8,6 @@
 ;; Intermediate code
 
 
-
 (define (intermediateCode ast)
   
   )
