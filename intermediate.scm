@@ -6,8 +6,13 @@
 ;;it should contain unique symbols.
 
 ;; Intermediate code
-
-
+;; Fonction pour génération de la représentation intermdiaire.
+;; retourne une liste AST avec le langage intermédiaire
 (define (intermediateCode ast)
+  
+  )
+
+;;implementation de la fonction $prinln
+(define (analyse-println expr)
   
   )

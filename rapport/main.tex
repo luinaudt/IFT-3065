@@ -38,12 +38,12 @@
 		\node[draw, right=of parser] (intermediate) {Intermediate.scm};
 		\node[draw, right=of intermediate] (codegen) {Codegen.scm};
 		\node[right=of codegen] (asm) {asm.s};
-		\node[below =0.3cm of codegen,ellipse, draw](prims) {Primitives};
+		\node[below =0.3cm of intermediate, ellipse, draw](prims) {Primitives};
 		
-		\path[draw, ->] (prims) -- (codegen);
+		\path[draw, ->] (prims) -- (intermediate);
 		\path[->] (file) edge node [above] {txt} (parser)
 				  (parser) edge node [above] {AST} (intermediate)
-				  (intermediate) edge node (outIR)  [above] {AST} (codegen)
+				  (intermediate) edge node (outIR)  [above] {IR} (codegen)
 				  (codegen) edge node [above] {txt} (asm);
 		\node[above =0.1cm of outIR, ellipse, draw, inner sep=2pt](symbTable) {Environnement};
 		\path[draw, ->] (symbTable) -| (intermediate);
@@ -59,7 +59,9 @@ Cette section présente les choix pour le code intermédiaire.
 	\begin{tabular}{|c|l|}
 		\hline
 		code intermediaire & description \\ \hline
-		\texttt{println} & affiche un élément \\ \hline
+		\texttt{print\_char} & affiche un élément \\ \hline
+		\texttt{print\_num} & affiche un élément \\ \hline
+		
 		\texttt{push\_lit} \emph{val}& ajoute un litteral sur la pile\\ \hline
 		\texttt{push\_glo} \emph{name} & ajouter la valeur d'une variable\\ \hline
 		\texttt{push\_loc} \emph{i} & empiler la valeur d'une variable locale. \emph{i} est l'index sur la pile\\ \hline
@@ -74,7 +76,8 @@ Cette section présente les choix pour le code intermédiaire.
         \texttt{remainder} & \\ \hline
         \texttt{quotient} & \\ \hline
         \texttt{lesser} & résultat de la comparaison est plus petit \\ \hline
-        \texttt{equal} & résultat de la compaaison est egal \\ \hline
+        \texttt{equal} & résultat de la comparaison est égal \\ \hline
+        \texttt{jmp} \emph{étiquette} & va à la position spécifiée\\ \hline 
 	\end{tabular}
 \end{table}
 
