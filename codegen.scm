@@ -88,153 +88,156 @@
 
 
 (define (compile-expr expr)
-  (match expr
+  (cond ((number? expr)
+	 (gen-literal expr))
+	(else
+	 (match expr
+
+		((println ,expr)
+
+		 (if (number? expr)
+		     (append (compile-expr expr)
+			     (list " call print_word_dec\n"
+				   " push $10  # newline\n"
+				   " call putchar\n"))
+		     (append
+		      (cond ((eq? expr '#f)
+			     (list " push '#'\n"
+				   " call putchar\n"
+				   " push 'f'\n"
+				   " call putchar\n"))
+			    ((eq? expr '#t)
+			     (list " push '#'\n"
+				   " call putchar\n"
+				   " push 't'\n"
+				   " call putchar\n"))
+			    ((eq? expr '())
+			     (list " push '('\n"
+				   " call putchar\n"
+				   " push ')'\n"
+				   " call putchar\n"))
+			    ((string? expr)
+			     (let ((len (string-length expr)))
+			       (let loop ((i 0) (code '()))
+				 (if (< i len)
+				     (loop (+ i 1)
+					   (append code
+						   (list " push $"
+							 (char->integer (string-ref expr i))
+							 "\n"
+							 " call putchar\n")))
+				     code)))))
+		      (list " push $10  # newline\n"
+			    " call putchar\n"))))
+
+		((+ ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list " pop  %rax\n"
+			       " add  %rax,(%rsp)\n")))
+
+		((- ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list " pop  %rax\n"
+			       " sub  %rax,(%rsp)\n")))
+
+		((* ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list " pop  %rax\n"
+			       " sar  $3,$rax\n"
+			       " imul (%rsp)\n")))
+
+		((quotient ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list " pop  %rbx\n"
+			       " pop  %rax\n"
+			       " cqo\n"
+			       " idiv %rbx\n"
+			       " sal  $3,%rax\n"
+			       " push %rax\n")))
+
+		((remainder ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list " pop  %rbx\n"
+			       " pop  %rax\n"
+			       " cqo\n"
+			       " idiv %rbx\n"
+			       " push %rdx\n")))
+
+		((modulo ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list " pop  %rbx\n"
+			       " pop  %rax\n"
+			       " mov  %rax,%r8\n"
+			       " mov  $0,%r9\n"
+			       " cqo\n"
+			       " idiv %rbx\n"
+			       " xor  %rbx,%r8\n"
+			       " cmovns %r9,%rbx\n"
+			       " add  %rdx,%rbx\n"
+			       " push %rdx\n")))
+
+		((< ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list (" pop  %rbx\n"
+				" pop  %rax\n"
+				" cmp  %rax,%rbx\n"
+				" mov  $1,%rax  # false\n"
+				" mov  $9,%rbx  # true\n"
+				" cmovs %rbx,%rax\n" 
+				" push %rax\n"))))
+		
+		((= ,expr1 ,expr2)
+
+		 (append (compile-expr expr1)
+			 (compile-expr expr2)
+			 (list (" pop  %rbx\n"
+				" pop  %rax\n"
+				" cmp  %rax,%rbx\n"
+				" mov  $1,%rax  # false\n"
+				" mov  $9,%rbx  # true\n"
+				" cmovz %rbx,%rax\n"
+				" push %rax\n"))))))))
          
-         ((println ,expr)
 
-          (if (number? expr)
-              (append (compile-expr expr)
-                      (list " call print_word_dec\n"
-                            " push $10  # newline\n"
-                            " call putchar\n"))
-              (append
-               (cond ((eq? expr '#f)
-                      (list " push '#'\n"
-                            " call putchar\n"
-                            " push 'f'\n"
-                            " call putchar\n"))
-                     ((eq? expr '#t)
-                      (list " push '#'\n"
-                            " call putchar\n"
-                            " push 't'\n"
-                            " call putchar\n"))
-                     ((eq? expr '())
-                      (list " push '('\n"
-                            " call putchar\n"
-                            " push ')'\n"
-                            " call putchar\n"))
-                     ((string? expr)
-                      (let ((len (string-length expr)))
-                        (let loop ((i 0) (code '()))
-                          (if (< i len)
-                              (loop (+ i 1)
-                                    (append code
-                                            (list " push $"
-                                                  (char->integer (string-ref expr i))
-                                                  "\n"
-                                                  " call putchar\n")))
-                              code)))))
-               (list " push $10  # newline\n"
-                     " call putchar\n"))))
-
-         ((+ ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list " pop  %rax\n"
-                        " add  %rax,(%rsp)\n")))
-
-         ((- ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list " pop  %rax\n"
-                        " sub  %rax,(%rsp)\n")))
-
-         ((* ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list " pop  %rax\n"
-                        " sar  $3,$rax\n"
-                        " imul (%rsp)\n")))
-
-         ((quotient ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list " pop  %rbx\n"
-                        " pop  %rax\n"
-                        " cqo\n"
-                        " idiv %rbx\n"
-                        " sal  $3,%rax\n"
-                        " push %rax\n")))
-
-         ((remainder ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list " pop  %rbx\n"
-                        " pop  %rax\n"
-                        " cqo\n"
-                        " idiv %rbx\n"
-                        " push %rdx\n")))
-
-         ((modulo ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list " pop  %rbx\n"
-                        " pop  %rax\n"
-                        " mov  %rax,%r8\n"
-                        " mov  $0,%r9\n"
-                        " cqo\n"
-                        " idiv %rbx\n"
-                        " xor  %rbx,%r8\n"
-                        " cmovns %r9,%rbx\n"
-                        " add  %rdx,%rbx\n"
-                        " push %rdx\n")))
-
-         ((< ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list (" pop  %rbx\n"
-                         " pop  %rax\n"
-                         " cmp  %rax,%rbx\n"
-                         " mov  $1,%rax  # false\n"
-                         " mov  $9,%rbx  # true\n"
-                         " cmovs %rbx,%rax\n" 
-                         " push %rax\n"))))
-         
-         ((= ,expr1 ,expr2)
-
-          (append (compile-expr expr1)
-                  (compile-expr expr2)
-                  (list (" pop  %rbx\n"
-                         " pop  %rax\n"
-                         " cmp  %rax,%rbx\n"
-                         " mov  $1,%rax  # false\n"
-                         " mov  $9,%rbx  # true\n"
-                         " cmovz %rbx,%rax\n"
-                         " push %rax\n"))))))
-         
-
-(define (compile-expr expr)
-  (cond ((or (number? expr)
-	     (string? expr)
-	     (equal? expr '#f)
-	     (equal? expr '#t))
-         (gen-literal expr))
-        ((list? expr)
-         (if (null? expr)
-             (gen-list expr)
-             (let ((first (car expr)) (rest (cdr expr)))
-               (cond ((assoc first prims)
-		      ((lookup first prims) rest))
-                     ((assoc first env)
-                      ((lookup first env) rest))
-                     ((or (assoc first op-table)
-                          (equal? first 'println))
-                      (analyse-proc expr))
-                     (else
-		      (error "unknown expression " expr))))))
-        ((pair? expr)
-         (gen-pair expr))
-        ((assoc expr env)
-         (gen-var (lookup expr env)))
-        (else
-         (error "unknown expression" expr))))
+;; (define (compile-expr expr)
+;;   (cond ((or (number? expr)
+;; 	     (string? expr)
+;; 	     (equal? expr '#f)
+;; 	     (equal? expr '#t))
+;;          (gen-literal expr))
+;;         ((list? expr)
+;;          (if (null? expr)
+;;              (gen-list expr)
+;;              (let ((first (car expr)) (rest (cdr expr)))
+;;                (cond ((assoc first prims)
+;; 		      ((lookup first prims) rest))
+;;                      ((assoc first env)
+;;                       ((lookup first env) rest))
+;;                      ((or (assoc first op-table)
+;;                           (equal? first 'println))
+;;                       (analyse-proc expr))
+;;                      (else
+;; 		      (error "unknown expression " expr))))))
+;;         ((pair? expr)
+;;          (gen-pair expr))
+;;         ((assoc expr env)
+;;          (gen-var (lookup expr env)))
+;;         (else
+;;          (error "unknown expression" expr))))
 
 (define (gen-var n)
   (gen " mov -" (number->string n) "(%rbp), %rax\n"
@@ -396,15 +399,15 @@
         (else
          (error "unknown operation" expr))))
 
-;; (trace compile-expr)
-;; (trace analyse-op)
-;; (trace analyse-operand)
-;; (trace analyse-proc)
-;; (trace compile-bindings)
-;; (trace compile-let)			
-;; (trace compile-bloc)
-;; (trace compile-if)
-;; (trace gen-literal)
+ ;; (trace compile-expr)
+ ;; (trace analyse-op)
+ ;; (trace analyse-operand)
+ ;; (trace analyse-proc)
+ ;; (trace compile-bindings)
+ ;; (trace compile-let)			
+ ;; (trace compile-bloc)
+ ;; (trace compile-if)
+ ;; (trace gen-literal)
 
 (define (compile-program exprs)
   (list " .text\n"
@@ -412,7 +415,7 @@
         " .globl main\n"
         "_main:\n"
         "main:\n"
-        (map compile-bloc exprs)
+        (compile-bloc exprs)
         " mov $0, %rax\n"
         " ret\n"))
 

@@ -146,14 +146,14 @@
           (else
            (eqv? x y)))))
 
-(define read
-  (lambda ()
-    ;; TODO
-    ))
+;; (define read
+;;   (lambda ()
+;;     ;; TODO
+;;     ))
 
-(define write
-  (lambda (x)
-    ;; TODO
-    ))
+;; (define write
+;;   (lambda (x)
+;;     ;; TODO
+;;     ))
 
 ;;;============================================================================
