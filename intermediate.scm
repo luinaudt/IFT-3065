@@ -35,7 +35,7 @@
 	  (list 'println (intermediateCode-gen expr)))))
 
 (define (analyse-add expr1 expr2)
-  (list '+ (intermediateCode-gen expr1) (intermediateCode-gen expr2)))
+  (list '$+ (intermediateCode-gen expr1) (intermediateCode-gen expr2)))
 
 ;; (pp intermediateCode-gen)
 ;; (trace intermediateCode-gen)
