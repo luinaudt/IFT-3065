@@ -10,24 +10,32 @@
 ;; retourne une liste AST avec le langage intermédiaire
 ;; environnement : environnement gcte grte
 (define (intermediateCode-gen expr);; gcte grte)
-  (cond ((pair? (car expr))
-	 (intermediateCode-gen (car expr)))
-	((number? (car expr))
-	 (car expr))
-	((eq? (car expr) 'println)
-	 (analyse-println (cdr expr)))
-	(else (error "erreur unknown expression"))))
-;;      (match expr
-;;	     (($println expr)
-;;	      (analyse-println ,expr))
-;;
-;;	     (($+ ,expr)
-;;	      (analyse-add ,expr)))))
+  (if (null? expr)
+      '()
+      (match expr
+	     ;;		((define ,expr)
+	     ;;		 
+	     ;;			 )
+	     (,number when (number? expr)
+		      expr)
+	     (,pair when (pair? (car expr))
+		    (cons (intermediateCode-gen (car expr))
+			  (intermediateCode-gen (cdr expr))))
+	     ((println ,expr)
+	      (analyse-println expr))
+	     ((+ ,expr1 ,expr2)
+	      (analyse-add expr1 expr2)))))
 
 ;;implementation de la fonction $prinln
 (define (analyse-println expr);; gcte grte)
-  (cond ((number? (car expr))
-	 (list 'println (car expr)))))
+  (match expr
+   (,number when (number? expr)
+	    (list 'println expr))
+   (,pair when (pair? expr)
+	  (list 'println (intermediateCode-gen expr)))))
+
+(define (analyse-add expr1 expr2)
+  (list '+ (intermediateCode-gen expr1) (intermediateCode-gen expr2)))
 
 ;; (pp intermediateCode-gen)
 ;; (trace intermediateCode-gen)

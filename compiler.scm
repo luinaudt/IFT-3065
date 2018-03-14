@@ -42,9 +42,10 @@
 
 (define (compile filename)
 
-  (let* ((ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
+  (let* (;;(ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
+	 (ast (parse-program filename))
 	 (inter (begin (pp ast) (intermediateCode-gen ast))) ;; generate intermediate rep
-         (code (compile-program inter)))  ;; generate code
+         (code (begin (pp inter) (compile-program inter))))  ;; generate code
     (pp ast)
     (let* ((base-filename (path-strip-extension filename))
            (asm-filename (string-append base-filename ".s"))
