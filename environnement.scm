@@ -1,9 +1,9 @@
 ;; fichier pour la gestion de l'environnement.
-
+(include "match.scm")
 ;;environnement de compilation
-(define gcte '())
+(define gcte (list '$println '$+))
 ;;environnement d'exécution
-(define grte '())
+(define grte (list '$println '$+))
 
 ;;recherche dans l'enironnement
 (define (env-lookup env var)
@@ -13,7 +13,7 @@
 
 ;;extension de l'environnement pour les lambda
 (define (cte-extend cte vars) (append vars cte))
-(define (rte-extend cte vars) (append vars r0te))
+(define (rte-extend rte vars) (append vars rte))
 
 
 ;;fonction de recherche
@@ -25,6 +25,13 @@
 
 (define (rte-lookup rte pos)
   (list-ref rte pos))
+
+(define (constant? x)
+  (or (number? x)
+      (string? x)
+      (boolean? x)))
+(define (variable? x)
+  (symbol? x))
 
 ;;fonction pour l'evaluation
 (define (ev expr cte rte)
@@ -40,7 +47,7 @@
 	  (lambda args (ev body (cte-extend cte params)
 			   (rte-extend rte args))))
 
-	 ((,fun  ,exprs) ;;(,fun . ,exprs) invlaide comprendre pourquoi
+	 ((,fun . ,exprs)
 	  (apply (ev fun cte rte)
 		 (map (lambda (x) (ev x cte rte))
 		      exprs)))))
@@ -48,5 +55,10 @@
 (define (eval expr)
   (ev expr gcte grte))
 
-
-
+(trace eval)
+(trace ev)
+(trace rte-lookup)
+(trace cte-lookup)
+(trace env-lookup)
+(trace cte-extend)
+(trace rte-extend)

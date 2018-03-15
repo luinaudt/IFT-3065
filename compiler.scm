@@ -44,7 +44,7 @@
 
   (let* (;;(ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
 	 (ast (parse-program filename))
-	 (inter (begin (pp ast) (intermediateCode-gen ast))) ;; generate intermediate rep
+	 (inter (intermediateCode-gen ast gcte grte)) ;; generate intermediate rep
          (code (begin (pp inter) (compile-program inter))))  ;; generate code
     (pp ast)
     (let* ((base-filename (path-strip-extension filename))

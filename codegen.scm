@@ -88,11 +88,11 @@
 
 
 (define (compile-expr expr)
-  (pp expr)
+;;  (pp expr)
   (match expr
 	 (,number when (number? expr)
 		  (gen-literal expr))
-	 ((println ,expr)
+	 (($println ,expr)
 	  (cond ((number? expr)
 		 (append (gen-literal expr)
 			 (list " call print_word_dec\n"
@@ -212,7 +212,7 @@
 			 " cmovz %rbx,%rax\n"
 			 " push %rax\n"))))))
          
-(pp compile-expr)
+;;(pp compile-expr)
 ;; (define (compile-expr expr)
 ;;   (cond ((or (number? expr)
 ;; 	     (string? expr)
