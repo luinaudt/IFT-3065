@@ -42,9 +42,9 @@
 
 (define (compile filename)
 
-  (let* (;;(ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
-	 (ast (parse-program filename))
-	 (inter (intermediateCode-gen ast gcte grte)) ;; generate intermediate rep
+  (let* ((ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
+	 ;;(ast (parse-program filename))
+	 (inter (closure-conv (assign-conv (alpha-conv ast))));; gcte grte)) ;; generate intermediate rep
          (code (begin (pp inter) (compile-program inter))))  ;; generate code
     (pp ast)
     (let* ((base-filename (path-strip-extension filename))
@@ -64,6 +64,7 @@
                     "-o"
                     exe-filename
                     (path-expand "stdio.o" root-dir)
+		    (path-expand "mmap.o" root-dir)
                     asm-filename)))
 
         ;; return exit status

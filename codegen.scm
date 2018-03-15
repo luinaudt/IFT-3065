@@ -415,6 +415,9 @@
         " .globl main\n"
         "_main:\n"
         "main:\n"
+	"push $100*1024*1024\n"
+	"call mmap\n"
+	"mov %rax, %r10\n"
         (map compile-bloc exprs)
         " mov $0, %rax\n"
         " ret\n"))

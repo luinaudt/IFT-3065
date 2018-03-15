@@ -1,7 +1,7 @@
 #! /usr/bin/env gsi
-
-(include "intermediate.scm")
 (include "environnement.scm")
+(include "closure-conv.scm")
+(include "intermediate.scm")
 (include "codegen.scm")
 (include "parser.scm")
 (include "compiler.scm")

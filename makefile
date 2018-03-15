@@ -3,7 +3,7 @@
 .SUFFIXES:
 .SUFFIXES: .scm .s .o .exe
 
-all: stdio.o
+all: stdio.o mmap.o
 
 .s.o:
 	gcc -c -o $*.o $*.s
