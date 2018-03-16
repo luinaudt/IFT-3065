@@ -99,8 +99,8 @@
   (define (variable? x)
     (symbol? x))
 
-  ;;(define (primitive? x)
-  ;;  '($println $+ $car $cdr $cons $set-car! $set-cdr!))
+  (define (primitive? x)
+    prims)
 
 )
 
