@@ -10,7 +10,6 @@
 
 ;; Define some special forms to define macros that are usable
 ;; in macro definitions.
-(include "prims.scm")
 (define-macro (for-macro-expansion . body)
   (eval `(begin ,@body))
   #f)
@@ -20,9 +19,6 @@
      (for-macro-expansion ,@body)
      ,@body))
 
-(define (make-closure code env) (vector code env))
-(define (closure-code clo) (vector-ref clo 0))
-(define (closure-env clo) (vector-ref clo 1))
 ;;;----------------------------------------------------------------------------
 
 ;; Define the match special form.

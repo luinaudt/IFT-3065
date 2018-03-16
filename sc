@@ -1,4 +1,5 @@
 #! /usr/bin/env gsi
+(include "prims.scm")
 (include "environnement.scm")
 (include "closure-conv.scm")
 (include "intermediate.scm")

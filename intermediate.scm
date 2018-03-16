@@ -8,13 +8,9 @@
 ;; Intermediate code
 ;; Fonction pour génération de la représentation intermdiaire.
 ;; retourne une liste AST avec le langage intermédiaire
-;; environnement : environnement cte rte
 (define (intermediateCode-gen expr cte rte)
-  ;;  (pp (cdr expr))
-  ;;(pp (closure-conv expr))
-  ;;(pp (alpha-conv expr))
-  
-  (match expr
+  ;;(pp expr)
+   (match expr
   	 (,null when (null? expr)
   		'())
   	 ((define ,name ,exprs)
@@ -33,19 +29,29 @@
   				(cte-extend cte params)
   				(rte-extend rte params)))
   	 ;;		 (error "lambda not supported yet"))
-	 
+	 ((if ,E1 ,E2)
+	  expr)
+	 ((if ,E1 ,E2 ,E3)
+	  expr)
   	 (,number when (number? expr)
   		  number)
   	 (,var when (variable? expr)
-  	       (rte-lookp rte (cte-lookup cte var)))
+  	       (rte-lookup rte (cte-lookup cte var)))
+	 ((make-closure . ,exprs)
+	  (intermediateCode-gen exprs cte rte))
   	 ((,fun . ,exprs)
-  	  (if (pair? fun)
+  	  ;;(if (pair? fun)
   	      (let* ((ret (intermediateCode-gen fun cte rte)))
-  		(cons ret (intermediateCode-gen exprs gcte grte)))
-  	      (cons (rte-lookup rte (cte-lookup cte fun))
-  		    (intermediateCode-gen exprs cte rte))))))
-
+  		(cons ret (intermediateCode-gen exprs cte rte))))
+  	   ;;   (cons (rte-lookup rte (cte-lookup cte fun))
+  		;;    (intermediateCode-gen exprs cte rte))))))
+))
 ;;implementation de la fonction $prinln
+;;(define (make-closure expr cte rte)
+;;  (match expr
+;;	 ())
+;;  )
+
 (define (ir-analyse-println expr cte rte);; gcte grte)
   (match expr
    (,number when (number? expr)
@@ -56,7 +62,7 @@
 (define (ir-analyse-add expr1 expr2 cte rte)
   (list '$+ (intermediateCode-gen expr1 cte rte) (intermediateCode-gen expr2 cte rte)))
 
-;; (pp intermediateCode-gen)
+ (pp intermediateCode-gen)
 ;;(trace intermediateCode-gen)
 ;;(trace ir-analyse-println)
 ;;(trace ir-analyse-add)
