@@ -1,7 +1,15 @@
 ;;fichier contenant la table des primitives schemes
 
 (define (primitive? x)
-  prims)
+  (in-list x prims))
+
+;;test si x est dans une liste y
+(define (in-list x y)
+  (if (null? y)
+      #f
+      (if (eq? x (car y))
+	  #t
+	  (in-list x (cdr y)))))
 
 (define prims '($println
 		$+

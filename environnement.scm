@@ -1,9 +1,9 @@
 ;; fichier pour la gestion de l'environnement.
 (include "match.scm")
 ;;environnement de compilation
-(define gcte prims)
+(define gcte '());; prims)
 ;;environnement d'exécution
-(define grte prims)
+(define grte '());;prims)
 
 ;;recherche dans l'enironnement
 (define (env-lookup env var)

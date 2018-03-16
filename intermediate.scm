@@ -9,15 +9,16 @@
 ;; Fonction pour génération de la représentation intermdiaire.
 ;; retourne une liste AST avec le langage intermédiaire
 (define (intermediateCode-gen expr cte rte)
-  ;;(pp expr)
+  (pp cte)
+;;  (pp expr)
    (match expr
   	 (,null when (null? expr)
   		'())
   	 ((define ,name ,exprs)
   	  (begin		   
-  	    (set! grte (rte-extend rte (intermediateCode-gen exprs cte rte)))
+  	    (set! grte (rte-extend rte (intermediateCode-gen exprs (cte-extend cte (list name)) rte)))
   	    (set! gcte (cte-extend cte (list name)))
-  	    '()))
+  	    ))
   	 ((set! ,name ,exprs)
   	  (error "set! not supported"))
   	 ((let ,liste ,exprs)
@@ -37,15 +38,15 @@
   		  number)
   	 (,var when (variable? expr)
   	       (rte-lookup rte (cte-lookup cte var)))
+	 (,prim when (primitive? prim)
+		(begin
+		  (pp "opk")
+		  prim))
 	 ((make-closure . ,exprs)
 	  (intermediateCode-gen exprs cte rte))
   	 ((,fun . ,exprs)
-  	  ;;(if (pair? fun)
   	      (let* ((ret (intermediateCode-gen fun cte rte)))
-  		(cons ret (intermediateCode-gen exprs cte rte))))
-  	   ;;   (cons (rte-lookup rte (cte-lookup cte fun))
-  		;;    (intermediateCode-gen exprs cte rte))))))
-))
+  		(cons ret (intermediateCode-gen exprs cte rte))))))
 ;;implementation de la fonction $prinln
 ;;(define (make-closure expr cte rte)
 ;;  (match expr
@@ -62,7 +63,6 @@
 (define (ir-analyse-add expr1 expr2 cte rte)
   (list '$+ (intermediateCode-gen expr1 cte rte) (intermediateCode-gen expr2 cte rte)))
 
- (pp intermediateCode-gen)
-;;(trace intermediateCode-gen)
+(trace intermediateCode-gen)
 ;;(trace ir-analyse-println)
 ;;(trace ir-analyse-add)
