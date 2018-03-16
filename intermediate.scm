@@ -4,13 +4,13 @@
 
 ;;the ast is a scheme list
 ;;it should contain unique symbols.
-(include "match.scm")
+;;(include "match.scm")
 ;; Intermediate code
 ;; Fonction pour génération de la représentation intermdiaire.
 ;; retourne une liste AST avec le langage intermédiaire
 (define (intermediateCode-gen expr cte rte)
   (pp cte)
-;;  (pp expr)
+  (pp expr)
    (match expr
   	 (,null when (null? expr)
   		'())
@@ -22,7 +22,7 @@
   	 ((set! ,name ,exprs)
   	  (error "set! not supported"))
   	 ((let ,liste ,exprs)
-  	  (error "let not supported"))
+  	  (intermediateCode-gen exprs cte rte))
   	 ((quote ,exprs)
   	  (error "quote not supported yet"))
   	 ((lambda ,params ,body)

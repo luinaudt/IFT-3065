@@ -99,8 +99,8 @@
   (define (variable? x)
     (symbol? x))
 
-  (define (primitive? x)
-    prims)
+  ;;(define (primitive? x)
+  ;;  prims)
 
 )
 
