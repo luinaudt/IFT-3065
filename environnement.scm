@@ -1,4 +1,5 @@
 (include "match.scm")
+(include "aaa.scm")
 
 (define (ev expr env)
   (match expr
@@ -11,6 +12,9 @@
 
 	 ((lambda ,params ,body)
 	  (lambda args (ev body (env-extend env params args))))
+
+         ((define ,symbol ,expr)
+          (cons (cons symbol (ev expr env)) env))
 
          ((,fun . ,exprs)
           (apply (ev fun env)
