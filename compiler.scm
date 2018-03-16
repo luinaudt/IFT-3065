@@ -42,8 +42,8 @@
 
 (define (compile filename)
 
-  (let* ((ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
-	 ;;(ast (parse-program filename))
+  (let* (;;(ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
+	 (ast (parse-program filename))
 	 (inter (intermediateCode-gen (closure-conv (assign-conv (alpha-conv ast))) gcte grte))
          (code (begin (pp inter) (compile-program inter))))  ;; generate code
     (pp ast)
