@@ -18,10 +18,16 @@
       '()
       (match expr
 	     ((define ,name ,expr)
-	      (begin (set! env-ir (env-extend env-ir (list name) (list taille-glob)))
-		     (set! taille-glob (+ taille-glob 1))
-		     (append (compile-ir expr env)
-			     (list `(pop_glo ,(- taille-glob 1))))))
+	      (let (var-val (assoc name env-ir))
+                (if var-val
+                    (begin
+                      (append (compile-ir expr env)
+                              (list `(pop_glo ,(cdr var-val)))))
+                    (begin
+                      (set! env-ir (env-extend env-ir (list name) (list taille-glob)))
+                      (set! taille-glob (+ taille-glob 1))
+                      (append (compile-ir expr env)
+                              (list `(pop_glo ,(- taille-glob 1))))))))
 	     (($println  ,expr)
 	      (append (compile-ir expr env)
 		      (list '(println))))
