@@ -410,11 +410,11 @@
  ;; (trace gen-literal)
 (define (compile-bloc expr)
   (match expr
-	 ((pop_glo ,val)
+	 ((pop_glo ,pos)
 	  (list "pop %rax\n"
-		"mov %rax,(%r11)\n"))
+		"mov %rax," (number->string (* 8 pos)) "(%r11)\n"))
 	 ((push_glo ,pos)
-	  (list "mov (%r11), %rax\n"
+	  (list "mov " (number->string (* 8 pos)) "(%r11), %rax\n"
 		"push %rax\n"))
 	 ((push_lit ,val)
 	  (list "push $8*" val "\n"))

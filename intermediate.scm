@@ -9,6 +9,8 @@
 ;; Intermediate code
 ;; Fonction pour génération de la représentation intermdiaire.
 ;; retourne une liste AST avec le langage intermédiaire
+(define env-ir '())
+(define taille-glob 0)
 
 (define (compile-ir expr env)
   ;;(pp expr)
@@ -16,8 +18,10 @@
       '()
       (match expr
 	     ((define ,name ,expr)
-	      (append (compile-ir expr (env-extend env (list name) (list 0)))
-		      (list `(pop_glo ,name))))
+	      (begin (set! env-ir (env-extend env-ir (list name) (list taille-glob)))
+		     (set! taille-glob (+ taille-glob 1))
+		     (append (compile-ir expr env)
+			     (list `(pop_glo ,(- taille-glob 1))))))
 	     (($println  ,expr)
 	      (append (compile-ir expr env)
 		      (list '(println))))
@@ -26,9 +30,9 @@
 		      (compile-ir p2 env)
 		      (list '(add))))
 	     (,lit when (constant? lit)
-		   (list (cons 'push_lit (list lit))))
+		   (list `(push_lit ,lit)))
 	     (,var when (variable? var)
-		   (list (cons 'push_glo (list var))))
+		   (list `(push_glo ,(env-lookup env-ir var)))) ;;(list var))))
 	     ((,E0 . ,Es)
 	      (append (compile-ir E0 env)
 		      (compile-ir Es env))))))
@@ -36,7 +40,7 @@
 
 
 ;;debug
-;;(pp intermediateCode-gen)
+;;(pp compile-ir)
 ;;(trace compile-ir)
 ;;(trace intermediateCode-gen)
 ;;(trace ir-analyse-println)
