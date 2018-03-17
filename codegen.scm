@@ -410,6 +410,12 @@
  ;; (trace gen-literal)
 (define (compile-bloc expr)
   (match expr
+	 ((pop_glo ,val)
+	  (list "pop %rax\n"
+		"mov %rax,(%r11)\n"))
+	 ((push_glo ,pos)
+	  (list "mov (%r11), %rax\n"
+		"push %rax\n"))
 	 ((push_lit ,val)
 	  (list "push $8*" val "\n"))
 	 ((add)
@@ -423,15 +429,24 @@
 		"push $10\n"
 		"call putchar\n"))))
 
+(define (compile-env env)
+  (if (null? env)
+      '()
+      (list (symbol->string (caar env)) ": .quad " (number->string (cdar env))
+	    (compile-env (cdr env)))))
+
 (define (compile-program exprs)
   (list " .text\n"
         " .globl _main\n"
         " .globl main\n"
         "_main:\n"
         "main:\n"
+	;;"push $100*1024*1024\n" ;;registre pour le tas
+	;;"call mmap\n"
+	;;"mov %rax, %r10\n"
 	"push $100*1024*1024\n"
 	"call mmap\n"
-	"mov %rax, %r10\n"
+	"mov %rax, %r11\n" ;;registre pour les variable globales
         (map compile-bloc exprs)
         " mov $0, %rax\n"
         " ret\n"))
