@@ -18,7 +18,7 @@
       '()
       (match expr
 	     ((define ,name ,expr)
-	      (let (var-val (assoc name env-ir))
+	      (let ((var-val (assoc name env-ir)))
                 (if var-val
                     (begin
                       (append (compile-ir expr env)
