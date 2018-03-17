@@ -2,8 +2,8 @@
 
 ;;;============================================================================
 
-;; Primitive operations
-;;(include "macros.scm")
+;; Primitive functions
+
 (define println  (lambda (x)   ($println x)))
 (define +        (lambda (x y) ($+ x y)))
 (define -        (lambda (x y) ($- x y)))
@@ -38,14 +38,7 @@
 
 ;;;============================================================================
 
-;; Primitive functions of primitive operations
-
-
-
-
-;;;============================================================================
-
-;; Primitive functions based on primitive operations
+;; Fonctions prédéfinies
 
 ;; (define not
 ;;   (lambda (x)
