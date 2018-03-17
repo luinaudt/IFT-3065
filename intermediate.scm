@@ -4,65 +4,41 @@
 
 ;;the ast is a scheme list
 ;;it should contain unique symbols.
-;;(include "match.scm")
+(include "match.scm")
+(define (constant? x)
+  (or (number? x)
+      (string? x)
+      (boolean? x)))
+
 ;; Intermediate code
 ;; Fonction pour génération de la représentation intermdiaire.
 ;; retourne une liste AST avec le langage intermédiaire
-(define (intermediateCode-gen expr cte rte)
-  (pp cte)
-  (pp expr)
-   (match expr
-  	 (,null when (null? expr)
-  		'())
-  	 ((define ,name ,exprs)
-  	  (begin		   
-  	    (set! grte (rte-extend rte (intermediateCode-gen exprs (cte-extend cte (list name)) rte)))
-  	    (set! gcte (cte-extend cte (list name)))
-  	    ))
-  	 ((set! ,name ,exprs)
-  	  (error "set! not supported"))
-  	 ((let ,liste ,exprs)
-  	  (intermediateCode-gen exprs cte rte))
-  	 ((quote ,exprs)
-  	  (error "quote not supported yet"))
-  	 ((lambda ,params ,body)
-  	  (intermediateCode-gen body
-  				(cte-extend cte params)
-  				(rte-extend rte params)))
-  	 ;;		 (error "lambda not supported yet"))
-	 ((if ,E1 ,E2)
-	  expr)
-	 ((if ,E1 ,E2 ,E3)
-	  expr)
-  	 (,number when (number? expr)
-  		  number)
-  	 (,var when (variable? expr)
-  	       (rte-lookup rte (cte-lookup cte var)))
-	 (,prim when (primitive? prim)
-		(begin
-		  (pp "opk")
-		  prim))
-	 ((make-closure . ,exprs)
-	  (intermediateCode-gen exprs cte rte))
-  	 ((,fun . ,exprs)
-  	      (let* ((ret (intermediateCode-gen fun cte rte)))
-  		(cons ret (intermediateCode-gen exprs cte rte))))))
-;;implementation de la fonction $prinln
-;;(define (make-closure expr cte rte)
-;;  (match expr
-;;	 ())
-;;  )
 
-(define (ir-analyse-println expr cte rte);; gcte grte)
-  (match expr
-   (,number when (number? expr)
-	    (list 'println expr))
-   (,pair when (pair? expr)
-	  (list 'println (intermediateCode-gen expr cte rte)))))
+(define (compile-ir expr env)
+  ;;(pp expr)
+  (if (null? expr)
+      (begin (pp "ouioo")
+	     '())
+      (match expr
+	     
+	     (($println  ,expr)
+	      (append (compile-ir expr env)
+		      (list '(println))))
+	     (($+ ,p1 ,p2)
+	      (append (compile-ir p1 env)
+		      (compile-ir p2 env)
+		      (list '(add))))
+	     (,lit when (constant? lit)
+		   (list (cons 'push_lit (list lit))))
+	     ((,E0 . ,Es)
+	      (append (compile-ir E0 env)
+		      (compile-ir Es env))))))
 
-(define (ir-analyse-add expr1 expr2 cte rte)
-  (list '$+ (intermediateCode-gen expr1 cte rte) (intermediateCode-gen expr2 cte rte)))
 
-(trace intermediateCode-gen)
+
+;;debug
+;;(pp intermediateCode-gen)
+(trace compile-ir)
+;;(trace intermediateCode-gen)
 ;;(trace ir-analyse-println)
 ;;(trace ir-analyse-add)

@@ -44,9 +44,9 @@
 
   (let* (;;(ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
 	 (ast (parse-program filename))
-	 (inter (intermediateCode-gen (closure-conv (assign-conv (alpha-conv ast))) gcte grte))
+	 (inter (compile-ir ast '()));;(closure-conv (assign-conv (alpha-conv ast))) gcte grte))
          (code (begin (pp inter) (compile-program inter))))  ;; generate code
-    (pp ast)
+    ;;(pp ast)
     (let* ((base-filename (path-strip-extension filename))
            (asm-filename (string-append base-filename ".s"))
            (exe-filename (string-append base-filename ".exe"))
