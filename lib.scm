@@ -47,104 +47,104 @@
 
 ;; Primitive functions based on primitive operations
 
-;; (define not
-;;   (lambda (x)
-;;     (if ($eq? x #f) #t #f)))
+(define not
+  (lambda (x)
+    (if ($eq? x #f) #t #f)))
 
-;; (define boolean?
-;;   (lambda (x)
-;;     (or ($eq? x #t) ($eq? x #f))))
+(define boolean?
+  (lambda (x)
+    (or ($eq? x #t) ($eq? x #f))))
 
-;; (define null?
-;;   (lambda (x)
-;;     ($eq? x '())))
+(define null?
+  (lambda (x)
+    ($eq? x '())))
 
-;; (define member
-;;   (lambda (x lst)
-;;     (cond (($eq? lst '())
-;;            #f)
-;;           ((equal? x ($car lst))
-;;            lst)
-;;           (else
-;;            (member x ($cdr lst))))))
+(define member
+  (lambda (x lst)
+    (cond (($eq? lst '())
+           #f)
+          ((equal? x ($car lst))
+           lst)
+          (else
+           (member x ($cdr lst))))))
 
-;; (define assoc
-;;   (lambda (k lst)
-;;     (cond (($eq? lst '())
-;;            #f)
-;;           ((equal? k ($car ($car lst)))
-;;            ($car lst))
-;;           (else
-;;            (assoc k ($cdr lst))))))
+(define assoc
+  (lambda (k lst)
+    (cond (($eq? lst '())
+           #f)
+          ((equal? k ($car ($car lst)))
+           ($car lst))
+          (else
+           (assoc k ($cdr lst))))))
 
-;; (define append
-;;   (lambda (x y)
-;;     (if ($eq? x '())
-;;         y
-;;         ($cons ($car x)
-;;                (append ($cdr x) y)))))
+(define append
+  (lambda (x y)
+    (if ($eq? x '())
+        y
+        ($cons ($car x)
+               (append ($cdr x) y)))))
 
-;; (define reverse
-;;   (lambda (x)
-;;     (let loop ((x x) (acc '()))
-;;       (if ($eq? x '())
-;;           acc
-;;           (loop ($cdr x)
-;;                 ($cons ($car x) acc))))))
+(define reverse
+  (lambda (x)
+    (let loop ((x x) (acc '()))
+      (if ($eq? x '())
+          acc
+          (loop ($cdr x)
+                ($cons ($car x) acc))))))
 
-;; (define length
-;;   (lambda (x)
-;;     (if ($eq? x '())
-;;         0
-;;         ($+ 1 (length ($cdr x))))))
+(define length
+  (lambda (x)
+    (if ($eq? x '())
+        0
+        ($+ 1 (length ($cdr x))))))
 
-;; (define map
-;;   (lambda (f lst)
-;;     (if ($eq? lst '())
-;;         '()
-;;         ($cons (f ($car lst))
-;;                (map f ($cdr lst))))))
+(define map
+  (lambda (f lst)
+    (if ($eq? lst '())
+        '()
+        ($cons (f ($car lst))
+               (map f ($cdr lst))))))
 
-;; (define char=?
-;;   (lambda (x y)
-;;     ($= ($char->integer x) ($char->integer y))))
+(define char=?
+  (lambda (x y)
+    ($= ($char->integer x) ($char->integer y))))
 
-;; (define char<?
-;;   (lambda (x y)
-;;     ($< ($char->integer x) ($char->integer y))))
+(define char<?
+  (lambda (x y)
+    ($< ($char->integer x) ($char->integer y))))
 
-;; (define string=?
-;;   (lambda (x y)
-;;     (if (and ($string? x)
-;;              ($string? y)
-;;              ($= ($string-length x) ($string-length y)))
-;;         ;; compare here
-;;         #f)))
+(define string=?
+  (lambda (x y)
+    (if (and ($string? x)
+             ($string? y)
+             ($= ($string-length x) ($string-length y)))
+        ;; compare here
+        #f)))
 
-;; (define string<?
-;;   (lambda (x y)
-;;     (if (and ($string? x)
-;;              ($string? y))
-;;         ;; compare here
-;;         #f)))
+(define string<?
+  (lambda (x y)
+    (if (and ($string? x)
+             ($string? y))
+        ;; compare here
+        #f)))
 
-;; (define eqv?
-;;   (lambda (x y)
-;;     (if (and ($number? x) ($number? y))
-;;         ($= x y)
-;;         ($eq? x y))))
+(define eqv?
+  (lambda (x y)
+    (if (and ($number? x) ($number? y))
+        ($= x y)
+        ($eq? x y))))
 
-;; (define equal?
-;;   (lambda (x y)
-;;     (cond (($pair? x)
-;;            (and ($pair? y)
-;;                 (equal? ($car x) ($car y))
-;;                 (equal? ($cdr x) ($cdr y))))
-;;           (($string? x)
-;;            (and ($string? y)
-;;                 (string=? x y)))
-;;           (else
-;;            (eqv? x y)))))
+(define equal?
+  (lambda (x y)
+    (cond (($pair? x)
+           (and ($pair? y)
+                (equal? ($car x) ($car y))
+                (equal? ($cdr x) ($cdr y))))
+          (($string? x)
+           (and ($string? y)
+                (string=? x y)))
+          (else
+           (eqv? x y)))))
 
 ;; (define read
 ;;   (lambda ()
