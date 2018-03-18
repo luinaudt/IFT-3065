@@ -78,7 +78,7 @@
 
 ;;debug
 ;;(pp compile-ir)
-(trace compile-ir)
+;;(trace compile-ir)
 ;;(trace intermediateCode-gen)
 ;;(trace ir-analyse-println)
 ;;(trace ir-analyse-add)
