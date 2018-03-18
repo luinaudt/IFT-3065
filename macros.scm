@@ -1,4 +1,6 @@
-;;(include "match.scm")
+(include "match.scm")
+
+(for-macro-expansion-and-execution
 
 (define-macro (begin . exprs)
   (if (not (null? exprs))
@@ -70,4 +72,4 @@
         (#t
          `(let (,(car bindings))
             (let* ,(cdr bindings)
-              ,@body)))))
+              ,@body))))))
