@@ -1,6 +1,8 @@
 (include "match.scm")
 ;;(include "aaa.scm")
 
+(define genv '())
+
 (define (ev expr env)
   (match expr
          
