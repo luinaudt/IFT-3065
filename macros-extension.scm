@@ -1,3 +1,4 @@
+(include "match.scm")
 
 (define (expand-macros ast)
  
@@ -21,11 +22,42 @@
 
 	 ;;let*
 
-	 ;;begin
+         ((begin)
+          #!void)
+         ((begin ,E1)
+          (expand-macros E1))
+         ((begin ,E1 . ,reste)
+          (let ((v (gensym)))
+            (expand-macros
+             `(let ((,v ,E1))
+                (begin ,@reste)))))
 
 	 ;;letrec
 
-	 ;;cond
+         ((cond)
+          #f)
+         ((cond (else ,E1 . ,Es))
+          (expand-macros
+           `(begin ,E1 ,@Es)))
+         ((cond (else . ,Es) . ,reste)
+          (error "improper else clause"))
+         ((cond (,test) . ,reste)
+          (expand-macros
+           `(or ,test (cond ,@reste))))
+         ((cond (,test => ,fn) . ,reste)
+          (let ((v (gensym)))
+            (expand-macros
+             `(let ((,v ,test))
+                (if ,v
+                    (,fn ,v)
+                    (cond ,@reste))))))
+         ((cond (,test => . ,Es) . ,reste)
+          (error "improper => clause"))
+         ((cond (,test ,E1 . ,Es) . ,reste)
+          (expand-macros
+           `(if ,test
+                (begin ,E1 ,@Es)
+                (cond ,@reste))))
 
 	 
 	 ;;or
