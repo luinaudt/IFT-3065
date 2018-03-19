@@ -460,7 +460,7 @@
 		"idiv %rbx\n"
 		"add %r8, %rdx\n"
 		"push %rdx\n"))
-	 ((less)
+	 ((less?)
 	  (list "cmovs %rbx, %rax\n"
 		"push %rax\n"))
 	 ((cmp)
