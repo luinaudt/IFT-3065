@@ -422,8 +422,11 @@
          ((push_lit ,val)
 	  (list "push $8*" val "\n"))
 
+	 ((push_proc ,name)
+	   (list "#todo\n"))
+	 
          ((push_loc ,pos)
-	  (list "# todo"))
+	  (list "# todo\n"))
 
          ((add)
 	  (list "pop %rax \n"
