@@ -41,7 +41,9 @@
                 (begin ,@reste)))))
 
 	 ;;letrec
-
+	 
+	 
+	 ;;cond
          ((cond)
           #f)
          ((cond (else ,E1 . ,Es))
