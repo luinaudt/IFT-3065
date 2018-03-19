@@ -428,7 +428,50 @@
          ((add)
 	  (list "pop %rax \n"
 		"add %rax, (%rsp)\n"))
-
+	 ((mul)
+	  (list "pop %rax \n"
+		"pop %rbx \n"
+		"sar $3, %rbx\n"
+		"mul %rbx\n"
+		"push %rax\n"))
+	 ((quotient)
+	  (list "pop %rax\n"
+		"pop %rbx\n"
+		"cqo \n"
+		"idiv %rbx\n"
+		"sal $3,%rax\n"
+		"push %rax\n"))
+	 ((remainder)
+	  (list "pop %rax\n"
+		"pop %rbx\n"
+		"cqo\n"
+		"idiv %rbx\n"
+		"push %rdx\n"))
+	 ((modulo)
+	  (list "pop %rax\n"
+		"pop %rbx\n"
+		"cqo\n"
+		"mov %rax, %r8\n"
+		"mov %rbx, %r9\n"
+		"shr $63,%r8\n"
+		"shr $63,%r9\n"
+		"cmp %r8, %r9\n"
+		"cmovne %rbx, %r8\n"
+		"idiv %rbx\n"
+		"add %r8, %rdx\n"
+		"push %rdx\n"))
+	 ((less)
+	  (list "cmovs %rbx, %rax\n"
+		"push %rax\n"))
+	 ((cmp)
+	  (list "pop %rax\n"
+		"pop %rbx\n"
+		"cmp %rax, %rbx\n"
+		"mov $1, %rax\n"
+		"mov $9, %rbx\n"))
+	 ((equal?)
+	  (list "cmovz %rbx,%rax\n"
+		"push %rax"))
          ((sub)
           (list "pop %rax \n"
                 "sub %rax, (%rsp)\n"))
