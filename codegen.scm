@@ -423,7 +423,7 @@
 	  (list "push $8*" val "\n"))
 
          ((push_loc ,pos)
-          )
+	  (list "# todo"))
 
          ((add)
 	  (list "pop %rax \n"

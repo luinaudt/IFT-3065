@@ -4,6 +4,9 @@
 
 ;; The run function executes a process and captures its exit
 ;; status and output.  This is used to execute the gcc compiler.
+;;(include "macros.scm")
+
+(include "macros-extension.scm")
 
 (define (run path . args)
   (let* ((port
@@ -44,7 +47,8 @@
 
   (let* (;;(ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
 	 (ast (parse-program filename))
-	 (inter (compile-ir ast '()));;(closure-conv (assign-conv (alpha-conv ast))) gcte grte))
+	 (ast-expanded (expand-macros ast))
+	 (inter (begin (pp ast-expanded) (compile-ir ast-expanded '())));;(closure-conv (assign-conv (alpha-conv ast))) gcte grte))
          (code (begin (pp inter) (compile-program inter))))  ;; generate code
     ;;(pp ast)
     (let* ((base-filename (path-strip-extension filename))
@@ -75,3 +79,5 @@
   (compile filename))
 
 ;;;============================================================================
+
+;(trace compile)
