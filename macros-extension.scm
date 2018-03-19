@@ -1,3 +1,4 @@
+(include "match.scm")
 
 (define (expand-macros ast)
  
@@ -16,10 +17,21 @@
 	  (if (null? bindings)
 	      (expand-macros `((lambda () ,@body)))
 	      (expand-macros `((lambda ,(map car bindings) ,@body)
-			   ,@(map cadr bindings)))))
+                               ,@(map cadr bindings)))))
+         
 	 ;;let nommé
-	 ((let ,name ,bindings . ,body)
-	  (error "k"))
+	 ((let ,name ,bindings . ,body) when (and (symbol? name) (null? bindings))
+	  (expand-macros
+           `((letrec ((,name (lambda ()
+                               ,@body)))
+               ,name))))
+         
+	 ((let ,name ,bindings . ,body) when (symbol? name)
+	  (expand-macros
+           `((letrec ((,name (lambda ,(map car bindings)
+                               ,@body)))
+               ,name)
+             ,@(map cadr bindings))))
 
 	 ;;let*
 	 ((let* ,bindings . ,body)
@@ -41,6 +53,7 @@
                 (begin ,@reste)))))
 
 	 ;;letrec
+         
 
          ((cond)
           #f)
