@@ -53,8 +53,14 @@
                 (begin ,@reste)))))
 
 	 ;;letrec
+<<<<<<< HEAD
          
 
+=======
+	 
+	 
+	 ;;cond
+>>>>>>> 58d933f7611ad344872e6efbea78b3a042fb0159
          ((cond)
           #f)
          ((cond (else ,E1 . ,Es))

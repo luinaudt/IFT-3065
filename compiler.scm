@@ -45,10 +45,10 @@
 
 (define (compile filename)
 
-  (let* (;;(ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
+  (let* ((ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
 	 (ast (parse-program filename))
 	 (ast-expanded (expand-macros ast))
-	 (inter (begin (pp ast-expanded) (compile-ir ast-expanded '())));;(closure-conv (assign-conv (alpha-conv ast))) gcte grte))
+	 (inter (compile-ir ast-expanded '()));;(closure-conv (assign-conv (alpha-conv ast))) gcte grte))
          (code (begin (pp inter) (compile-program inter))))  ;; generate code
     ;;(pp ast)
     (let* ((base-filename (path-strip-extension filename))
