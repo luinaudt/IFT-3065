@@ -426,7 +426,7 @@
 	    (list "pop %rdi\n"
 		  "lea " retLab "(%rip), %rax\n"
 		  "push %rax\n"
-		  "mov $" (number->string nargs) ", %rax \n"
+		  "mov $2, %rax\n";; (number->string nargs) ", %rax \n"
 		  "jmp *%rdi\n"
 		  ".align 8\n .quad 0\n .quad 12 \n .byte 0\n"
 		  retLab ":\n")))
@@ -434,7 +434,7 @@
 	 ((ret ,pos)
 	  (list "mov 8*" (number->string pos) "(%rsp),%rdi \n"
 		"mov (%rsp), %rax \n"
-		"add $8*2"  ",%rsp\n"
+		"add $8*4"  ",%rsp\n"
 		"push %rax \n"
 		"jmp *%rdi\n"))
 	 
@@ -501,10 +501,12 @@
 	 ((equal?)
 	  
 	  (list "cmovz %rbx,%rax\n"
-		"push %rax"))
+		"push %rax\n"))
 	 ((sub)
-	  (list "pop %rax \n"
-		"sub %rax, (%rsp)\n"))
+	  (list "pop %rbx \n"
+		"pop %rax\n"
+		"sub %rbx, %rax\n"
+		"push %rax\n"))
 
 	 ((println)
 	  (list "mov (%rsp),%rax\n"
@@ -533,15 +535,15 @@
         " .globl main\n"
         "_main:\n"
         "main:\n"
+	"mov %rsp, %rbp\n"
 	;;"push $100*1024*1024\n" ;;registre pour le tas
 	;;"call mmap\n"
 	;;"mov %rax, %r10\n"
-	"push $100*1024*1024\n"
+    	"push $100*1024*1024\n"
 	"call mmap\n"
 	"mov %rax, %r11\n" ;;registre pour les variable globales
         (map compile-bloc exprs)
-	"\n"
-	"#pop %rax\n"
+	" mov %rbp, %rsp\n"
         " mov $0, %rax\n"
         " ret\n \n\n"
 	(map compile-bloc lambdas)
