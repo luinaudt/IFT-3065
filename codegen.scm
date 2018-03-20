@@ -430,7 +430,7 @@
 	 ((ret ,pos)
 	  (list "mov 8*" (number->string pos) "(%rsp),%rdi \n"
 		"mov (%rsp), %rax \n"
-		"add $8*2"  ",%rsp\n"
+		"add $8*1"  ",%rsp\n"
 		"push %rax \n"
 		"jmp *%rdi\n"))
 	 
