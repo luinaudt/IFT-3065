@@ -408,8 +408,11 @@
  ;; (trace compile-bloc)
  ;; (trace compile-if)
  ;; (trace gen-literal)
-
-
+(define return-count 0)
+(define return-gensym
+  (lambda ()
+    (set! return-count (+ return-count 1))
+    (string-append "return" (number->string return-count))))
 (define (compile-bloc expr)
   (match expr
          ((proc ,name ,nbparams)
@@ -419,18 +422,19 @@
 		"jnz nargs_error\n"))
 
 	 ((call ,nargs)
-	  (list "pop %rdi\n"
-		"lea return1(%rip), %rax\n"
-		"push %rax\n"
-		"mov $" (number->string nargs) ", %rax \n"
-		"jmp *%rdi\n"
-		".align 8\n .quad 0\n .quad 12 \n .byte 0\n"
-		"return1:\n"))
+	  (let ((retLab (return-gensym)))
+	    (list "pop %rdi\n"
+		  "lea " retLab "(%rip), %rax\n"
+		  "push %rax\n"
+		  "mov $" (number->string nargs) ", %rax \n"
+		  "jmp *%rdi\n"
+		  ".align 8\n .quad 0\n .quad 12 \n .byte 0\n"
+		  retLab ":\n")))
 	 
 	 ((ret ,pos)
 	  (list "mov 8*" (number->string pos) "(%rsp),%rdi \n"
 		"mov (%rsp), %rax \n"
-		"add $8*1"  ",%rsp\n"
+		"add $8*2"  ",%rsp\n"
 		"push %rax \n"
 		"jmp *%rdi\n"))
 	 
@@ -536,7 +540,8 @@
 	"call mmap\n"
 	"mov %rax, %r11\n" ;;registre pour les variable globales
         (map compile-bloc exprs)
-	"\n#pop %rax\n"
+	"\n"
+	"#pop %rax\n"
         " mov $0, %rax\n"
         " ret\n \n\n"
 	(map compile-bloc lambdas)

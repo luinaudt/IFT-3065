@@ -92,7 +92,7 @@
                      (if var-val
                          `((push_loc ,(length env)))
                          `((push_glo ,(env-lookup (append env env-ir) var))
-			   (call 1)
+			   (call 2)
 			   ))))
              
 	     ((,E0 . ,Es)
