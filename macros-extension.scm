@@ -1,9 +1,10 @@
 (include "match.scm")
 
 (define (expand-macros ast)
- 
+  
   (match ast
-	 ;; and
+         
+	 ;;and
 	 ((and)
 	  #t)
 	 ((and ,E1)
@@ -12,21 +13,34 @@
 	  (let ((v (gensym)))
 	    (expand-macros `(let ((,v ,E1)) (if ,v (and . ,reste) ,v)))))
 
+	 ;;or
+	 ((or)
+	  #f)
+	 ((or ,E1)
+	  (expand-macros E1))
+	 ((or ,E1 . ,reste)
+	  (let ((v (gensym)))
+	    (expand-macros `(let ((,v ,E1)) (if ,v ,v (or . ,reste))))))
+
 	 ;;let
-	 ((let ,bindings . ,body) when (pair? bindings)
-	  (if (null? bindings)
-	      (expand-macros `((lambda () ,@body)))
-	      (expand-macros `((lambda ,(map car bindings) ,@body)
-                               ,@(map cadr bindings)))))
+         ((let ,bindings . ,body) when (null? bindings)
+          `((lambda ()
+              ,@(expand-macros body))))
          
-	 ;;let nommé
-	 ((let ,name ,bindings . ,body) when (and (symbol? name) (null? bindings))
-	  (expand-macros
+         ((let ,bindings . ,body) when (pair? bindings)
+          (expand-macros
+           `((lambda ,(map car bindings)
+               ,@body)
+             ,@(map cadr bindings))))
+         
+         ;;let nommé
+         ((let ,name ,bindings . ,body) when (and (symbol? name) (null? bindings))
+          (expand-macros
            `((letrec ((,name (lambda ()
                                ,@body)))
                ,name))))
          
-	 ((let ,name ,bindings . ,body) when (symbol? name)
+         ((let ,name ,bindings . ,body) when (symbol? name)
 	  (expand-macros
            `((letrec ((,name (lambda ,(map car bindings)
                                ,@body)))
@@ -34,13 +48,23 @@
              ,@(map cadr bindings))))
 
 	 ;;let*
-	 ((let* ,bindings . ,body)
-	  (if (null? bindings)
-	      (expand-macros `(lambda () ,@body))
-	      (if (null? (cdr bindings))
-		  (expand-macros `(let (,(car bindings)) ,@body))
-		  (expand-macros `(let (,(car bindings)) (let* ,(cdr bindings) ,@body))))))
+	 ((let* ,bindings . ,body) when (null? bindings)
+          `((lambda ()  
+              ,@(expand-macros body))))
+         
+         ((let* ,bindings . ,body) when (and (pair? bindings) (null? (cdr bindings)))
+          (expand-macros
+           `(let (,(car bindings))
+              ,@body)))
+         
+         ((let* ,bindings . ,body) when (pair? bindings)
+          (expand-macros
+           `(let (,(car bindings))
+              (let* ,(cdr bindings)
+                ,@body))))
 	 
+         ;;letrec
+         
 	 ;;begin
 	 ((begin)
           #!void)
@@ -52,7 +76,7 @@
              `(let ((,v ,E1))
                 (begin ,@reste)))))
 
-	 ;;letrec
+         ;;cond
          ((cond)
           #f)
          ((cond (else ,E1 . ,Es))
@@ -67,9 +91,7 @@
           (let ((v (gensym)))
             (expand-macros
              `(let ((,v ,test))
-                (if ,v
-                    (,fn ,v)
-                    (cond ,@reste))))))
+                (if ,v (,fn ,v) (cond ,@reste))))))
          ((cond (,test => . ,Es) . ,reste)
           (error "improper => clause"))
          ((cond (,test ,E1 . ,Es) . ,reste)
@@ -78,20 +100,15 @@
                 (begin ,E1 ,@Es)
                 (cond ,@reste))))
 
-	 
-	 ;;or
-	 ((or)
-	  #f)
-	 ((or ,E1)
-	  (expand-macros E1))
-	 ((or ,E1 . ,reste)
-	  (let ((v (gensym)))
-	    (expand-macros `(let ((,v ,E1))
-			      (if ,v ,v (or . ,reste))))))
-	 ((,E0 . ,E1)
+         ;;list
+	 ((,E0)
+          (list (expand-macros E0)))
+         ((,E0 . ,E1)
 	  (cons (expand-macros E0)
 		(expand-macros E1)))
+
+         ;;anything else
 	 (,e
 	  e)))
 
-;;(trace expand-macros)
+(trace expand-macros)
