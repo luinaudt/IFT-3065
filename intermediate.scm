@@ -17,6 +17,16 @@
 (define env-ir '())
 (define taille-glob 0)
 
+
+(define (compile-ir-bloc expr env)
+  (let ((env-old env-ir))
+    (if (null? expr)
+	(begin
+	  (set! env-ir env-old)
+	  '())
+	(append (compile-ir (car expr) env)
+		(compile-ir-bloc (cdr expr) env)))))
+
 (define (compile-ir expr env)
   ;;(pp expr)
   (if (null? expr)
@@ -45,7 +55,7 @@
                      (loc-env (map cons params (reverse range))))
                 (set! lambda-env (append lambda-env
 					 (append `((proc ,name  ,(length params)))
-						 (compile-ir body (append loc-env env))
+						 (compile-ir-bloc body (append loc-env env))
 						 `((ret 1)))))
                 `((push_proc ,name))))
 	     
@@ -86,24 +96,27 @@
              
 	     (,lit when (constant? lit)
 		   (list `(push_lit ,lit)))
-             
+
 	     (,var when (variable? var)
                    (let ((var-val (assoc var env)))
                      (if var-val
                          `((push_loc ,(length env)))
-                         `((push_glo ,(env-lookup (append env env-ir) var))
-			   (call 2)
+			 ;;(error "unbound variable")
+                         `((push_glo ,(env-lookup env-ir var))
+			   ;;(call 2))
 			   ))))
              
 	     ((,E0 . ,Es)
-	      (if (pair? E0)
-		  (append (compile-ir E0 env)
-			  (compile-ir Es env))
-		  (append (compile-ir Es env)
-			  (compile-ir E0 env)))))))
-;;			  (list `(call ,(length Es))) ))))))
-
-
+	      (begin (pp E0)
+		     (pp Es)
+		     (append (compile-ir Es env)
+		      (compile-ir E0 env)
+		      (list `(call ,(length Es)))))
+	     ))))
+  
+(define (compile-ir-call fn expr env)
+  (error "")
+  )
 
 ;;debug
 ;;(pp compile-ir)
