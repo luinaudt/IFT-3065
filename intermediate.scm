@@ -22,7 +22,7 @@
   (if (null? expr)
       '()
       (match expr
-             
+            
 	     ((define ,name ,expr)
 	      (let ((var-val (assoc name env-ir)))
                 (if var-val
@@ -34,7 +34,7 @@
                       (set! taille-glob (+ taille-glob 1))
                       (append (compile-ir expr env)
                               (list `(pop_glo ,(- taille-glob 1))))))))
-             
+	     
              ((lambda ,params . ,body)
               (let* ((name (lambda-gensym))
                      (len (length params))
@@ -43,12 +43,12 @@
                                   (cons x (loop (+ x 1)))
                                   '())))
                      (loc-env (map cons params (reverse range))))
-                (set! lambda-env (append lambda-env (append `((proc ,name  ,(length params)))
-							    (compile-ir body
-									(append loc-env env))
-							    `((ret 1)))))
+                (set! lambda-env (append lambda-env
+					 (append `((proc ,name  ,(length params)))
+						 (compile-ir body (append loc-env env))
+						 `((ret 1)))))
                 `((push_proc ,name))))
-             
+	     
              (($- ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
@@ -56,6 +56,7 @@
 	     (($println  ,expr)
 	      (append (compile-ir expr env)
 		      (list '(println))))
+		      
              (($* ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
@@ -64,7 +65,6 @@
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
 		      (list '(modulo))))
-		      
 	     (($quotient ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
@@ -113,8 +113,15 @@
 
 
 (define lambda-count 0)
-
-(define lambda-gensym ;; une version de gensym utile pour le deboguage
+(define label-count 0)
+(define label-gensym
   (lambda ()
-    (set! lambda-count (+ lambda-count 1))
-    (string->symbol (string-append "lam" (number->string lambda-count)))))
+    (set! label-count (+ label-count 1))
+    (list "lab_" (number->string label-count))))
+
+;; generation lambda symbol
+(define lambda-gensym 
+  (lambda ()
+    (begin
+      (set! lambda-count (+ lambda-count 1))
+      (string-append "lam" (number->string lambda-count)))))
