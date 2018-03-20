@@ -411,10 +411,19 @@
 (define (compile-bloc expr)
   (match expr
          ((proc ,name ,nbparams)
-	  (list ;;".align 3\n .quad 0 \n .quad 0 \n .byte 0\n"
+	  (list ".align 8\n .quad 0 \n .quad 0 \n .byte 0\n"
 		(symbol->string name) ":\n"
 		"cmp $" (number->string nbparams) ", %rax\n"
 		"jnz nargs_error\n"))
+
+	 ((call ,nargs)
+	  (list "pop %rdi\n"
+		"lea return1(%rip), %rax\n"
+		"push %rax\n"
+		"mov $" (number->string nargs) ", %rax \n"
+		"jmp *%rdi\n"
+		".align 8\n .quad 0\n .quad 12 \n .byte 0\n"
+		"return1:\n"))
 	 
 	 ((ret ,pos)
 	  (list "mov 8*" (number->string pos) "(%rsp),%rdi \n"
@@ -424,24 +433,22 @@
 		"jmp *%rdi\n"))
 	 
 	 ((pop_glo ,pos)
-	  (list "pop %rax\n"
-		"mov %rax," (number->string (* 8 pos)) "(%r11)\n"))
+	  (list "pop glob_" (number->string pos) "(%rip)\n"))
 
-         ((push_glo ,pos)
-	  (list "mov " (number->string (* 8 pos)) "(%r11), %rax\n"
-		"push %rax\n"))
+	 ((push_glo ,pos)
+	  (list "push glob_" (number->string pos) "(%rip)\n"))
 
-         ((push_lit ,val)
+	 ((push_lit ,val)
 	  (list "push $8*" val "\n"))
 
 	 ((push_proc ,lab)
 	  (list "lea " (symbol->string lab) "(%rip), %rax\n"
 		"push %rax\n"))
-	 
-         ((push_loc ,pos)
-	  (list "#todo\n"))
 
-         ((add)
+	 ((push_loc ,pos)
+	  (list "push 8*" (number->string pos) "(%rsp)\n"))
+
+	 ((add)
 	  (list "pop %rax \n"
 		"add %rax, (%rsp)\n"))
 	 ((mul)
@@ -488,11 +495,11 @@
 	 ((equal?)
 	  (list "cmovz %rbx,%rax\n"
 		"push %rax"))
-         ((sub)
-          (list "pop %rax \n"
-                "sub %rax, (%rsp)\n"))
+	 ((sub)
+	  (list "pop %rax \n"
+		"sub %rax, (%rsp)\n"))
 
-         ((println)
+	 ((println)
 	  (list "mov (%rsp),%rax\n"
 		"sar $3, %rax\n"
 		"mov %rax, (%rsp)\n"
@@ -530,9 +537,11 @@
         " ret\n"
 	(map compile-bloc lambdas)
 	compile-args-error
-	".data\n"
+	".data\n .align 8\n"
 	(map compile-env env)))
-(trace compile-bloc)
+
+
+;;(trace compile-bloc)
 ;; (define prims
 ;;   `((if       ,compile-if)
 ;;     (let      ,compile-let)

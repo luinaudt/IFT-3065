@@ -44,9 +44,9 @@
                                   '())))
                      (loc-env (map cons params (reverse range))))
                 (set! lambda-env (append lambda-env (append `((proc ,name  ,(length params)))
-                                                           (compile-ir body
-                                                                       (append loc-env env))
-                                                           `((ret 1)))))
+							    (compile-ir body
+									(append loc-env env))
+							    `((ret 1)))))
                 `((push_proc ,name))))
              
              (($- ,p1 ,p2)
@@ -90,12 +90,17 @@
 	     (,var when (variable? var)
                    (let ((var-val (assoc var env)))
                      (if var-val
-                         `((push_loc ,(cdr var-val)))
-                         `((push_glo ,(env-lookup (append env env-ir) var))))))
+                         `((push_loc ,(length env)))
+                         `((push_glo ,(env-lookup (append env env-ir) var))
+			   (call 1)
+			   ))))
              
 	     ((,E0 . ,Es)
-	      (append (compile-ir E0 env)
-		      (compile-ir Es env))))))
+	      (if (pair? E0)
+		  (append (compile-ir E0 env)
+			  (compile-ir Es env))
+		  (append (compile-ir Es env)
+			  (compile-ir E0 env)))))))
 
 
 
