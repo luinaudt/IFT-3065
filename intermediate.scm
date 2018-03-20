@@ -39,16 +39,14 @@
               (let* ((name (lambda-gensym))
                      (len (length params))
                      (range (let loop ((x 0))
-                              (if (< x len)
+                              (if (< x len) 
                                   (cons x (loop (+ x 1)))
                                   '())))
                      (loc-env (map cons params (reverse range))))
-                (set! lambda-env (env-extend lambda-env
-                                             (list name)
-                                             (list (append `((proc ,name))
+                (set! lambda-env (append lambda-env (append `((proc ,name  ,(length params)))
                                                            (compile-ir body
                                                                        (append loc-env env))
-                                                           `((ret 1))))))
+                                                           `((ret 1)))))
                 `((push_proc ,name))))
              
              (($- ,p1 ,p2)

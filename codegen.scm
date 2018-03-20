@@ -410,7 +410,19 @@
  ;; (trace gen-literal)
 (define (compile-bloc expr)
   (match expr
-         
+         ((proc ,name ,nbparams)
+	  (list ;;".align 3\n .quad 0 \n .quad 0 \n .byte 0\n"
+		(symbol->string name) ":\n"
+		"cmp $" (number->string nbparams) ", %rax\n"
+		"jnz nargs_error\n"))
+	 
+	 ((ret ,pos)
+	  (list "mov 8*" (number->string pos) "(%rsp),%rdi \n"
+		"mov (%rsp), %rax \n"
+		"#add $8*0"  ",%rsp\n"
+		"push %rax \n"
+		"jmp *%rdi\n"))
+	 
 	 ((pop_glo ,pos)
 	  (list "pop %rax\n"
 		"mov %rax," (number->string (* 8 pos)) "(%r11)\n"))
@@ -422,11 +434,12 @@
          ((push_lit ,val)
 	  (list "push $8*" val "\n"))
 
-	 ((push_proc ,name)
-	   (list "#todo\n"))
+	 ((push_proc ,lab)
+	  (list "lea " (symbol->string lab) "(%rip), %rax\n"
+		"push %rax\n"))
 	 
          ((push_loc ,pos)
-	  (list "# todo\n"))
+	  (list "#todo\n"))
 
          ((add)
 	  (list "pop %rax \n"
@@ -490,10 +503,17 @@
 (define (compile-env env)
   (if (null? env)
       '()
-      (list (symbol->string (caar env)) ": .quad " (number->string (cdar env))
-	    (compile-env (cdr env)))))
+      (list "glob_" (number->string (cdr env)) ": .quad 0\n")))
+;;(number->string (cdar env))
+;;(compile-env (cdr env)))))
+(define compile-args-error
+  (list "nargs_error:\n"
+	"mov $1, %rax\n"
+	"ret \n"
+	""))
 
-(define (compile-program exprs)
+
+(define (compile-program exprs lambdas env)
   (list " .text\n"
         " .globl _main\n"
         " .globl main\n"
@@ -507,8 +527,12 @@
 	"mov %rax, %r11\n" ;;registre pour les variable globales
         (map compile-bloc exprs)
         " mov $0, %rax\n"
-        " ret\n"))
-
+        " ret\n"
+	(map compile-bloc lambdas)
+	compile-args-error
+	".data\n"
+	(map compile-env env)))
+(trace compile-bloc)
 ;; (define prims
 ;;   `((if       ,compile-if)
 ;;     (let      ,compile-let)

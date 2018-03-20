@@ -49,7 +49,7 @@
 	 ;;(ast (parse-program filename))
 	 (ast-expanded (expand-macros ast))
 	 (inter (compile-ir ast-expanded '()));;(closure-conv (assign-conv (alpha-conv ast))) gcte grte))
-         (code (begin (pp inter) (compile-program inter))))  ;; generate code
+	 (code (begin (pp (append  inter lambda-env)) (compile-program inter lambda-env env-ir))))  ;; generate code
     ;;(pp ast)
     (let* ((base-filename (path-strip-extension filename))
            (asm-filename (string-append base-filename ".s"))
