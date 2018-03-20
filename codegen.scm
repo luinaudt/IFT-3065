@@ -536,7 +536,7 @@
 	"call mmap\n"
 	"mov %rax, %r11\n" ;;registre pour les variable globales
         (map compile-bloc exprs)
-	"\n\n\npop %rax\n"
+	"\n#pop %rax\n"
         " mov $0, %rax\n"
         " ret\n \n\n"
 	(map compile-bloc lambdas)
