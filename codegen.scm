@@ -408,6 +408,8 @@
  ;; (trace compile-bloc)
  ;; (trace compile-if)
  ;; (trace gen-literal)
+
+
 (define (compile-bloc expr)
   (match expr
          ((proc ,name ,nbparams)
@@ -428,7 +430,7 @@
 	 ((ret ,pos)
 	  (list "mov 8*" (number->string pos) "(%rsp),%rdi \n"
 		"mov (%rsp), %rax \n"
-		"#add $8*0"  ",%rsp\n"
+		"add $8*2"  ",%rsp\n"
 		"push %rax \n"
 		"jmp *%rdi\n"))
 	 
@@ -493,6 +495,7 @@
 		"mov $1, %rax\n"
 		"mov $9, %rbx\n"))
 	 ((equal?)
+	  
 	  (list "cmovz %rbx,%rax\n"
 		"push %rax"))
 	 ((sub)
@@ -533,11 +536,12 @@
 	"call mmap\n"
 	"mov %rax, %r11\n" ;;registre pour les variable globales
         (map compile-bloc exprs)
+	"\n\n\npop %rax\n"
         " mov $0, %rax\n"
-        " ret\n"
+        " ret\n \n\n"
 	(map compile-bloc lambdas)
 	compile-args-error
-	".data\n .align 8\n"
+	"\n\n.data\n .align 8\n"
 	(map compile-env env)))
 
 
