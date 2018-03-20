@@ -14,7 +14,7 @@
 (define (compile-bloc expr fs)
 ;;  (pp fs)
   (if (null? expr)
-      '()
+      (list "add $8*" (number->string fs) ",%rsp \n")
       (let
 	  ((code (match (car expr)
 			((proc ,name ,nbparams)
@@ -27,13 +27,15 @@
 
 			((call ,nargs)
 			 (let ((retLab (return-gensym)))
+			   (begin
+			     (set! fs 1)
 			     (list "pop %rdi\n"
 				   "lea " retLab "(%rip), %rax\n"
 				   "push %rax\n"
 				   "mov $" (number->string nargs) ", %rax\n";; (number->string nargs) ", %rax \n"
 				   "jmp *%rdi\n"
 				   ".align 8\n .quad 0\n .quad 12 \n .byte 0\n"
-				   retLab ":\n")))
+				   retLab ":\n"))))
 			
 			((ret ,pos)
 			 (let ((old-fs fs))
@@ -173,15 +175,10 @@
 	" .globl main\n"
 	"_main:\n"
 	"main:\n"
-	;;"push $100*1024*1024\n" ;;registre pour le tas
-	;;"call mmap\n"
-	;;"mov %rax, %r10\n"
 	"push $100*1024*1024\n"
 	"call mmap\n"
 	"mov %rax, %r11\n" ;;registre pour les variable globales
 	(compile-bloc exprs 0)
-	;;	" add 8*" (number->string fs) ", %rsp\n"
-	" pop %rax\n"
 	" mov $0, %rax\n"
 	" ret\n \n\n"
 	(compile-bloc lambdas 0)
