@@ -101,6 +101,7 @@
 			  (compile-ir Es env))
 		  (append (compile-ir Es env)
 			  (compile-ir E0 env)))))))
+;;			  (list `(call ,(length Es))) ))))))
 
 
 
