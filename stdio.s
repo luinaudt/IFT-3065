@@ -304,9 +304,11 @@ print_ln:
 	mov     17*8(%rsp), %rax   # get value
 	mov	%rax,%rbx
 	and	$0x07,%rbx	   #mask to get type
-	cmp	$0, %rbx
-        jnz     print_bool
+	cmp	$1, %rbx
+        jz      print_bool
 	sar	$3, %rax
+	cmp	$2, %rbx
+	jz	print_char
 	push	%rax
 	call	print_word_dec
 	jmp	print_ln_end
@@ -320,6 +322,10 @@ print_bool_true:
 print_bool_end:	
 	push	%rax
 	call	print_string
+	jmp	print_ln_end
+print_char:
+	push	%rax
+	call 	putchar
 	
 	
 print_ln_end:	
