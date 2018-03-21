@@ -4,7 +4,8 @@
   
   (match ast
          
-	 ;;and
+	 ;; and
+         
 	 ((and)
 	  #t)
 	 ((and ,E1)
@@ -13,7 +14,8 @@
 	  (let ((v (gensym)))
 	    (expand-macros `(let ((,v ,E1)) (if ,v (and . ,reste) ,v)))))
 
-	 ;;or
+	 ;; or
+         
 	 ((or)
 	  #f)
 	 ((or ,E1)
@@ -22,7 +24,8 @@
 	  (let ((v (gensym)))
 	    (expand-macros `(let ((,v ,E1)) (if ,v ,v (or . ,reste))))))
 
-	 ;;let
+	 ;; let
+         
          ((let ,bindings . ,body) when (null? bindings)
           `((lambda ()
               ,@(expand-macros body))))
@@ -33,7 +36,8 @@
                ,@body)
              ,@(map cadr bindings))))
          
-         ;;let nommé
+         ;; let nommé
+         
          ((let ,name ,bindings . ,body) when (and (symbol? name) (null? bindings))
           (expand-macros
            `((letrec ((,name (lambda ()
@@ -47,7 +51,8 @@
                ,name)
              ,@(map cadr bindings))))
 
-	 ;;let*
+	 ;; let*
+         
 	 ((let* ,bindings . ,body) when (null? bindings)
           `((lambda ()  
               ,@(expand-macros body))))
@@ -63,9 +68,23 @@
               (let* ,(cdr bindings)
                 ,@body))))
 	 
-         ;;letrec
+         ;; letrec
          
-	 ;;begin
+         ((letrec ,bindings . ,body) when (null? bindings)
+          `((lambda ()
+              ,@(expand-macros body))))
+
+         ((letrec ,bindings . ,body) when (pair? bindings)
+          (let ((syms (map (lambda (x) gensym)   ;; generate a symbol for each variable
+                           (map car bindings))))
+            (expand-macros
+             `(let ,(map $instantiate (map car bindings)) ;; instantiate variables
+                ,@(map $set! syms (map cadr bindings)) ;; compute expressions to bind
+                ,@(map $set! (map car bindings) vals) ;; assign expressions to variables
+                ,@body))))
+          
+	 ;; begin
+         
 	 ((begin)
           #!void)
          ((begin ,E1)
@@ -76,7 +95,8 @@
              `(let ((,v ,E1))
                 (begin ,@reste)))))
 
-         ;;cond
+         ;; cond
+         
          ((cond)
           #f)
          ((cond (else ,E1 . ,Es))
@@ -100,15 +120,28 @@
                 (begin ,E1 ,@Es)
                 (cond ,@reste))))
 
-         ;;list
+         ;; lists
+         
 	 ((,E0)
           (list (expand-macros E0)))
          ((,E0 . ,E1)
 	  (cons (expand-macros E0)
 		(expand-macros E1)))
 
-         ;;anything else
+         ;; anything else
+         
 	 (,e
 	  e)))
 
-(trace expand-macros)
+
+;;(trace expand-macros)
+
+
+(define ($instantiate x)
+  (cons x (list #!unbound)))
+
+(define ($set! var val)
+  `(set! ,var ,val))
+
+;;(define ($bind vals)
+;;  (map cons
