@@ -21,8 +21,8 @@
 \input{drawPackages.tex}
 
 % Title Page
-\title{Rapport de l'étape 1 du projet compilateur \\ Étape 1}
-\author{Francis de Ladurantaye \\ Thomas Luinaud}
+\title{Étape 2 du projet de compilateur \\ Rapport}
+\author{Thomas Luinaud \\ Francis de Ladurantaye}
 
 
 \begin{document}
@@ -73,8 +73,8 @@ Cette section présente les choix pour le code intermédiaire.
 		\texttt{ret} \emph{i} & retourne la valeur à l'index \emph{i} de la pile\\  \hline
 		\texttt{cmp} & dépile deux valeurs et les compare \\ \hline
 		\texttt{modulo} & dépile deux valeurs et fait le modulo \\ \hline
-        \texttt{remainder} & \\ \hline
-        \texttt{quotient} & \\ \hline
+        \texttt{remainder} & dépile deux valeurs et fait le remainder \\ \hline
+        \texttt{quotient} & dépile deux valeurs et fait le quotient \\ \hline
         \texttt{lesser} & résultat de la comparaison est plus petit \\ \hline
         \texttt{equal} & résultat de la comparaison est égal \\ \hline
         \texttt{jmp} \emph{étiquette} & va à la position spécifiée\\ \hline 
@@ -82,111 +82,92 @@ Cette section présente les choix pour le code intermédiaire.
 \end{table}
 
 \newpage
-\section{ancien rapport}
+
 \section{Spécification du problème}
-Le but du projet est de réaliser un compilateur pour un sous-ensemble sélectionné du langage de programmation Scheme. Le travail à réaliser étant divisé en trois étapes, nous devrons chaque fois étendre notre support à un plus grand sous-ensemble du langage, en construisant à partir du point où nous nous étions arrêté lors de l'étape précédente. À terme, le compilateur résultant devra être autogène, c'est-à-dire d'être en mesure de se compiler lui-même, de façon à garantir son autosuffisance en éliminant les dépendances aux compilateurs Scheme existants. Cela implique inévitablement que le sous-ensemble que nous chercherons à supporter au terme de la troisième étape devra être suffisamment étendu afin d'offrir la puissance nécessaire à l'atteinte de cet objectif mais également d'écrire le compilateur en prenant en compte les éléments que nous supporterons.
 
-\subsection{Sous-ensemble de Scheme à supporter}
-Au terme de l'étape 1 du projet, il est attendu de nous que le parseur produit soit habilité à supporter les constructions syntaxiques suivantes :
+À cette étape du projet, il nous fallait être en mesure de compiler, en plus des entiers et des booléens déjà supportés à l'étape 1, les listes, les caractères, les chaînes de caractères ainsi que les constantes littérales structurées. Par ailleurs, nous devions supporter la définition et la mutation de variables globales et permettre la déclaration et les appels de fonction (lambda-expressions inclues). Une fois en mesure de compiler ce qui précède, ces outils devaient être utilisés pour construire la liste d'opérations primitives du langage ainsi qu'une biliothèque de fonctions prédéfinies, servant principalement à intéragir avec les nouveaux types de données supportés. Enfin, nous devions ajouter une phase d'expansion de macros pour les macros \texttt{cond}, \texttt{and}, \texttt{or}, \texttt{begin}, \texttt{let*}, \texttt{letrec} et \texttt{let} nommé afin de permettre à notre compilateur de supporter des énoncés conditionnels plus complexes et la définition de variables locales.
 
-\begin{itemize}
-\item Nombres entiers positifs et négatifs
-\item Booléens \texttt{\#t} et \texttt{\#f}
-\item Caractères, qui débutent par \texttt{\#\textbackslash}
-\item Chaînes de caractères et caractère d'échappement ``\texttt{\textbackslash}"
-\item Symboles
-\item Listes propres et impropres
-\item Commentaires
-\end{itemize}
+\subsection{Opérations primitives}
 
-De son côté, le générateur de code devra permettre la compilation des expressions suivantes en se limitant pour l'instant simplement à la manipulation d'entiers et de booléens :
+À la fin de cette étape, en plus de ce qui était demandé à l'étape 1, il nous était donc demandé d'implanter les opérations primitives suivantes :
 
 \begin{itemize}
-\item Constantes entières
-\item Constantes booléennes
-\item \texttt{(println} $expr$\texttt{)}
-\item \texttt{(+} $expr_1$ $expr_2$\texttt{)}
-\item \texttt{(-} $expr_1$ $expr_2$\texttt{)}
-\item \texttt{(*} $expr_1$ $expr_2$\texttt{)}
-\item \texttt{(quotient} $expr_1$ $expr_2$\texttt{)}
-\item \texttt{(modulo} $expr_1$ $expr_2$\texttt{)}
-\item \texttt{(=} $expr_1$ $expr_2$\texttt{)}
-\item \texttt{(<} $expr_1$ $expr_2$\texttt{)}
-\item \texttt{(if} $expr_1$ $expr_2$ $expr_3$\texttt{)}
-\item \texttt{(let ((}$var_1$ $expr_1$\texttt{) ...)} $expr_0$\texttt{)}
+\item (\texttt{\$number?} \textit{expr}) : test de type pour les entiers
+\item (\texttt{\$read-char}) : lecture d'un caractère sur stdin
+\item (\texttt{\$write-char} \textit{expr}) : écriture d'un caractère sur stdout
+\item (\texttt{\$integer->char} \textit{expr}) : conversion d'entier vers caractère
+\item (\texttt{\$char->integer} \textit{expr}) : conversion de caractère vers entier
+\item (\texttt{\$char?} \textit{expr}) : test de type pour les caractères
+\item (\texttt{\$make-string} \textit{expr}) : création d'une chaîne de caractères ayant la longueur indiquée 
+\item (\texttt{\$string-ref} \textit{$expr_1$ $expr_2$}) : extraction d'un caractère à un certain index
+\item (\texttt{\$string-set!} \textit{$expr_1$ $expr_2$ $expr_3$}) : modification d'un caractère à un certain index
+\item (\texttt{\$string-length} \textit{expr}) : nombre de caractères dans la chaîne de caractères
+\item (\texttt{\$string?} \textit{expr}) : test de type pour les chaînes de caractères
+\item (\texttt{\$cons} \textit{$expr_1$ $expr_2$}) : création d'une paire
+\item (\texttt{\$car} \textit{expr}) : extraction du champ car
+\item (\texttt{\$cdr} \textit{expr}) : extraction du champ cdr
+\item (\texttt{\$set-car!} \textit{$expr_1$ $expr_2$}) : modification du champ car
+\item (\texttt{\$set-cdr!} \textit{$expr_1$ $expr_2$}) : modification du champ cdr
+\item (\texttt{\$pair?} \textit{expr}) : test de type pour les paires
+\item (\texttt{\$procedure?} \textit{expr}) : test de type pour les fonctions
+\item (\texttt{\$eq?} \textit{$expr_1$ $expr_2$}) : test d'identité
 \end{itemize}
 
-\subsection{Analyseur lexical (parseur)}
-En ce qui concerne la première étape du projet, il nous était demandé d'être en mesure de compiler et exécuter des fichiers Scheme simples ne comportant que les constructions syntaxiques du sous-ensemble de Scheme à supporter pour le moment. Cela implique que notre compilateur doit inclure un analyseur lexical (parseur) et syntaxique (générateur de code) utilisant l'approche par descente récursive, dont les rôles seront respectivement d'effectuer la lecture des fichiers à compiler, caractère par caractère, afin d'en extraire les différents éléments et de produire le code machine résultant. En plus d'extraire les éléments pertinents lors de se traversée (lecture), le parseur doit aussi effectuer le regroupement des éléments extraits en expressions (listing), simplifiant ainsi le travail du générateur de code assembleur qui n'aura donc nul besoin de retraverser ces fichiers à la suite du parseur.
+\subsection{Fonctions prédéfinies}
 
-Afin d'illustrer le travail du parseur, supposons que le contenu du fichier à compiler est le suivant : "Hello World!". Le parseur, lors de sa traversée dudit fichier, reconnaîtra le guillemet se trouvant au début et, sachant alors qu'il se trouve dans une chaîne de caractères, lira successivement les caractères suivants jusqu'à ce qu'il tombe sur le guillemet fermant à la suite duquel cet élément \textit{chaîne de caractère} sera ajouté à une liste servant à représenter le sens du programme. Cette étape est très importante car, dans le cas présent, le caractère d'espacement au centre de la chaîne n'a ici pas d'autre sens que celui d'un simple caractère, mais il aurait signifié la délimitation entre deux éléments distincts s'il ne s'était pas trouvé entouré d'une paire de guillemets. De nombreux caractères ayant ainsi plusieurs sens, et ce dans tous les langages de programmation, un générateur de code devant effectuer cette tâche parallèlement à la production du code machine paraît quasi irréalisable, l'implantation d'un simple parseur représentant déjà un défi non négligeable.
+Une fois ajouté le support des opérations précédentes, nous avions à les utiliser pour la construction de cette bibliothèque de fonctions prédéfinies :
 
-\subsection{Analyseur syntaxique (générateur de code)}
-Le générateur de code est l'élément central du compilateur. Une fois produit le \textit{listing} des expressions, le générateur de code a tout ce dont il a besoin pour effectuer sa tâche. Cela s'explique par le fait que la représentation sous forme de \textit{listing} des expressions du programme correspond au sens de celui-ci, de manière dissociée de la chaîne de caractères dont il provient. Le travaille du générateur de code se résume donc à parcourir le listing reçu et d'en traiter les éléments de la façon appropriée, ce pour en générer le code machine dont l'exécution produira les résultats correspondant au programme originel.
+\begin{itemize}
+\item (\texttt{not} \textit{expr}) : inverse booléen
+\item (\texttt{boolean?} \textit{expr}) : test de type pour les booléens
+\item (\texttt{null?} \textit{expr}) : test de type pour la liste vide
+\item (\texttt{member} \textit{$expr_1$ $expr_2$}) : test d'appartenance
+\item (\texttt{assoc} \textit{$expr_1$ $expr_2$}) : recherche dans une liste d'association
+\item (\texttt{append} \textit{$expr_1$ $expr_2$}) : concaténation de listes
+\item (\texttt{reverse} \textit{expr}) : renverser une liste
+\item (\texttt{length} \textit{expr}) : longueur d'une liste
+\item (\texttt{map} \textit{$expr_1$ $expr_2$}) : map sur les listes
+\item (\texttt{char=?} \textit{$expr_1$ $expr_2$}) : test d'égalité de caractères
+\item (\texttt{char<?} \textit{$expr_1$ $expr_2$}) : test < sur les caractères
+\item (\texttt{string=?} \textit{$expr_1$ $expr_2$}) : test d'égalité sur les chaîens de caractères
+\item (\texttt{string<?} \textit{$expr_1$ $expr_2$}) : test < sur les chaînes de caractères
+\item (\texttt{eqv?} \textit{$expr_1$ $expr_2$}) : test d'équivalence
+\item (\texttt{equal?} \textit{$expr_1$ $expr_2$}) : test d'égalité structurelle
+\item (\texttt{read}) : lecture d'une donnée Scheme sur stdin
+\item (\texttt{write} \textit{expr}) : écriture dune donnée Scheme sur stdout
+\end{itemize}
 
-Cette tâche est cependant plus compliquée qu'il n'y paraît. En effet, le générateur se charge non seulement de la génération de code, mais aussi de s'assurer que les expressions reçues sont syntaxiquement correctes. Cela nécessite entre autres de vérifier que les procédures contenues dans les expressions ont le nombre d'arguments attendu ou que les variables apparaissant dans les expressions ont bien été initialisées antérieurement à leur utilisation. En outre, c'est au générateur de code qu'il revient de gérer les fermetures lors de la présence de \texttt{let} et de s'assurer que l'accès au contenu d'une variable ayant ainsi été redéfinie renvoie la valeur attendue. Ces difficultés ne font que s'accumuler lorsque le programme à compiler contient de multiples \texttt{let} imbriqués, requérant une gestion de la pile appropriée à ces constructions syntaxiques qui sont tout à fait correctes.
-
-Comme dernières complications liées au générateur de code assembleur, la gestion des symboles et des énoncés conditionnels. Au niveau de l'énoncé conditionnel \texttt{if}, la génération des étiquettes servant à sauter les blocs ne devant pas être exécutés doit être gérée de façon particulière car plusieurs \texttt{if} peuvent se trouver dans un même programme. Il est important que chacun d'eux n'effectue pas de saut vers des portions de code des autres \texttt{if}. En lien direct avec les énoncés conditionnels, certains symboles sont particulièrement importants. Nous parlons bien entendu ici des symboles \texttt{\#t} et \texttt{\#f} qui doivent être reconnus par le générateur de code car, ne se trouvant pas dans l'environnement comme ceux associés aux variables ou référant à des procédures, une recherche dans l'environnement engendrerait la détection d'une variable non initialisée.
-
-Toutes ces difficultés seront donc à prendre en considération tout au long de l'implémentation du générateur de code afin de s'éviter d'avoir de mauvaises surprises nécessitant de recoder le corps de plusieurs fonctions, et ce possiblement à de multiples occasions.
-
-\subsection{Tests unitaires}
-Enfin, le dernier élément du travail à réaliser était la conception de tests unitaires pertinents servant à vérifier le bon fonctionnement des différents éléments de notre compilateur, principalement du parseur et du générateur de code. En plus des 27 tests fournis, nous devions en produire entre 30 et 50 tests supplémentaires pour bien vérifier chaque fonctionnalité. Les résultats des tests seront présentés dans une section subséquente de ce rapport.
-
+Malheureusement, comme il sera expliqué plus en détail dans les sections subséquentes, nous n'avons réussi à implémenter qu'un mince ensemble de ces opérations et fonctions.
 
 \section{Méthodologie}
-En ce qui a trait à la méthodologie adoptée pour l'attente des objectifs, nous avons débuté par l'analyse des fichiers fournis afin de nous faire une certaine idée de la direction dans laquelle nous lancer. Nous avons testé de façon extensive la fonction \texttt{read} afin de bien comprendre ce qui était attendu comme résultat de la traversée d'un fichier par notre futur parseur. Ce faisant, nous avons aussi constaté les manques de cette fonction, nous donnant donc une idée assez claire sur ce qu'il restait à y implémenter.
 
-Autrement, nous avons testé les différentes commandes offertes par le \texttt{makefile} fourni, ce qui nous permit rapidement de comprendre comment lancer le compilateur pour exécuter les tests unitaires. Nous avons donc rapidement pu écrire des tests supplémentaires, ce qui nous aida grandement au débogage lorsque nous tentions d'implanter de nouvelles fonctionnalités et encore plus grandement lorsqu'il nous était nécessaire de réimplémenter une fonction après avoir constaté un problème.
+Comme nous savions dès le départ que l'implantation des opérations primitives et des fonctions prédéfinies requerrait le support des définitions et appels de fonctions, c'est donc à cela que nous nous sommes d'abord attaqués. Ce faisant, nous avons consacré la majeure partie de notre énergie à cette tâche afin d'éviter de devoir réécrire du code à plusieurs reprises. Comme le support des définitions et appels de fonctions demandait de savoir gérer la conversion de fermeture adéquatement, c'est par cela que nous avons commencé.
 
-Par ailleurs, nous nous sommes fréquemment référé à la documentation du langage Scheme telle que présentée dans les fichiers PDF \texttt{r5rs.pdf} et \texttt{r7rs.pdf} que nous avons téléversé sur notre répertoire GitHub. Bien que nous n'ayons pas suivi à la lettre ce que nous y avons lu sur la structure lexicale et la représentation externe du langage, cette documentation nous a grandement guidés lors de la construction de notre grammaire pour l'implantation de la fonction \texttt{read} de notre parseur.
-
-Du côté de la gestion du répertoire GitHub, nous avons tenté d'effectuer nos changements sur des branches séparées de la branche principale afin de conserver la branche \textit{master} dans un état fonctionnel, mais nous avons tout de même dû revenir à un état antérieur à un certain point comme nous avions tenté d'adopter une nouvelle philosophie pour le parseur qui ne s'est finalement pas révélée viable.
+Autrement, dans nos moments de désespoir, nous avons travaillé sur les modules ne nécessitant pas de savoir gérer les fermetures. Parmi ces modules, on compte la génération de la représentation intermédiaire, la traduction de la représentation intermédiaire en code assembleur et la phase d'expansion de macros, tâches avec lesquelles nous avons eu plus de succès.
 
 \section{Problèmes rencontrés}
 
-\subsection{Symboles \texttt{\#t} et \texttt{\#f}}
-Parmi les problèmes rencontrés, les plus notables se sont révélés être la gestion des symboles \texttt{\#t} et \texttt{\#f}, de la forme spéciale \texttt{let} et des listes impropres. Concernant la reconnaissance des symboles \texttt{\#t} et \texttt{\#f}, la difficulté fut de se rendre compte que le symbole retourné par \texttt{(string->symbol "\#f")} était \texttt{|\#f|} et non pas \texttt{'\#f} et qu'il fallait donc explicitement retourner \texttt{'\#f} en présence de la chaîne \texttt{"\#f"}. Nous saurons donc à l'avenir que dans le langage Scheme, l'expression \texttt{string->symbol} ajoute une barre verticale de chaque côté du symbole résultant lorsque la chaîne à convertir débute par les caractères \texttt{\#} ou \texttt{\textbackslash}.
+\subsection{Conversion de fermetures}
 
-\subsection{Forme spéciale \texttt{let}}
-La gestion de la forme spéciale \texttt{let}, nous l'affirmons avec grande conviction, fut la plus difficile à implémenter. Nous avions initialement prévu ajouter les variables qui y sont définies, accompagnées de leur valeur, dans une liste d'association représentant l'environnement, mais nous nous sommes rapidement rendu compte que cela ne permettrait pas d'accéder aux valeurs de ces variables une fois le code compilé vers l'assembleur. Ce pour quoi nous avons opté a été de garder dans l'environnement les variables déclarées au sein du  \texttt{let}, mais plutôt que de les y mettre avec leurs valeurs, nous les y avons mises accompagnées du décalage à effectuer par rapport au dessous de la pile pour retrouver leur valeur sur la pile. Ainsi, lors d'un accès à ces variables, la première étape consiste à retrouver le décalage dans l'environnement d'évaluation, puis à retrouver la valeur de cette variable dans la pile. De plus, en conservant dans le registre \texttt{\%rbp} la valeur de \texttt{\%rsp} au premier\texttt{let} rencontré, cela nous permet d'aisément gérer un nombre arbitraire de \texttt{let} imbriqués en n'ayant aucune difficulté.
+La conversion des fermetures a de loin été ce qui nous a causé le plus de problèmes. Il nous fallut un temps considérable pour commencer à cerner ce qui se passait au sein du fichier \texttt{closure-conv.scm} et bien que nous croyons plutôt bien comprendre les différentes étapes de la conversion de fermeture et leurs justifications, ce serait un euphémiste d'affirmer que nous ne serions point en mesure de le réécrire si nous avions à le faire. De plus, nous ne comprenions initialement pas comment traiter les \text{make-closure} afin d'en produire la représentation intermédiaire. Heureusement nous avons commencé à voir la lumière au bout du tunnel dans les deux derniers jours mais cela ne nous a pas laissé le temps d'implanter les opérations et fonctions demandées.
 
-Les autres difficultés rencontrées lors de l'implémentation de la forme spéciale \texttt{let} furent celle de restaurer l'environnement à son état initial à la sortie et le fait qu'il faille évaluer chacune des expressions avant de commencer à assigner les résultats aux variables à lier. Pour ce faire, nous avons commencé par garder dans des variables (\texttt{old-env} et \texttt{old-stack}) l'état de l'environnement et du décalage par rapport au dessous de la pile avant d'étendre l'environnement avec les nouvelles affectations; cela nous permettant de pouvoir effectuer la restauration à la sortie. Ensuite, nous effectuons le calcul de l'expression dont le résultat sera affecté à la première variable. Toutefois, plutôt que d'immédiatement mettre la variable dans l'environnement (avec son décalage dans la pile), nous allons plutôt récursivement faire de même avec toutes les autres expressions à calculer pour les liaisons. C'est seulement une fois toutes ces expressions évaluées que nous regroupons toutes les variables avec leur décalage sur la pile et que nous les utilisons pour étendre l'environnement. C'est donc de cette façon que nous arrivons à respecter le comportement que doit avoir la forme spéciale \texttt{let} en Scheme.
+\subsection{Représentation intermédiaire}
 
-\subsection{Listes impropres}
-Bien que les listes propres ne nous aient causé aucun problème, il n'en fut point de même quant à la gestion des listes impropres. La structure même des listes impropres a été ce qui nous a causé le plus de problèmes, celles-ci ne devant pas débuter ni terminer par le point signifiant l'impropreté de la liste. Nous avons donc dû, au sein du parseur, ajouter deux fonctions supplémentaires pour la lecture des listes, l'une faisant office de point d'entrée afin de s'assurer que la liste ne début pas par le point, l'autre faisant office de point de sortie (nécessaire seulement dans le cas d'une liste impropre) afin de s'assurer que le point ne termine pas non plus la liste. Nous sommes toutefois satisfaits de la façon dont nous sommes arrivés à gérer cela et trouvons finalement le résultat assez propre.
+La grande difficulté que nous avons eue au niveau de la représentation intermédiaire fut celle mentionnée au paragraphe précédent. Nous nous sommes posé un grand nombre de questions sur la façon de produire cette représentation intermédiaire lorsque nous tombions sur des expressoins de la forme \texttt{(define fun (lambda (x) ... ))}. Sachant qu'une telle expression ne doit pas exécuter le code de la lambda-expression, nous avions réalisé que ce n'était pas à cet endroit que nous devions produire le code de la représentation intermédiaire de cette lambda-expression. Comme il n'était pas possible de simplement ignorer le corps de la lambda-expression lors de la production de la représentation intermédiaire pour y revenir plus tard, nous avons fini par supposer qu'il fallait la produire lors de notre passage mais en la gardant en mémoire dans une sorte d'environnement pour les lambda-expressions. Ainsi, il serait possible d'y avoir accès plus tard lors de la génération de code assembleur, ce qui permettrait de les écrire à l'extérieur de la fonction \texttt{main}.
 
+\subsection{Expansion de macros}
+
+L'implantation de la phase d'expansion de macros nous a posé certains problèmes, mais bien moindres que pour la conversion des fermetures et la production de la représentation intermédiaire. Une des difficultés rencontrée a été de comprendre où devait avoir lieu l'expansion. Cela était dû au fait que nous avions déjà implanté la majorité des macros demandées lors de l'étape 1, mais que nous l'avions fait en utilisant \texttt{define-macro}. Nous nous demandions donc comment effectuer les substitutions une fois la phase de \textit{parsing} terminée, et ce de façon récursive afin d'éliminer aussi les macros qui seraient apparues suite à une première substitution. Afin de pallier au problème, nous avons opté pour la réécriture des macros, cette fois-ci en faisant usage des capacités de \textit{pattern matching} offertes par la macro \texttt{match} vue en classe. Il devenait donc très simple, en effectuant une substitution, d'appeler récursivement la fonction d'expansion de macros sur le code de remplacement.
+
+Aussi en lien avec l'expansion des macros, il nous fut particulièrement difficile de trouver comment substituer correctement la forme \textit{letrec}. La liaison des variables aux expressions se faisant en trois temps (création des variables, calcul de expressions et enfin liaison des résultats aux variables), cette macro dépasse largement les formes \texttt{let} et \texttt{let*} en ce qui a trait au niveau de complexité de son implémentation. Nous y sommes toutefois arrivés et en sommes très fier.
 
 \section{Résultats des tests unitaires}
-Tous les tests fournis pour l'étape 1 fonctionnent à merveille. De plus, les tests que nous avons conçus pour tester les différentes fonctionnalités passent non seulement correctement lors du \texttt{make ut}, ils nous ont aussi été d'une grande aide tout au long du développement de notre compilateur. Comme vous pourrez le constater, certains tests unitaires échouent malgré ce qui vient d'être mentionné, mais ces échecs sont normaux au point où nous en sommes. En effet, certains d'entre eux visent à tester le parseur alors que les expressions qu'ils contiennent ne sont pas encore supportées au niveau de la génération de code, expliquant que les erreurs surviennent uniquement dans le fichier \texttt{codegen.scm} et non pas dans \texttt{parser.scm}. C'est le cas par exemple des tests suivants, qui testent le parseur sur les chaînes de caractères, la quotation et les listes, propres et impropres :
 
-\begin{itemize}
-\item \texttt{let-string-println.scm}
-\item \texttt{let-string-println-number.scm}
-\item \texttt{list-impropre-comp.scm}
-\item \texttt{list-proper1.scm}
-\item \texttt{list-proper2.scm}
-\item \texttt{list-proper-empty.scm}
-\item \texttt{println-let-strings.scm}
-\item \texttt{println-list-impropre1.scm}
-\item \texttt{println-list-proper1.scm}
-\item \texttt{println-quote.scm}
-\item \texttt{println-string.scm}
-\end{itemize}
-
-De plus, nous avons aussi écrit des tests dont le but est d'échouer afin de nous assurer que des expressions invalides entraînent effectivement des erreurs. C'est le cas des tests qui débutent par \texttt{crash}, tels que les suivants :
-
-\begin{itemize}
-\item \texttt{crash-let.scm} $\rightarrow$ \texttt{let} sans \textit{body}
-\item \texttt{crash-println-if-let-multi.scm} $\rightarrow$ contient l'expression \texttt{(\#t 156)}
-\item \texttt{crash-quote-double.scm} $\rightarrow$ \texttt{quote} suivi de deux arguments
-\item \texttt{crash-vide.scm} $\rightarrow$ liste vide sans quote (sans \texttt{'} au début)
-\end{itemize}
+Comme la gestion des fermetures et l'ajout de la représentation intermédiaire ont demandé une refonte majeure de notre compilateur, le temps nous a malheureusement (grandement) manqué pour implanter ce qui était démandé. Notre compilateur se trouve présentement dans un état dans lequel la majorité des tests unitaires n'arrivent pas à compiler correctement et il est donc difficile de présenter les résultats à ces tests. Toutefois, nous pouvons affirmer que les tests simples (addition, soustraction, multiplication, quotient, modulo) fonctionnent s'ils ne contiennent qu'un seul niveau d'imbrication de \texttt{let}. En temps normal, nous devrions parvenir à passer avec succès l'ensemble des tests d'ici environ une semaine.
 
 \section{Atteinte des objectifs}
-En conclusion, nous sommes très satisfaits du travail accompli. Au meilleur de nos connaissances, nous avons réussi à faire fonctionner complètement ce qui était demandé et avons même pris un peu d'avance sur les prochaines étapes. Nous avons hâte de voir comment gérer l'allocation dynamique de façon à pouvoir supporter le \texttt{define} et représenter les listes en mémoire.
 
-Enfin, l'idée d'atteindre le stade où notre compilateur sera autogène nous anime et nous attendons impatiemment de voir les fonctionnalités supplémentaires que nous aurons à supporter au terme de la prochaine étape.
+Tel qu'expliqué lors des sections précédentes, la refonte majeure du compilateur nous a littéralement complètement empêché d'arriver à atteindre les objectifs associés à l'étape 2. Cependant, nous prenons cela avec philosophie comme nous savons que cette refonte était nécessaire et qu'elle ne sera pas à refaire. Nous aurions cependant préféré savoir dès la première étape qu'avoir une représentation intermédiaire est une quasi nécessité. Cela nous aurait permis de penser différemment notre compilateur dès le départ, nous évitant peut-être cette refonte complète qui a plombé notre atteinte des objectifs.
 
 \newpage
 
