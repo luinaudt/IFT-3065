@@ -96,7 +96,7 @@
 	     (($quotient ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
-		      (list '(mul))))
+		      (list '(quotient))))
 	     (($= ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)

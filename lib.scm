@@ -6,12 +6,12 @@
 
 (define println  (lambda (x)   ($println x)))
 (define +        (lambda (x y) ($+ x y)))
- (define -        (lambda (x y) ($- x y)))
- (define *        (lambda (x y) ($* x y)))
- (define quotient (lambda (x y) ($quotient x y)))
- (define modulo   (lambda (x y) ($modulo x y)))
- (define =        (lambda (x y) ($= x y)))
- (define <        (lambda (x y) ($< x y)))
+(define -        (lambda (x y) ($- x y)))
+(define *        (lambda (x y) ($* x y)))
+(define quotient (lambda (x y) ($quotient x y)))
+(define modulo   (lambda (x y) ($modulo x y)))
+(define =        (lambda (x y) ($= x y)))
+(define <        (lambda (x y) ($< x y)))
 
 ;;(define number?  (lambda (x)   ($number? x)))
 

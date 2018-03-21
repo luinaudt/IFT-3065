@@ -96,8 +96,8 @@
 		    ((quotient)
 		     (begin
 		       (set! fs (- fs 1 ))
-		       (list "pop %rax\n"
-			     "pop %rbx\n"
+		       (list "pop %rbx\n"
+			     "pop %rax\n"
 			     "cqo \n"
 			     "idiv %rbx\n"
 			     "sal $3,%rax\n"
@@ -105,26 +105,24 @@
 		    ((remainder)
 		     (begin
 		       (set! fs (- fs 1 ))
-		       (list "pop %rax\n"
-			     "pop %rbx\n"
+		       (list "pop %rbx\n"
+			     "pop %rax\n"
 			     "cqo\n"
 			     "idiv %rbx\n"
 			     "push %rdx\n")))
 		    ((modulo)
 		     (begin
 		       (set! fs (- fs 1 ))
-		       (list "pop %rax\n"
-			     "pop %rbx\n"
-			     "cqo\n"
-			     "mov %rax, %r8\n"
-			     "mov %rbx, %r9\n"
-			     "shr $63,%r8\n"
-			     "shr $63,%r9\n"
-			     "cmp %r8, %r9\n"
-			     "cmovne %rbx, %r8\n"
-			     "idiv %rbx\n"
-			     "add %r8, %rdx\n"
-			     "push %rdx\n")))
+		       (list " pop  %rbx\n"
+                             " pop  %rax\n"
+                             " mov  %rax,%r8\n"
+                             " mov  $0,%r9\n"
+                             " cqo\n"
+                             " idiv %rbx\n"
+                             " xor  %rbx,%r8\n"
+                             " cmovns %r9,%rbx\n"
+                             " add  %rbx,%rdx\n"
+                             " push %rdx\n")))
 		    ((less?)
 		     (begin
 		       (set! fs (+ fs 1 ))
