@@ -101,25 +101,22 @@
                    (let ((var-val (assoc var env)))
                      (if var-val
                          `((push_loc ,(length env)))
-			 ;;(error "unbound variable")
                          `((push_glo ,(env-lookup env-ir var))
-			   ;;(call 2))
 			   ))))
              
 	     ((,E0 . ,Es)
-	      (begin (pp E0)
-		     (pp Es)
-		     (append (compile-ir Es env)
-		      (compile-ir E0 env)
-		      (list `(call ,(length Es)))))
+	      (begin ;;(pp expr)
+		     ;;(pp Es)
+		     (append (compile-ir-bloc Es env)
+			     (compile-ir E0 env)
+			     (list `(call ,(length Es)))))
 	     ))))
   
-(define (compile-ir-call fn expr env)
-  (error "")
-  )
+
 
 ;;debug
 ;;(pp compile-ir)
+;;(trace compile-ir-bloc)
 ;;(trace compile-ir)
 ;;(trace intermediateCode-gen)
 ;;(trace ir-analyse-println)
