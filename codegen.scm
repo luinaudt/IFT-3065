@@ -79,7 +79,12 @@
 		     (begin
 		       (set! fs (+ fs 1 ))
 		       (list "push 8*" (number->string pos) "(%rsp)\n")))
-
+		    ((lab ,label)
+		     (list label ":\n"))
+		    ((jmp ,label)
+		     (list "jmp " label "\n"))
+		    ((jmpe ,label)
+		     (list "je " label "\n"))
 		    ((add)
 		     (begin
 		       (set! fs (- fs 1))
