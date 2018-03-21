@@ -36,6 +36,7 @@
 (define (constant? x)
   (or (number? x)
       (string? x)
+      (char? x)
       (boolean? x)))
 
 (define (variable? x)

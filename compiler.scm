@@ -48,8 +48,9 @@
   (let* ((ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
 	 ;;(ast (parse-program filename))
 	 (ast-expanded (expand-macros ast))
-	 (inter (compile-ir ast-expanded '()));;(closure-conv (assign-conv (alpha-conv ast))) gcte grte))
-	 (code (begin (compile-program inter lambda-env env-ir))))  ;; generate code
+	 (ast-closed ast-expanded);;(closure-conv (assign-conv (alpha-conv ast-expanded))))
+	 (inter (begin (pp ast-closed) (compile-ir-bloc ast-closed '())));; '())))
+	 (code (begin (pp inter)(compile-program inter lambda-env env-ir))))  ;; generate code
     ;;(pp ast)
     (let* ((base-filename (path-strip-extension filename))
            (asm-filename (string-append base-filename ".s"))

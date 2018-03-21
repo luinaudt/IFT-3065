@@ -135,13 +135,3 @@
 
 
 ;;(trace expand-macros)
-
-
-(define ($instantiate x)
-  (cons x (list #!unbound)))
-
-(define ($set! var val)
-  `(set! ,var ,val))
-
-;;(define ($bind vals)
-;;  (map cons

@@ -17,6 +17,16 @@
 (define env-ir '())
 (define taille-glob 0)
 
+
+(define (compile-ir-bloc expr env)
+  (let ((env-old env-ir))
+    (if (null? expr)
+	(begin
+	  (set! env-ir env-old)
+	  '())
+	(append (compile-ir (car expr) env)
+		(compile-ir-bloc (cdr expr) env)))))
+
 (define (compile-ir expr env)
   ;;(pp expr)
   (if (null? expr)
@@ -45,10 +55,28 @@
                      (loc-env (map cons params (reverse range))))
                 (set! lambda-env (append lambda-env
 					 (append `((proc ,name  ,(length params)))
-						 (compile-ir body (append loc-env env))
+						 (compile-ir-bloc body (append loc-env env))
 						 `((ret 1)))))
                 `((push_proc ,name))))
-	     
+	     ((if ,cond ,E0)
+	      (let ((labend (label-gensym)))
+		(append (compile-ir cond env)
+			(compile-ir '#f '())
+			(list '(cmp))
+			(list `(jmpe ,labend))
+			(compile-ir E0 env)
+			(list `(lab ,labend)))))
+	     ((if ,cond ,E0 ,E1)
+	      (let ((labfalse (label-gensym)) (labend (label-gensym)))
+		(append (compile-ir cond env)
+			(compile-ir '#f '())
+			(list '(cmp))
+			(list `(jmpe ,labfalse))
+			(compile-ir E0 env)
+			(list `(jmp ,labend))
+			(list `(lab ,labfalse)) ;;faux
+			(compile-ir E1 env)
+			(list `(lab ,labend)))));;fin
              (($- ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
@@ -86,26 +114,27 @@
              
 	     (,lit when (constant? lit)
 		   (list `(push_lit ,lit)))
-             
+
 	     (,var when (variable? var)
                    (let ((var-val (assoc var env)))
                      (if var-val
                          `((push_loc ,(length env)))
-                         `((push_glo ,(env-lookup (append env env-ir) var))
-			   (call 2)
+                         `((push_glo ,(env-lookup env-ir var))
 			   ))))
              
 	     ((,E0 . ,Es)
-	      (if (pair? E0)
-		  (append (compile-ir E0 env)
-			  (compile-ir Es env))
-		  (append (compile-ir Es env)
-			  (compile-ir E0 env)))))))
-
+	      (begin ;;(pp expr)
+		     ;;(pp Es)
+		     (append (compile-ir-bloc Es env)
+			     (compile-ir E0 env)
+			     (list `(call ,(length Es)))))
+	     ))))
+  
 
 
 ;;debug
 ;;(pp compile-ir)
+;;(trace compile-ir-bloc)
 ;;(trace compile-ir)
 ;;(trace intermediateCode-gen)
 ;;(trace ir-analyse-println)

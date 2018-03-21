@@ -27,11 +27,11 @@
 		    ((call ,nargs)
 		     (let ((retLab (return-gensym)))
 		       (begin
-			 (set! fs 1)
+			 (set! fs (- fs nargs))
 			 (list "pop %rdi\n"
 			       "lea " retLab "(%rip), %rax\n"
 			       "push %rax\n"
-			       "mov $" (number->string nargs) ", %rax\n";; (number->string nargs) ", %rax \n"
+			       "mov $" (number->string nargs) ", %rax \n"
 			       "jmp *%rdi\n"
 			       ".align 8\n .quad 0\n .quad 12 \n .byte 0\n"
 			       retLab ":\n"))))
@@ -45,6 +45,12 @@
 			       "add $8*" (number->string old-fs)  ",%rsp\n"
 			       "push %rax \n"
 			       "jmp *%rdi\n"))))
+
+		    ((push_proc ,lab)
+		     (begin
+		       (set! fs (+ fs 1 ))
+		       (list "lea " lab "(%rip), %rax\n"
+			     "push %rax\n")))
 		    
 		    ((pop_glo ,pos)
 		     (begin
@@ -59,14 +65,16 @@
 		    ((push_lit ,val)
 		     (begin
 		       (set! fs (+ fs 1 ))
-		       (list "push $8*" val "\n")))
-
-		    ((push_proc ,lab)
-		     (begin
-		       (set! fs (+ fs 1 ))
-		       (list "lea " lab "(%rip), %rax\n"
-			     "push %rax\n")))
-
+		       (cond ((number? val)
+			      (list "push $8*" val "\n"))
+			     ((char? val)
+			      (list "push $2+8*" (number->string (char->integer val)) "\n"))
+			     ((boolean? val)
+			      (if val
+				  (list "push $9\n")
+				  (list "push $1\n")
+			     )))))
+		       
 		    ((push_loc ,pos)
 		     (begin
 		       (set! fs (+ fs 1 ))
@@ -137,7 +145,7 @@
 			     "push %rax\n")))
 		    ((sub)
 		     (begin
-		       (set! fs (- fs 1 ))
+		       (set! fs (- fs 1))
 		       (list "pop %rbx \n"
 			     "pop %rax\n"
 			     "sub %rbx, %rax\n"
@@ -145,10 +153,11 @@
 
 		    ((println)
 		     (begin
-		       (set! fs (- fs 1 ))
+		       ;;(set! fs (+ fs 1))
 		       (list "call print_ln \n"
 			     "push $10\n"
-			     "call putchar\n"))))))
+			     "call putchar\n"
+			     "push $0\n"))))))
 	(append code (compile-bloc (cdr expr) fs)))))
 
 
