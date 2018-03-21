@@ -79,8 +79,8 @@
                            (map car bindings))))
             (expand-macros
              `(let ,(map $instantiate (map car bindings)) ;; instantiate variables
-                ,@(map $set! syms (map cadr bindings)) ;; compute expressions to bind
-                ,@(map $set! (map car bindings) vals) ;; assign expressions to variables
+                ,@(map $set! syms (map cadr bindings)) ;; evaluate expressions to bind
+                ,@(map $set! (map car bindings) syms) ;; assign expressions to variables
                 ,@body))))
           
 	 ;; begin
@@ -135,3 +135,10 @@
 
 
 ;;(trace expand-macros)
+
+
+(define ($instantiate x)
+  (cons x (list #!unbound)))
+
+(define ($set! var val)
+  `(set! ,var ,val))
