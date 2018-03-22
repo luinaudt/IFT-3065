@@ -4,7 +4,6 @@
 
 ;;the ast is a scheme list
 ;;it should contain unique symbols.
-(include "match.scm")
 
 ;; Intermediate code
 ;; Fonction pour génération de la représentation intermdiaire.
@@ -28,7 +27,7 @@
 		(compile-ir-bloc (cdr expr) env)))))
 
 (define (compile-ir expr env)
-  ;;(pp expr)
+  ;(pp expr)
   (if (null? expr)
       '()
       (match expr
@@ -44,6 +43,20 @@
                       (set! taille-glob (+ taille-glob 1))
                       (append (compile-ir expr env)
                               (list `(pop_glo ,(- taille-glob 1))))))))
+
+             (($cons ,e1 ,e2)
+              (append (list '(push_heap 2))
+                      (compile-ir e1 env)
+                      (compile-ir e2 env)
+                      (list '(cons))))
+
+             (($car ,p)
+              (append (compile-ir p env)
+                      (list '(car))))
+
+             (($cdr ,p)
+              (append (compile-ir p env)
+                      (list '(cdr))))
 	     
              ((lambda ,params . ,body)
               (let* ((name (lambda-gensym))
@@ -58,6 +71,7 @@
 						 (compile-ir-bloc body (append loc-env env))
 						 `((ret 1)))))
                 `((push_proc ,name))))
+             
 	     ((if ,cond ,E0)
 	      (let ((labend (label-gensym)))
 		(append (compile-ir cond env)
@@ -66,6 +80,7 @@
 			(list `(jmpe ,labend))
 			(compile-ir E0 env)
 			(list `(lab ,labend)))))
+             
 	     ((if ,cond ,E0 ,E1)
 	      (let ((labfalse (label-gensym)) (labend (label-gensym)))
 		(append (compile-ir cond env)
@@ -77,11 +92,12 @@
 			(list `(lab ,labfalse)) ;;faux
 			(compile-ir E1 env)
 			(list `(lab ,labend)))));;fin
+             
              (($- ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
 		      (list '(sub))))
-	     (($println  ,expr)
+	     (($println ,expr)
 	      (append (compile-ir expr env)
 		      (list '(println))))
 		      
@@ -111,6 +127,60 @@
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
 		      (list '(add))))
+             
+             (($number? ,expr)
+              (append (compile-ir expr env)
+                      (list '(get_tag))
+                      (list '(push_tag 0))
+                      (list '(cmp))
+                      (list '(equal?))))
+             
+             (($boolean? ,expr)
+              (append (compile-ir expr env)
+                      (list '(boolean?)
+                            '(cmp)
+                            '(equal?))))
+             
+             (($char? ,expr)
+              (append (compile-ir expr env)
+                      (list '(get_tag))
+                      (list '(push_tag 2))
+                      (list '(cmp))
+                      (list '(equal?))))
+             
+             (($string? ,expr)
+              (append (compile-ir expr env)
+                      (list '(get_tag))
+                      (list '(push_tag 3))
+                      (list '(cmp))
+                      (list '(equal?))))
+             
+             (($pair? ,expr)
+              (append (compile-ir expr env)
+                      (list '(get_tag))
+                      (list '(push_tag 6))
+                      (list '(cmp))
+                      (list '(equal?))))
+             
+             (($procedure? ,expr)
+              (append (compile-ir expr env)
+                      (list '(get_tag))
+                      (list '(push_tag 7))
+                      (list '(cmp))
+                      (list '(equal?))))
+             
+             (($null? ,expr)
+              (append (compile-ir expr env)
+                      (list '(null?)
+                            '(cmp)
+                            '(equal?))))
+
+             (($eq? ,e1 ,e2)
+              (append (compile-ir e1 env)
+                      (compile-ir e2 env)
+                      (list '(cmp))
+                      (list '(equal?))))
+                      
              
 	     (,lit when (constant? lit)
 		   (list `(push_lit ,lit)))

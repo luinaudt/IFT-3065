@@ -35,9 +35,10 @@
 
 (define (constant? x)
   (or (number? x)
-      (string? x)
+      (null? x)
+      (boolean? x)
       (char? x)
-      (boolean? x)))
+      (string? x)))
 
 (define (variable? x)
   (symbol? x))

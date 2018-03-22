@@ -85,7 +85,8 @@
                      (if (equal? (cdr y)
                                  (get-expected-output file))
                          y
-                         (cons 1 (cdr y)))))
+                         (cons 1 (cdr y)))
+                     (cons 2 (cdr y))))
                x)))))
 
 (define (get-expected-output filename)
@@ -110,16 +111,24 @@
 
    (lambda (mode)
      (let ((result (test-using-mode file mode)))
-       (if (or (and (not (= 0 (car result)))
-		    (string=? (substring file 0 17) "unit-tests/crash-"))
-	       (and (= 0 (car result))
-		    (not (string=? (substring file 0 17) "unit-tests/crash-"))))
-	   (set! nb-good (+ nb-good 1))
+       (if (= 2 (car result))
+           
            (begin
-             (set! nb-fail (+ nb-fail 1))
+             (set! nb-other (+ nb-other 1))
              (print "\n")
              (print "*********************** FAILED TEST " mode " " file "\n")
-             (print (cdr result))))
+             (print (cdr result)))
+           
+           (if (or (and (not (= 0 (car result)))
+                        (string=? (substring file 0 17) "unit-tests/crash-"))
+                   (and (= 0 (car result))
+                        (not (string=? (substring file 0 17) "unit-tests/crash-"))))
+               (set! nb-good (+ nb-good 1))
+               (begin
+                 (set! nb-fail (+ nb-fail 1))
+                 (print "\n")
+                 (print "*********************** FAILED TEST " mode " " file "\n")
+                 (print (cdr result)))))
 
        (show-bar nb-good
                  nb-fail
