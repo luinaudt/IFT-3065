@@ -73,13 +73,14 @@
                 `((push_proc ,name))))
              
 	     ((if ,cond ,E0)
-	      (let ((labend (label-gensym)))
-		(append (compile-ir cond env)
-			(compile-ir '#f '())
-			(list '(cmp))
-			(list `(jmpe ,labend))
-			(compile-ir E0 env)
-			(list `(lab ,labend)))))
+              (compile-ir `(if ,cond ,E0 #!void)))
+              ;(let ((labend (label-gensym)))
+              ;  (append (compile-ir cond env)
+              ;          (compile-ir '#f '())
+              ;          (list '(cmp))
+	      ;  	 (list `(jmpe ,labend))
+	      ;          (compile-ir E0 env)
+	      ;          (list `(lab ,labend)))))
              
 	     ((if ,cond ,E0 ,E1)
 	      (let ((labfalse (label-gensym)) (labend (label-gensym)))
@@ -91,7 +92,8 @@
 			(list `(jmp ,labend))
 			(list `(lab ,labfalse)) ;;faux
 			(compile-ir E1 env)
-			(list `(lab ,labend)))));;fin
+			(list `(lab ,labend))   ;;fin
+                        (list '(fs-adjust)))))
              
              (($- ,p1 ,p2)
 	      (append (compile-ir p1 env)
@@ -216,11 +218,11 @@
 (define label-gensym
   (lambda ()
     (set! label-count (+ label-count 1))
-    (list "lab_" (number->string label-count))))
+    (list "lab_" (number->string (- label-count 1)))))
 
 ;; generation lambda symbol
 (define lambda-gensym 
   (lambda ()
     (begin
       (set! lambda-count (+ lambda-count 1))
-      (string-append "lam" (number->string lambda-count)))))
+      (string-append "lam" (number->string (- lambda-count 1))))))

@@ -7,11 +7,13 @@
 (define return-gensym
   (lambda ()
     (set! return-count (+ return-count 1))
-    (string-append "return" (number->string return-count))))
+    (string-append "return" (number->string (- return-count 1)))))
 
  
 
 (define (compile-bloc expr fs)
+  ;(pp fs)
+  ;(pp expr)
   (if (null? expr)
       (list "add $8*" (number->string fs) ",%rsp \n")
       (let ((code
@@ -25,6 +27,11 @@
 
                     ((lab ,label)
                      (list label ":\n"))
+
+                    ((fs-adjust)
+                     (begin
+                       (set! fs (- fs 1))
+                       (list ""))) 
                     
 		    ((proc ,name ,nbparams)
 		     (begin
@@ -94,9 +101,8 @@
 			     ((boolean? val)
 			      (if val
 				  (list "push $9\n")
-				  (list "push $1\n")
-			     )))))
-		       
+				  (list "push $1\n"))))))
+                    
 		    ((push_loc ,pos)
 		     (begin
 		       (set! fs (+ fs 1 ))
@@ -148,7 +154,9 @@
 		    ((less?)
 		     (begin
 		       (set! fs (+ fs 1 ))
-		       (list "cmovs %rbx, %rax\n"
+		       (list "mov $1, %rax\n"
+			     "mov $9, %rbx\n"
+                             "cmovs %rbx, %rax\n"
 			     "push %rax\n")))
                     
 		    ((cmp)
@@ -156,14 +164,14 @@
 		       (set! fs (- fs 2 ))
 		       (list "pop %rax\n"
 			     "pop %rbx\n"
-			     "cmp %rax, %rbx\n"
-                             "mov $1, %rax\n"
-			     "mov $9, %rbx\n")))
+			     "cmp %rax, %rbx\n")))
                     
 		    ((equal?)
 		     (begin
 		       (set! fs (+ fs 1 ))
-		       (list "cmovz %rbx,%rax\n"
+		       (list "mov $1, %rax\n"
+			     "mov $9, %rbx\n"
+                             "cmovz %rbx,%rax\n"
 			     "push %rax\n")))
                     
 		    ((sub)
@@ -215,7 +223,7 @@
 
 		    ((println)
 		     (begin
-		       ;;(set! fs (+ fs 1))
+		       ;(set! fs (- fs 1))
 		       (list "call print_ln \n"
 			     "push $10\n"
 			     "call putchar\n"
