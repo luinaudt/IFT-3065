@@ -49,8 +49,13 @@
 	 ;;(ast (parse-program filename))
 	 (ast-expanded (expand-macros ast))
 	 (ast-closed ast-expanded);;(closure-conv (assign-conv (alpha-conv ast-expanded))))
+<<<<<<< HEAD
 	 (inter (begin (compile-ir-bloc ast-closed '())));; '())))
 	 (code (begin  (pp inter) (pp lambda-env) (compile-program inter lambda-env env-ir))))  ;; generate code
+=======
+	 (inter (begin #|(pp ast-closed)|# (compile-ir-bloc ast-closed '())));; '())))
+	 (code (begin #|(pp inter)|# (compile-program inter lambda-env env-ir))))  ;; generate code
+>>>>>>> 137055daaf42ef6162c971b465369fffefe5a144
     ;;(pp ast)
     (let* ((base-filename (path-strip-extension filename))
            (asm-filename (string-append base-filename ".s"))

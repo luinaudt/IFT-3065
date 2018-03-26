@@ -75,13 +75,14 @@
               ,@(expand-macros body))))
 
          ((letrec ,bindings . ,body) when (pair? bindings)
-          (let ((syms (map (lambda (x) gensym)   ;; generate a symbol for each variable
+          (let ((syms (map (lambda (x) (gensym))  ;; generate a symbol for each variable
                            (map car bindings))))
-            (expand-macros
-             `(let ,(map $instantiate (map car bindings)) ;; instantiate variables
-                ,@(map $set! syms (map cadr bindings)) ;; evaluate expressions to bind
-                ,@(map $set! (map car bindings) syms) ;; assign expressions to variables
-                ,@body))))
+            (begin
+              (expand-macros
+               `(let ,(map $instantiate (map car bindings))  ;; instantiate variables
+                  (let ,(map list syms (map cadr bindings))  ;; evaluate expressions
+                    ,@(map $set! (map car bindings) syms)    ;; assign them to variables
+                    ,@body))))))
           
 	 ;; begin
          
