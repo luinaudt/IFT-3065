@@ -9,7 +9,7 @@
     (set! return-count (+ return-count 1))
     (string-append "return" (number->string (- return-count 1)))))
 
-
+ 
 
 (define (compile-bloc expr fs)
   ;(pp fs)
@@ -101,18 +101,12 @@
 			     ((boolean? val)
 			      (if val
 				  (list "push $9\n")
-<<<<<<< HEAD
-				  (list "push $1\n")
-				  )))))
-		    
-=======
 				  (list "push $1\n"))))))
                     
->>>>>>> 137055daaf42ef6162c971b465369fffefe5a144
 		    ((push_loc ,pos)
 		     (begin
 		       (set! fs (+ fs 1 ))
-		       (list "push 8*" (number->string  (- pos 1)) "(%rsp)\n")))
+		       (list "push 8*" (number->string pos) "(%rsp)\n")))
 
 		    ((add)
 		     (begin
@@ -229,7 +223,7 @@
 
 		    ((println)
 		     (begin
-		       ;(set! fs (- fs 1))
+		       ;;(set! fs (+ fs 1))
 		       (list "call print_ln \n"
 			     "push $10\n"
 			     "call putchar\n"

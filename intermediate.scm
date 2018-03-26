@@ -4,6 +4,7 @@
 
 ;;the ast is a scheme list
 ;;it should contain unique symbols.
+(include "match.scm")
 
 ;; Intermediate code
 ;; Fonction pour génération de la représentation intermdiaire.
@@ -27,10 +28,11 @@
 		(compile-ir-bloc (cdr expr) env)))))
 
 (define (compile-ir expr env)
-  ;(pp expr)
+  ;;(pp expr)
   (if (null? expr)
       '()
       (match expr
+            
 	     ((define ,name ,expr)
 	      (let ((var-val (assoc name env-ir)))
                 (if var-val
@@ -66,17 +68,6 @@
                                   (cons x (loop (+ x 1)))
                                   '())))
                      (loc-env (map cons params (reverse range))))
-<<<<<<< HEAD
-		(begin
-		  (pp body)
-		  (set! fs (+ 1 len))
-		  (set! lambda-env (append lambda-env
-					   (append `((proc ,name  ,len))
-						   (compile-ir-bloc body (append loc-env env))
-						   `((ret 1)))))
-		  (set! fs (+ 1 old-fs))
-		  `((push_proc ,name)))))
-=======
                 (pp expr)
                 (pp name)
                 (set! lambda-env (append lambda-env
@@ -85,7 +76,6 @@
                                                  `((ret 1)))))
                 `((push_proc ,name))))
              
->>>>>>> 137055daaf42ef6162c971b465369fffefe5a144
 	     ((if ,cond ,E0)
               (compile-ir `(if ,cond ,E0 #!void)))
               ;(let ((labend (label-gensym)))
