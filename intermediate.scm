@@ -16,7 +16,7 @@
 (define lambda-env '())
 (define env-ir '())
 (define taille-glob 0)
-
+(define fs 0)
 
 (define (compile-ir-bloc expr env)
   (let ((env-old env-ir))
@@ -32,7 +32,6 @@
   (if (null? expr)
       '()
       (match expr
-            
 	     ((define ,name ,expr)
 	      (let ((var-val (assoc name env-ir)))
                 (if var-val
@@ -47,17 +46,22 @@
 	     
              ((lambda ,params . ,body)
               (let* ((name (lambda-gensym))
+		     (old-fs fs)
                      (len (length params))
                      (range (let loop ((x 0))
                               (if (< x len) 
                                   (cons x (loop (+ x 1)))
                                   '())))
                      (loc-env (map cons params (reverse range))))
-                (set! lambda-env (append lambda-env
-					 (append `((proc ,name  ,(length params)))
-						 (compile-ir-bloc body (append loc-env env))
-						 `((ret 1)))))
-                `((push_proc ,name))))
+		(begin
+		  (pp body)
+		  (set! fs (+ 1 len))
+		  (set! lambda-env (append lambda-env
+					   (append `((proc ,name  ,len))
+						   (compile-ir-bloc body (append loc-env env))
+						   `((ret 1)))))
+		  (set! fs (+ 1 old-fs))
+		  `((push_proc ,name)))))
 	     ((if ,cond ,E0)
 	      (let ((labend (label-gensym)))
 		(append (compile-ir cond env)
@@ -84,7 +88,7 @@
 	     (($println  ,expr)
 	      (append (compile-ir expr env)
 		      (list '(println))))
-		      
+	     
              (($* ,p1 ,p2)
 	      (append (compile-ir p1 env)
 		      (compile-ir p2 env)
@@ -113,23 +117,30 @@
 		      (list '(add))))
              
 	     (,lit when (constant? lit)
-		   (list `(push_lit ,lit)))
+		   (begin
+		     (set! fs (+ 1 fs))
+		     (list `(push_lit ,lit))))
 
 	     (,var when (variable? var)
-                   (let ((var-val (assoc var env)))
-                     (if var-val
-                         `((push_loc ,(length env)))
-                         `((push_glo ,(env-lookup env-ir var))
-			   ))))
-             
+		   (begin
+		      (set! fs (+ 1 fs))
+		      (let ((var-val (assoc var env)))
+			(if var-val
+			    (begin
+			      (pp var-val)
+			      (pp fs)
+			    `((push_loc ,(- fs (+ 1 (cdr var-val))))))
+			    `((push_glo ,(env-lookup env-ir var))
+			      )))))
+	     
 	     ((,E0 . ,Es)
 	      (begin ;;(pp expr)
-		     ;;(pp Es)
-		     (append (compile-ir-bloc Es env)
-			     (compile-ir E0 env)
-			     (list `(call ,(length Es)))))
-	     ))))
-  
+		;;(pp Es)
+		(append (compile-ir-bloc Es env)
+			(compile-ir E0 env)
+			(list `(call ,(length Es)))))
+	      ))))
+
 
 
 ;;debug
