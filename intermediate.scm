@@ -66,10 +66,12 @@
                                   (cons x (loop (+ x 1)))
                                   '())))
                      (loc-env (map cons params (reverse range))))
+                (pp expr)
+                (pp name)
                 (set! lambda-env (append lambda-env
-					 (append `((proc ,name  ,(length params)))
-						 (compile-ir-bloc body (append loc-env env))
-						 `((ret 1)))))
+                                         (append `((proc ,name  ,(length params)))
+                                                 (compile-ir-bloc body (append loc-env env))
+                                                 `((ret 1)))))
                 `((push_proc ,name))))
              
 	     ((if ,cond ,E0)
