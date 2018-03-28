@@ -68,8 +68,8 @@
                                   (cons x (loop (+ x 1)))
                                   '())))
                      (loc-env (map cons params (reverse range))))
-                (pp expr)
-                (pp name)
+                ;;(pp expr)
+                ;;(pp name)
                 (set! lambda-env (append lambda-env
                                          (append `((proc ,name  ,(length params)))
                                                  (compile-ir-bloc body (append loc-env env))
@@ -199,8 +199,8 @@
 		      (let ((var-val (assoc var env)))
 			(if var-val
 			    (begin
-			      (pp var-val)
-			      (pp fs)
+			      ;;(pp var-val)
+			      ;;(pp fs)
 			    `((push_loc ,(- fs (+ 1 (cdr var-val))))))
 			    `((push_glo ,(env-lookup env-ir var))
 			      )))))
