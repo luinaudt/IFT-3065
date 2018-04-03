@@ -201,7 +201,7 @@
 			    (begin
 			      ;;(pp var-val)
 			      ;;(pp fs)
-			    `((push_loc ,(- fs (+ 1 (cdr var-val))))))
+			    `((push_loc ,(- fs (cdr var-val)))))
 			    `((push_glo ,(env-lookup env-ir var))
 			      )))))
 	     
