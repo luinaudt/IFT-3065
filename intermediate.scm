@@ -56,10 +56,11 @@
                      (new-env (append loc-env env))
                      (old-fs fs))
                 (set! fs (+ nb-params 1))  ;; params + return address
-                (set! lambda-env (append lambda-env
-                                         (list `(proc ,proc-name ,nb-params))
+                (set! lambda-env (append (list `(proc ,proc-name ,nb-params))
                                          (compile-ir-bloc body new-env)
-                                         (list `(ret ,(- fs (+ nb-params 1))))))
+                                         (list `(ret ,(- fs (+ nb-params 1))))
+                                         lambda-env))
+                (pp lambda-env)
                 (set! fs (+ old-fs 1))  ;; add 1 for lambda-expression address
                 (list `(push_proc ,proc-name))))
 
