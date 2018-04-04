@@ -115,10 +115,12 @@
 
                     ((close ,nfree)
                      (begin
-                       (list "mov  $" (number->string (* (+ nfree 1) 8)) ", 8*0(%r11)\n"
-                             "mov  $0, 8*1(%r11)\n"
+                       (list "mov  $" (number->string (* (+ nfree 1) 8)) ", %rax\n"
+                             "mov  %rax, 8*0(%r11)\n"
+                             "mov  $0, %rax\n"
+                             "mov  %rax, 8*1(%r11)\n"
                              (get-fv (- nfree 1))
-                             "pop  $8*2(%r11)\n"
+                             "pop  8*2(%r11)\n"
                              "push %r11\n"
                              "add  $8*2+1, (%rsp)\n"
                              "add  $8*" (number->string (+ nfree 3)) ", %r11\n")))
