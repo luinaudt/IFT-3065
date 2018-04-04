@@ -63,7 +63,7 @@
                                "lea " retLab "(%rip), %rax\n"
                                "push %rax\n"
                                "mov $" (number->string nargs) ", %rax\n"
-                               "jmp *%rdi\n"
+                               "jmp *-1(%rdi)\n"
                                "\n.align 8\n.quad 0\n.quad 12\n.byte 0\n"
                                retLab ":\n"))))
                     
@@ -122,21 +122,24 @@
 
                     ((push_free ,pos)
                      (begin
+                       (debug fs expr)
                        (list "pop  %rdi\n"
                              "push 8*" (number->string (+ pos 1)) "-1(%rdi)\n")))
 
                     ((pop_free ,pos)
                      (begin
                        (set! fs (- fs 2))
+                       (debug fs expr)
                        (list "pop  %rdi\n"
                              "pop  8*" (number->string (+ pos 1)) "-1(%rdi)\n")))
 
                     ((close ,nfree)
                      (begin
                        (set! fs (- fs nfree))
-                       (list "push $" (number->string (* (+ nfree 1) 8)) "\n"
+                       (debug fs expr)
+                       (list "push $" (number->string (* (+ nfree 1) 8)) "  # nfree + 1\n"
                              "pop  8*0(%r11)\n"
-                             "push $0\n"
+                             "push $0  # type\n"
                              "pop  8*1(%r11)\n"
                              (get-fv (- nfree 1))
                              "pop  8*2(%r11)\n"
@@ -147,6 +150,7 @@
                     ((push_this ,offset)
                      (begin
                        (set! fs (+ fs 1))
+			(debug fs expr)
                        (list "push 8*" (number->string offset) "(%rsp)\n")))
 
                     ((println)
