@@ -19,72 +19,79 @@
 (define fs 0)
 
 (define (compile-ir-bloc expr env)
-  (let ((env-old env-ir))
-    (if (null? expr)
-	(begin
-	  (set! env-ir env-old)
-	  '())
-	(append (compile-ir (car expr) env)
-		(compile-ir-bloc (cdr expr) env)))))
+  (if (null? expr)
+      '()
+      (begin
+        (append (compile-ir (car expr) env)
+                (compile-ir-bloc (cdr expr) env)))))
 
 (define (compile-ir expr env)
-  ;;(pp expr)
   (if (null? expr)
       '()
       (match expr
-            
-	     ((define ,name ,expr)
-	      (let ((var-val (assoc name env-ir)))
-                (if var-val
-                    (begin
-                      (append (compile-ir expr env)
-                              (list `(pop_glo ,(cdr var-val)))))
-                    (begin
-                      (set! env-ir (env-extend env-ir (list name) (list taille-glob)))
-                      (set! taille-glob (+ taille-glob 1))
-                      (append (compile-ir expr env)
-                              (list `(pop_glo ,(- taille-glob 1))))))))
-
-             (($cons ,e1 ,e2)
-              (append (list '(push_heap 2))
-                      (compile-ir e1 env)
-                      (compile-ir e2 env)
-                      (list '(cons))))
-
-             (($car ,p)
-              (append (compile-ir p env)
-                      (list '(car))))
-
-             (($cdr ,p)
-              (append (compile-ir p env)
-                      (list '(cdr))))
+             
+	     ((define ,var-name ,e1)
+	      (let* ((var-val (assoc var-name env-ir))
+                     (ir-code
+                      (if var-val
+                          (begin
+                            (append (compile-ir e1 env)
+                                    (list `(pop_glo ,(cdr var-val)))))
+                          (begin
+                            (set! env-ir (env-extend env-ir `(,var-name) `(,taille-glob)))
+                            (set! taille-glob (+ taille-glob 1))
+                            (append (compile-ir e1 env)
+                                    (list `(pop_glo ,(- taille-glob 1))))))))
+                (set! fs (- fs 1))
+                ir-code))
 	     
              ((lambda ,params . ,body)
-              (let* ((name (lambda-gensym))
-		     (old-fs fs)
-                     (len (length params))
+              (let* ((proc-name (lambda-gensym))
+                     (nb-params (length params))
                      (range (let loop ((x 0))
-                              (if (< x len) 
+                              (if (< x nb-params) 
                                   (cons x (loop (+ x 1)))
                                   '())))
-                     (loc-env (map cons params (reverse range))))
-                ;;(pp expr)
-                ;;(pp name)
+                     (loc-env (map cons params (reverse range)))
+                     (new-env (append loc-env env))
+                     (old-fs fs))
+                (set! fs (+ nb-params 1))  ;; params + return address
                 (set! lambda-env (append lambda-env
-                                         (append `((proc ,name  ,(length params)))
-                                                 (compile-ir-bloc body (append loc-env env))
-                                                 `((ret 1)))))
-                `((push_proc ,name))))
+                                         (list `(proc ,proc-name ,nb-params))
+                                         (compile-ir-bloc body new-env)
+                                         (list `(ret ,(- fs (+ nb-params 1))))))
+                (set! fs (+ old-fs 1))  ;; add 1 for lambda-expression address
+                (list `(push_proc ,proc-name))))
+
+             (($cons ,e1 ,e2)
+              (begin
+                (set! fs (+ fs 1))
+                (append (list '(push_heap 2))
+                        (compile-ir e1 env)
+                        (compile-ir e2 env)
+                        (list '(cons)))))
+
+             (($car ,p)
+              (begin
+                (set! fs (+ fs 1))
+                (append (compile-ir p env)
+                        (list '(car)))))
+
+             (($cdr ,p)
+              (begin
+                (set! fs (+ fs 1))
+                (append (compile-ir p env)
+                        (list '(cdr)))))
              
 	     ((if ,cond ,E0)
               (compile-ir `(if ,cond ,E0 #!void)))
-              ;(let ((labend (label-gensym)))
-              ;  (append (compile-ir cond env)
-              ;          (compile-ir '#f '())
-              ;          (list '(cmp))
-	      ;  	 (list `(jmpe ,labend))
-	      ;          (compile-ir E0 env)
-	      ;          (list `(lab ,labend)))))
+             ;;(let ((labend (label-gensym)))
+             ;;  (append (compile-ir cond env)
+             ;;          (compile-ir '#f '())
+             ;;          (list '(cmp))
+             ;;  	 (list `(jmpe ,labend))
+             ;;          (compile-ir E0 env)
+             ;;          (list `(lab ,labend)))))
              
 	     ((if ,cond ,E0 ,E1)
 	      (let ((labfalse (label-gensym)) (labend (label-gensym)))
@@ -99,84 +106,105 @@
 			(list `(lab ,labend))   ;;fin
                         (list '(fs-adjust)))))
              
-             (($- ,p1 ,p2)
-	      (append (compile-ir p1 env)
-		      (compile-ir p2 env)
-		      (list '(sub))))
-	     (($println ,expr)
-	      (append (compile-ir expr env)
-		      (list '(println))))
-	     
-             (($* ,p1 ,p2)
-	      (append (compile-ir p1 env)
-		      (compile-ir p2 env)
-		      (list '(mul))))
-	     (($modulo ,p1 ,p2)
-	      (append (compile-ir p1 env)
-		      (compile-ir p2 env)
-		      (list '(modulo))))
-	     (($quotient ,p1 ,p2)
-	      (append (compile-ir p1 env)
-		      (compile-ir p2 env)
-		      (list '(quotient))))
-	     (($= ,p1 ,p2)
-	      (append (compile-ir p1 env)
-		      (compile-ir p2 env)
-		      (list '(cmp))
-		      (list '(equal?))))
-	     (($< ,p1 ,p2)
-	      (append (compile-ir p1 env)
-		      (compile-ir p2 env)
-		      (list '(cmp))
-		      (list '(less?))))
-	     (($+ ,p1 ,p2)
-	      (append (compile-ir p1 env)
-		      (compile-ir p2 env)
-		      (list '(add))))
+	     (($println ,ex)
+              (begin
+                (append (compile-ir ex env)
+                        (list '(println)))))
              
-             (($number? ,expr)
-              (append (compile-ir expr env)
+             (($+ ,p1 ,p2)
+              (begin
+                (set! fs (- fs 1))
+                (append (compile-ir p1 env)
+                        (compile-ir p2 env)
+                        (list '(add)))))
+             
+             (($- ,p1 ,p2)
+              (begin
+                (set! fs (- fs 1))
+                (append (compile-ir p1 env)
+                        (compile-ir p2 env)
+                        (list '(sub)))))
+             
+             (($* ,p1 ,p2)
+              (begin
+                (set! fs (- fs 1))
+                (append (compile-ir p1 env)
+                        (compile-ir p2 env)
+                        (list '(mul)))))
+             
+             (($quotient ,p1 ,p2)
+              (begin
+                (set! fs (- fs 1))
+                (append (compile-ir p1 env)
+                        (compile-ir p2 env)
+                        (list '(quotient)))))
+             
+             (($modulo ,p1 ,p2)
+              (begin
+                (set! fs (- fs 1))
+                (append (compile-ir p1 env)
+                        (compile-ir p2 env)
+                        (list '(modulo)))))
+             
+             (($= ,p1 ,p2)
+              (begin
+                (set! fs (- fs 1))
+                (append (compile-ir p1 env)
+                        (compile-ir p2 env)
+                        (list '(cmp))
+                        (list '(equal?)))))
+             
+             (($< ,p1 ,p2)
+              (begin
+                (set! fs (- fs 1))
+                (append (compile-ir p1 env)
+                        (compile-ir p2 env)
+                        (list '(cmp))
+                        (list '(less?)))))
+             
+             (($number? ,e1)
+              (append (compile-ir e1 env)
                       (list '(get_tag))
                       (list '(push_tag 0))
                       (list '(cmp))
                       (list '(equal?))))
              
-             (($boolean? ,expr)
-              (append (compile-ir expr env)
+             (($boolean? ,e1)
+              (append (compile-ir e1 env)
                       (list '(boolean?)
                             '(cmp)
                             '(equal?))))
              
-             (($char? ,expr)
-              (append (compile-ir expr env)
+             (($char? ,e1)
+              (append (compile-ir e1 env)
                       (list '(get_tag))
                       (list '(push_tag 2))
                       (list '(cmp))
                       (list '(equal?))))
              
-             (($string? ,expr)
-              (append (compile-ir expr env)
+             (($string? ,e1)
+              (append (compile-ir e1 env)
                       (list '(get_tag))
                       (list '(push_tag 3))
                       (list '(cmp))
                       (list '(equal?))))
              
-             (($pair? ,expr)
-              (append (compile-ir expr env)
+             (($pair? ,e1)
+              (append (compile-ir e1 env)
                       (list '(get_tag))
                       (list '(push_tag 6))
                       (list '(cmp))
                       (list '(equal?))))
              
-             (($procedure? ,expr)
-              (append (compile-ir expr env)
+             (($procedure? ,e1)
+              (append (compile-ir e1 env)
                       (list '(get_tag))
                       (list '(push_tag 7))
                       (list '(cmp))
                       (list '(equal?))))
              
-             (($null? ,expr)
-              (append (compile-ir expr env)
+             (($null? ,e1)
+              (append (compile-ir e1 env)
                       (list '(null?)
                             '(cmp)
                             '(equal?))))
@@ -186,42 +214,31 @@
                       (compile-ir e2 env)
                       (list '(cmp))
                       (list '(equal?))))
-                      
              
-	     (,lit when (constant? lit)
-		   (begin
-		     (set! fs (+ 1 fs))
-		     (list `(push_lit ,lit))))
+             
+             (,lit when (constant? lit)
+                   (begin
+                     (set! fs (+ fs 1))
+                     (list `(push_lit ,lit))))
 
-	     (,var when (variable? var)
-		   (begin
-		      (set! fs (+ 1 fs))
-		      (let ((var-val (assoc var env)))
-			(if var-val
-			    (begin
-			      ;;(pp var-val)
-			      ;;(pp fs)
-			    `((push_loc ,(- fs (cdr var-val)))))
-			    `((push_glo ,(env-lookup env-ir var))
-			      )))))
-	     
-	     ((,E0 . ,Es)
-	      (begin ;;(pp expr)
-		;;(pp Es)
-		(append (compile-ir-bloc Es env)
-			(compile-ir E0 env)
-			(list `(call ,(length Es)))))
-	      ))))
-
-
-
-;;debug
-;;(pp compile-ir)
-;;(trace compile-ir-bloc)
-;;(trace compile-ir)
-;;(trace intermediateCode-gen)
-;;(trace ir-analyse-println)
-;;(trace ir-analyse-add)
+             (,var when (variable? var)
+                   (let ((var-val (assoc var env)))
+                     ;;(pp expr)
+                     ;;(pp (cdr var-val))
+                     ;;(pp env)
+                     ;;(pp fs)
+                     (set! fs (+ fs 1))
+                     ;;(pp (- (+ fs (cdr var-val)) 2))
+                     ;;(display "\n")
+                     (if var-val
+                         `((push_loc ,(- (+ fs (cdr var-val)) 2)))
+                         `((push_glo ,(env-lookup env-ir var))))))
+             
+             ((,E0 . ,Es)
+              (let ((fs 0))
+                (append (compile-ir-bloc Es env)
+                        (compile-ir E0 env)
+                        (list `(call ,(length Es)))))))))
 
 
 (define lambda-count 0)
@@ -237,3 +254,5 @@
     (begin
       (set! lambda-count (+ lambda-count 1))
       (string-append "lam" (number->string (- lambda-count 1))))))
+
+(trace compile-ir)

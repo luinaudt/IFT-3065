@@ -9,15 +9,13 @@
     (set! return-count (+ return-count 1))
     (string-append "return" (number->string (- return-count 1)))))
 
- 
+
 
 (define (compile-bloc expr fs)
-  ;(pp fs)
-  ;(pp expr)
   (if (null? expr)
       (list "add $8*" (number->string fs) ",%rsp \n")
       (let ((code
-	     (match (car expr)
+             (match (car expr)
 
                     ((jmp ,label)
                      (list "jmp " label "\n"))
@@ -33,115 +31,147 @@
                        (set! fs (- fs 1))
                        (list ""))) 
                     
-		    ((proc ,name ,nbparams)
-		     (begin
-		       (set! fs (+ fs (+ 1 nbparams)))
-		       (list ".align 8\n"
-                             ".quad 0\n"
-                             ".quad 0\n"
-                             ".byte 0\n"
-			     name ":\n"
-			     "cmp $" (number->string nbparams) ", %rax\n"
-			     "jnz nargs_error\n")))
+                    ((proc ,name ,nb-params)
+                     (begin
+                       (set! fs (+ fs (+ 1 nb-params)))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "\n.align 8\n.quad 0\n.quad 0\n.byte 0\n"
+                             name ":\n"
+                             "cmp $" (number->string nb-params) ", %rax\n"
+                             "jnz nargs_error\n")))
 
-		    ((call ,nargs)
-		     (let ((retLab (return-gensym)))
-		       (begin
-			 (set! fs (- fs nargs))
-			 (list "pop %rdi\n"
-			       "lea " retLab "(%rip), %rax\n"
-			       "push %rax\n"
-			       "mov $" (number->string nargs) ", %rax \n"
-			       "jmp *%rdi\n"
-			       ".align 8\n .quad 0\n .quad 12 \n .byte 0\n"
-			       retLab ":\n"))))
-		    
-		    ((ret ,pos)
-		     (let ((old-fs fs))
-		       (begin
-			 (set! fs 0)
-			 (list "mov 8*" (number->string pos) "(%rsp),%rdi \n"
-			       "mov (%rsp), %rax \n"
-			       "add $8*" (number->string old-fs)  ",%rsp\n"
-			       "push %rax \n"
-			       "jmp *%rdi\n"))))
+                    ((call ,nargs)
+                     (let ((retLab (return-gensym)))
+                       (set! fs (- fs nargs))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "pop %rdi\n"
+                             "lea " retLab "(%rip), %rax\n"
+                             "push %rax\n"
+                             "mov $" (number->string nargs) ", %rax\n"
+                             "jmp *%rdi\n"
+                             "\n.align 8\n.quad 0\n.quad 12\n.byte 0\n"
+                             retLab ":\n")))
+                    
+                    ((ret ,pos)
+                     (let ((old-fs fs))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (set! fs 0)
+                       (list "mov 8*" (number->string pos) "(%rsp),%rdi\n"
+                             "mov (%rsp), %rax\n"
+                             "add $8*" (number->string old-fs) ",%rsp\n"
+                             "push %rax\n"
+                             "jmp *%rdi\n")))
 
-		    ((push_proc ,lab)
-		     (begin
-		       (set! fs (+ fs 1 ))
-		       (list "lea " lab "(%rip), %rax\n"
-			     "push %rax\n")))
-		    
-		    ((pop_glo ,pos)
-		     (begin
-		       (set! fs (- fs 1 ))
-		       (list "pop glob_" (number->string pos) "(%rip)\n")))
-
-		    ((push_glo ,pos)
-		     (begin
-		       (set! fs (+ fs 1 ))
-		       (list "push glob_" (number->string pos) "(%rip)\n")))
-
-                    ((push_heap ,size)
+                    ((push_proc ,label)
                      (begin
                        (set! fs (+ fs 1))
-                       (list "mov (%r11), %rax\n"
-                             "add $8*" size ", %r11\n"
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "lea " label "(%rip), %rax\n"
                              "push %rax\n")))
 
-		    ((push_lit ,val)
-		     (begin
-		       (set! fs (+ fs 1 ))
-		       (cond ((number? val)
-			      (list "push $8*" val "\n"))
+                    ((push_lit ,val)
+                     (begin
+                       (set! fs (+ fs 1))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (cond ((number? val)
+                              (list "push $8*" val "\n"))
                              ((null? val)
                               (list "push $17\n"))
-			     ((char? val)
-			      (list "push $2+8*" (number->string (char->integer val)) "\n"))
-			     ((boolean? val)
-			      (if val
-				  (list "push $9\n")
-				  (list "push $1\n"))))))
+                             ((char? val)
+                              (list "push $2+8*" (number->string (char->integer val)) "\n"))
+                             ((boolean? val)
+                              (if val
+                                  (list "push $9\n")
+                                  (list "push $1\n"))))))
                     
-		    ((push_loc ,pos)
-		     (begin
-		       (set! fs (+ fs 1 ))
-		       (list "push 8*" (number->string pos) "(%rsp)\n")))
+                    ((push_loc ,pos)
+                     (begin
+                       (set! fs (+ fs 1))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "push 8*" (number->string pos) "(%rsp)\n")))
 
-		    ((add)
-		     (begin
-		       (set! fs (- fs 1))
-		       (list "pop %rax \n"
-			     "add %rax, (%rsp)\n")))
-		    ((mul)
-		     (begin
-		       (set! fs (- fs 1 ))
-		       (list "pop %rax \n"
-			     "pop %rbx \n"
-			     "sar $3, %rbx\n"
-			     "mul %rbx\n"
-			     "push %rax\n")))
-		    ((quotient)
-		     (begin
-		       (set! fs (- fs 1 ))
-		       (list "pop %rbx\n"
-			     "pop %rax\n"
-			     "cqo \n"
-			     "idiv %rbx\n"
-			     "sal $3,%rax\n"
-			     "push %rax\n")))
-		    ((remainder)
-		     (begin
-		       (set! fs (- fs 1 ))
-		       (list "pop %rbx\n"
-			     "pop %rax\n"
-			     "cqo\n"
-			     "idiv %rbx\n"
-			     "push %rdx\n")))
-		    ((modulo)
-		     (begin
-		       (set! fs (- fs 1 ))
-		       (list " pop  %rbx\n"
+                    ((push_glo ,pos)
+                     (begin
+                       (set! fs (+ fs 1 ))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "push glob_" (number->string pos) "(%rip)\n")))
+                    
+                    ((pop_glo ,pos)
+                     (begin
+                       (set! fs (- fs 1 ))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "pop glob_" (number->string pos) "(%rip)\n")))
+
+                    ((println)
+                     (list "call print_ln \n"
+                           "push $10\n"
+                           "call putchar\n"
+                           "push $0\n"))
+
+                    ((add)
+                     (begin
+                       (set! fs (- fs 1))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "pop %rax \n"
+                             "add %rax, (%rsp)\n")))
+                    
+                    ((sub)
+                     (begin
+                       (set! fs (- fs 1))
+                       (list "pop %rbx \n"
+                             "pop %rax\n"
+                             "sub %rbx, %rax\n"
+                             "push %rax\n")))
+                    ((mul)
+                     (begin
+                       (set! fs (- fs 1))
+                       (list "pop %rax \n"
+                             "pop %rbx \n"
+                             "sar $3, %rbx\n"
+                             "mul %rbx\n"
+                             "push %rax\n")))
+                    
+                    ((quotient)
+                     (begin
+                       (set! fs (- fs 1))
+                       (list "pop %rbx\n"
+                             "pop %rax\n"
+                             "cqo \n"
+                             "idiv %rbx\n"
+                             "sal $3,%rax\n"
+                             "push %rax\n")))
+                    
+                    ((remainder)
+                     (begin
+                       (set! fs (- fs 1 ))
+                       (list "pop %rbx\n"
+                             "pop %rax\n"
+                             "cqo\n"
+                             "idiv %rbx\n"
+                             "push %rdx\n")))
+                    
+                    ((modulo)
+                     (begin
+                       (set! fs (- fs 1 ))
+                       (list " pop  %rbx\n"
                              " pop  %rax\n"
                              " mov  %rax,%r8\n"
                              " mov  $0,%r9\n"
@@ -151,36 +181,29 @@
                              " cmovns %r9,%rbx\n"
                              " add  %rbx,%rdx\n"
                              " push %rdx\n")))
-		    ((less?)
-		     (begin
-		       (set! fs (+ fs 1 ))
-		       (list "mov $1, %rax\n"
-			     "mov $9, %rbx\n"
+                    
+                    ((cmp)
+                     (begin
+                       (set! fs (- fs 2 ))
+                       (list "pop %rax\n"
+                             "pop %rbx\n"
+                             "cmp %rax, %rbx\n")))
+                    
+                    ((less?)
+                     (begin
+                       (set! fs (+ fs 1 ))
+                       (list "mov $1, %rax\n"
+                             "mov $9, %rbx\n"
                              "cmovs %rbx, %rax\n"
-			     "push %rax\n")))
+                             "push %rax\n")))
                     
-		    ((cmp)
-		     (begin
-		       (set! fs (- fs 2 ))
-		       (list "pop %rax\n"
-			     "pop %rbx\n"
-			     "cmp %rax, %rbx\n")))
-                    
-		    ((equal?)
-		     (begin
-		       (set! fs (+ fs 1 ))
-		       (list "mov $1, %rax\n"
-			     "mov $9, %rbx\n"
+                    ((equal?)
+                     (begin
+                       (set! fs (+ fs 1 ))
+                       (list "mov $1, %rax\n"
+                             "mov $9, %rbx\n"
                              "cmovz %rbx,%rax\n"
-			     "push %rax\n")))
-                    
-		    ((sub)
-		     (begin
-		       (set! fs (- fs 1))
-		       (list "pop %rbx \n"
-			     "pop %rax\n"
-			     "sub %rbx, %rax\n"
-			     "push %rax\n")))
+                             "push %rax\n")))
 
                     ((get_tag)
                      (list "and $7,(%rsp)\n"))
@@ -190,6 +213,28 @@
                        (set! fs (+ fs 1))
                        (list "push $" tag "\n")))
 
+                    ((null?)
+                     (begin
+                       (set! fs (+ fs 1))
+                       (list "push $17\n")))
+
+                    ((boolean?)
+                     (begin
+                       (set! fs (+ fs 1))
+                       (list "mov (%rsp), %rax\n"
+                             "and $15, %rax\n"
+                             "push %rax\n")))
+
+                    ((push_heap ,size)
+                     (begin
+                       (set! fs (+ fs 1))
+                       (display fs)
+                       (display "   ")
+                       (pp (car expr))
+                       (list "mov (%r11), %rax\n"
+                             "add $8*" size ", %r11\n"
+                             "push %rax\n")))
+                    
                     ((cons)
                      (begin
                        (set! fs (- fs 2))
@@ -199,18 +244,6 @@
                              "mov %rax, (%rdi)\n"
                              "mov %rbx, 8(%rdi)\n")))
 
-                    ((null?)
-                     (begin
-                       (set! fs (+ fs 1))
-                       (list "push $17\n")))
-
-                    ((boolean?)
-                     (begin
-                       (set! fs (+fs 1))
-                       (list "mov (%rsp), %rax\n"
-                             "and $15, %rax\n"
-                             "push %rax\n")))
-
                     ((car)
                      (list "mov (%rsp), %rsi\n"
                            "mov (%rsi), %rax\n"
@@ -219,17 +252,9 @@
                     ((cdr)
                      (list "mov (%rsp), %rsi\n"
                            "mov 8(%rsi), %rax\n"
-                           "mov %rax, (%rsp)\n"))
-
-		    ((println)
-		     (begin
-		       ;;(set! fs (+ fs 1))
-		       (list "call print_ln \n"
-			     "push $10\n"
-			     "call putchar\n"
-			     "push $0\n"))))))
+                           "mov %rax, (%rsp)\n")))))
         
-	(append code (compile-bloc (cdr expr) fs)))))
+        (append code (compile-bloc (cdr expr) fs)))))
 
 
 (define (compile-env env)
@@ -239,10 +264,10 @@
 ;;(number->string (cdar env))
 ;;(compile-env (cdr env)))))
 (define compile-args-error
-  (list "nargs_error:\n"
+  (list "\n"
+        "nargs_error:\n"
 	"mov $1, %rax\n"
-	"ret \n"
-	""))
+	"ret\n"))
 
 
 (define (compile-program exprs lambdas env)
@@ -261,15 +286,3 @@
 	compile-args-error
 	"\n\n.data\n .align 8\n"
 	(map compile-env env)))
-
-
-;;(trace compile-bloc)
-;;(trace compile-expr)
-;; (define prims
-;;   `((if       ,compile-if)
-;;     (let      ,compile-let)
-;;     (set!     ,compile-set!)
-;;     (quote    ,compile-quote)
-;;     ))
-
-;(trace compile-bloc)

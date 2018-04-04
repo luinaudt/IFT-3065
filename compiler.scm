@@ -45,17 +45,17 @@
 
 (define (compile filename)
 
-  (let* ((ast (append (parse-program "lib.scm") (parse-program filename)));; parse program
-	 ;;(ast (parse-program filename))
-	 (ast-expanded (expand-macros ast))
-	 (ast-closed ast-expanded);;(closure-conv (assign-conv (alpha-conv ast-expanded))))
-	 (inter (begin #|(pp ast-closed)|# (compile-ir-bloc ast-closed '())));; '())))
-	 (code (begin #|(pp inter)|# (compile-program inter lambda-env env-ir))))  ;; generate code
-    ;;(pp ast)
-    (let* ((base-filename (path-strip-extension filename))
-           (asm-filename (string-append base-filename ".s"))
-           (exe-filename (string-append base-filename ".exe"))
-           (root-dir (path-directory (this-source-file))))
+  (let* ((ast           (append (parse-program "lib.scm") (parse-program filename)))
+	 (ast-expanded  (expand-macros ast))
+         ;;(closure-conv  (assign-conv (alpha-conv ast-expanded))))
+	 (ast-closed    ast-expanded)
+         (inter         (compile-ir-bloc ast-closed '()))
+	 (code          (compile-program inter lambda-env env-ir)))
+    
+    (let* ((base-filename  (path-strip-extension filename))
+           (asm-filename   (string-append base-filename ".s"))
+           (exe-filename   (string-append base-filename ".exe"))
+           (root-dir       (path-directory (this-source-file))))
 
       ;; write generated assembler code
 
