@@ -103,6 +103,26 @@
                        (debug fs expr)
                        (list "pop glob_" (number->string pos) "(%rip)\n")))
 
+                    ((push_free ,pos)
+                     (begin
+                       (list "pop  %rdi\n"
+                             "push 8*" (number->string (+ pos 1)) "-1(%rdi)\n")))
+
+                    ((pop_free ,pos)
+                     (begin
+                       (list "pop  %rdi\n"
+                             "pop  8*" (number->string (+ pos 1)) "-1(%rdi)\n")))
+
+                    ((close ,nfree)
+                     (begin
+                       (list "mov  $" (number->string (* (+ nfree 1) 8)) ", 8*0(%r11)\n"
+                             "mov  $0, 8*1(%r11)\n"
+                             (get-fv nfree)
+                             "pop  $8*2($r11)\n"
+                             "push %r11\n"
+                             "add  $8*2+1, (%rsp)\n"
+                             "add  $8*" (number->string (+ nfree 3)) ", %r11\n")))
+
                     ((println)
                      (begin
                        (debug fs expr)
@@ -287,3 +307,9 @@
   (display fs)
   (display "   ")
   (pp (car expr)))
+
+(define (get-fv i)
+  (if (> i 0)
+      (string->append "pop  8*" (number->string (+ i 3)) "(%r11)\n"
+                      (get-fv (- i 1)))
+      "pop  8*3(%r11)\n"))
