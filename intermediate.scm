@@ -72,7 +72,7 @@
              ((closure-code $clo)
               (begin
                 (set! fs (+ fs 1))
-                (list `(push_this ,fs))))
+                (list `(push_this ,(- fs 1)))))
 
              ((closure-ref $this ,pos)
               (begin
