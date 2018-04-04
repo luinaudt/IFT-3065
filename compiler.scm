@@ -46,11 +46,10 @@
 (define (compile filename)
 
   (let* ((ast           (append (parse-program "lib.scm") (parse-program filename)))
-	 (ast-expanded  (expand-macros ast))
-         ;;(closure-conv  (assign-conv (alpha-conv ast-expanded))))
-	 (ast-closed    ast-expanded)
-         (inter         (compile-ir-bloc ast-closed '()))
-	 (code          (compile-program inter lambda-env env-ir)))
+         (closed-ast    (closure-conv (assign-conv (alpha-conv ast))))
+	 (expanded-ast  (begin (pp closed-ast) (expand-macros closed-ast)))
+         (ir-code       (begin (pp expanded-ast) (compile-ir-bloc expanded-ast '())))
+	 (code          (compile-program ir-code lambda-env env-ir)))
     
     (let* ((base-filename  (path-strip-extension filename))
            (asm-filename   (string-append base-filename ".s"))
