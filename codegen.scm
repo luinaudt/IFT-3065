@@ -20,7 +20,8 @@
   (lambda ()
     (begin
       (set! fs-stack (cons fs fs-stack))
-      (set! fs 0))))
+      ;;(set! fs 0)
+      )))
 
 
 (define (compile-bloc expr fs)
@@ -75,7 +76,7 @@
                        ;;(set! fs 0)
 			 (list "mov 8*" (number->string pos) "(%rsp),%rdi\n"
 			       "mov (%rsp), %rax\n"
-			       "add $8*" (number->string old-fs) ",%rsp\n"
+			       "add $8*" (number->string (- fs old-fs)) ",%rsp\n"
 			       "push %rax\n"
 			       "jmp *%rdi\n"))))
 
@@ -146,7 +147,7 @@
                     ((push_this ,offset)
                      (begin
                        (set! fs (+ fs 1))
-                       (list "push " (number->string offset) "(%rsp)\n")))
+                       (list "push 8*" (number->string offset) "(%rsp)\n")))
 
                     ((println)
                      (begin
