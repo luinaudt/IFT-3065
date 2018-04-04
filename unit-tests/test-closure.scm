@@ -1,0 +1,7 @@
+(define f
+  (lambda (n y)
+    (lambda (x) ($+ n x))))
+(define g (f 5 6))
+(define h (f 42 43))
+(g 10)
+(+ 5 7)
