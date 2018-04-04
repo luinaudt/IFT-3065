@@ -21,11 +21,11 @@
 (define (compile-ir-bloc expr env)
   (if (null? expr)
       '()
-      (begin
-        (append (compile-ir (car expr) env)
-                (compile-ir-bloc (cdr expr) env)))))
+      (append (compile-ir (car expr) env)
+              (compile-ir-bloc (cdr expr) env))))
 
 (define (compile-ir expr env)
+  (pp expr)
   (if (null? expr)
       '()
       (match expr
@@ -222,23 +222,25 @@
                      (list `(push_lit ,lit))))
 
              (,var when (variable? var)
-                   (let ((var-val (assoc var env)))
-                     ;;(pp expr)
-                     ;;(pp (cdr var-val))
-                     ;;(pp env)
-                     ;;(pp fs)
+                   (let* ((var-val (assoc var env))
+                          (ir-code
+                           (if var-val
+                               `((push_loc ,(- (+ fs (cdr var-val)) 1)))
+                               `((push_glo ,(env-lookup env-ir var))))))
                      (set! fs (+ fs 1))
-                     ;;(pp (- (+ fs (cdr var-val)) 2))
-                     ;;(display "\n")
-                     (if var-val
-                         `((push_loc ,(- (+ fs (cdr var-val)) 2)))
-                         `((push_glo ,(env-lookup env-ir var))))))
+                     ir-code))
              
              ((,E0 . ,Es)
-              (let ((fs 0))
-                (append (compile-ir-bloc Es env)
-                        (compile-ir E0 env)
-                        (list `(call ,(length Es)))))))))
+              (let ((nargs (length Es)) (old-fs fs))
+                (begin
+                  (set! fs nargs)
+                  (pp fs)
+                  (let ((ir-code (append (compile-ir-bloc Es env)
+                                         (compile-ir E0 env)
+                                         (list `(call ,(length Es))))))
+                    (pp fs)
+                    (set! fs old-fs)
+                    ir-code)))))))
 
 
 (define lambda-count 0)

@@ -34,9 +34,7 @@
                     ((proc ,name ,nb-params)
                      (begin
                        (set! fs (+ fs (+ 1 nb-params)))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (list "\n.align 8\n.quad 0\n.quad 0\n.byte 0\n"
                              name ":\n"
                              "cmp $" (number->string nb-params) ", %rax\n"
@@ -45,9 +43,7 @@
                     ((call ,nargs)
                      (let ((retLab (return-gensym)))
                        (set! fs (- fs nargs))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (list "pop %rdi\n"
                              "lea " retLab "(%rip), %rax\n"
                              "push %rax\n"
@@ -58,9 +54,7 @@
                     
                     ((ret ,pos)
                      (let ((old-fs fs))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (set! fs 0)
                        (list "mov 8*" (number->string pos) "(%rsp),%rdi\n"
                              "mov (%rsp), %rax\n"
@@ -71,18 +65,14 @@
                     ((push_proc ,label)
                      (begin
                        (set! fs (+ fs 1))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (list "lea " label "(%rip), %rax\n"
                              "push %rax\n")))
 
                     ((push_lit ,val)
                      (begin
                        (set! fs (+ fs 1))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (cond ((number? val)
                               (list "push $8*" val "\n"))
                              ((null? val)
@@ -97,45 +87,40 @@
                     ((push_loc ,pos)
                      (begin
                        (set! fs (+ fs 1))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (list "push 8*" (number->string pos) "(%rsp)\n")))
 
                     ((push_glo ,pos)
                      (begin
                        (set! fs (+ fs 1 ))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (list "push glob_" (number->string pos) "(%rip)\n")))
                     
                     ((pop_glo ,pos)
                      (begin
                        (set! fs (- fs 1 ))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (list "pop glob_" (number->string pos) "(%rip)\n")))
 
                     ((println)
-                     (list "call print_ln \n"
-                           "push $10\n"
-                           "call putchar\n"
-                           "push $0\n"))
+                     (begin
+                       (debug fs (car expr))
+                       (list "call print_ln \n"
+                             "push $10\n"
+                             "call putchar\n"
+                             "push $0\n")))
 
                     ((add)
                      (begin
                        (set! fs (- fs 1))
-                       (display fs)
-                       (display "   ")
-                       (pp (car expr))
+                       (debug fs (car expr))
                        (list "pop %rax \n"
                              "add %rax, (%rsp)\n")))
                     
                     ((sub)
                      (begin
                        (set! fs (- fs 1))
+                       (debug fs (car expr))
                        (list "pop %rbx \n"
                              "pop %rax\n"
                              "sub %rbx, %rax\n"
@@ -143,6 +128,7 @@
                     ((mul)
                      (begin
                        (set! fs (- fs 1))
+                       (debug fs (car expr))
                        (list "pop %rax \n"
                              "pop %rbx \n"
                              "sar $3, %rbx\n"
@@ -152,6 +138,7 @@
                     ((quotient)
                      (begin
                        (set! fs (- fs 1))
+                       (debug fs (car expr))
                        (list "pop %rbx\n"
                              "pop %rax\n"
                              "cqo \n"
@@ -161,7 +148,8 @@
                     
                     ((remainder)
                      (begin
-                       (set! fs (- fs 1 ))
+                       (set! fs (- fs 1))
+                       (debug fs (car expr))
                        (list "pop %rbx\n"
                              "pop %rax\n"
                              "cqo\n"
@@ -170,7 +158,8 @@
                     
                     ((modulo)
                      (begin
-                       (set! fs (- fs 1 ))
+                       (set! fs (- fs 1))
+                       (debug fs (car expr))
                        (list " pop  %rbx\n"
                              " pop  %rax\n"
                              " mov  %rax,%r8\n"
@@ -184,14 +173,16 @@
                     
                     ((cmp)
                      (begin
-                       (set! fs (- fs 2 ))
+                       (set! fs (- fs 2))
+                       (debug fs (car expr))
                        (list "pop %rax\n"
                              "pop %rbx\n"
                              "cmp %rax, %rbx\n")))
                     
                     ((less?)
                      (begin
-                       (set! fs (+ fs 1 ))
+                       (set! fs (+ fs 1))
+                       (debug fs (car expr))
                        (list "mov $1, %rax\n"
                              "mov $9, %rbx\n"
                              "cmovs %rbx, %rax\n"
@@ -199,28 +190,34 @@
                     
                     ((equal?)
                      (begin
-                       (set! fs (+ fs 1 ))
+                       (set! fs (+ fs 1))
+                       (debug fs (car expr))
                        (list "mov $1, %rax\n"
                              "mov $9, %rbx\n"
                              "cmovz %rbx,%rax\n"
                              "push %rax\n")))
 
                     ((get_tag)
-                     (list "and $7,(%rsp)\n"))
+                     (begin
+                       (debug fs (car expr))
+                       (list "and $7,(%rsp)\n")))
 
                     ((push_tag ,tag)
                      (begin
                        (set! fs (+ fs 1))
+                       (debug fs (car expr))
                        (list "push $" tag "\n")))
 
                     ((null?)
                      (begin
                        (set! fs (+ fs 1))
+                       (debug fs (car expr))
                        (list "push $17\n")))
 
                     ((boolean?)
                      (begin
                        (set! fs (+ fs 1))
+                       (debug fs (car expr))
                        (list "mov (%rsp), %rax\n"
                              "and $15, %rax\n"
                              "push %rax\n")))
@@ -286,3 +283,8 @@
 	compile-args-error
 	"\n\n.data\n .align 8\n"
 	(map compile-env env)))
+
+(define (debug fs expr)
+  (display fs)
+  (display "   ")
+  (pp (car expr)))
