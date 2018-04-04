@@ -3,5 +3,5 @@
     (lambda (x) ($+ n x))))
 (define g (f 5 6))
 (define h (f 42 43))
-(g 10)
-(+ 5 7)
+(println (g 10))
+(println (+ 5 7))

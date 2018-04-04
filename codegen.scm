@@ -4,11 +4,23 @@
 
 
 (define return-count 0)
+(define fs-stack '())
 (define return-gensym
   (lambda ()
     (set! return-count (+ return-count 1))
     (string-append "return" (number->string (- return-count 1)))))
 
+(define pop-fs
+  (lambda ()
+    (begin
+    (set! fs (car fs-stack))
+    (set! fs-stack (cdr fs-stack)))))
+
+(define push-fs
+  (lambda ()
+    (begin
+      (set! fs-stack (cons fs fs-stack))
+      (set! fs 0))))
 
 
 (define (compile-bloc expr fs)
@@ -33,6 +45,7 @@
                     
                     ((proc ,name ,nb-params)
                      (begin
+		       (push-fs)
                        (set! fs (+ fs (+ 1 nb-params)))
                        (debug fs expr)
                        (list "\n.align 8\n.quad 0\n.quad 0\n.byte 0\n"
@@ -55,13 +68,16 @@
                     
                     ((ret ,pos)
                      (let ((old-fs fs))
-                       (debug fs expr)
-                       (set! fs 0)
-                       (list "mov 8*" (number->string pos) "(%rsp),%rdi\n"
-                             "mov (%rsp), %rax\n"
-                             "add $8*" (number->string old-fs) ",%rsp\n"
-                             "push %rax\n"
-                             "jmp *%rdi\n")))
+                       (begin
+			 (debug fs expr)
+			 (pop-fs)
+			 (debug fs expr)
+                       ;;(set! fs 0)
+			 (list "mov 8*" (number->string pos) "(%rsp),%rdi\n"
+			       "mov (%rsp), %rax\n"
+			       "add $8*" (number->string old-fs) ",%rsp\n"
+			       "push %rax\n"
+			       "jmp *%rdi\n"))))
 
                     ((push_proc ,label)
                      (begin
