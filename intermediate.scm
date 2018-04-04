@@ -60,21 +60,23 @@
                                          (compile-ir-bloc body new-env)
                                          (list `(ret ,(- fs (+ nb-params 1))))
                                          lambda-env))
-                (pp lambda-env)
                 (set! fs (+ old-fs 1))  ;; add 1 for lambda-expression address
                 (list `(push_proc ,proc-name))))
 
              ((make-closure ,code . ,fv)
               (begin
+                (set! fs (+ fs 2))
                 (append (compile-ir code env)
                         (list `(close ,(length fv))))))
 
              ((closure-code $clo)
               (begin
+                (set! fs (+ fs 1))
                 (list `(push_this ,fs))))
 
              ((closure-ref $this ,pos)
               (begin
+                (set! fs (+ fs 2))
                 (append (list `(push_this ,fs))
                         (list `(push_free ,pos)))))
 

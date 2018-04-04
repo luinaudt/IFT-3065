@@ -110,11 +110,13 @@
 
                     ((pop_free ,pos)
                      (begin
+                       (set! fs (- fs 2))
                        (list "pop  %rdi\n"
                              "pop  8*" (number->string (+ pos 1)) "-1(%rdi)\n")))
 
                     ((close ,nfree)
                      (begin
+                       (set! fs (- fs nfree))
                        (list "push $" (number->string (* (+ nfree 1) 8)) "\n"
                              "pop  8*0(%r11)\n"
                              "push $0\n"
