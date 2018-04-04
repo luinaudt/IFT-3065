@@ -63,6 +63,20 @@
                 (set! fs (+ old-fs 1))  ;; add 1 for lambda-expression address
                 (list `(push_proc ,proc-name))))
 
+             ((make-closure ,code . ,fv)
+              (begin
+                (append (compile-ir code env)
+                        (list `(close ,(length fv))))))
+
+             ((closure-code $clo)
+              (begin
+                (list `(push_this ,fs))))
+
+             ((closure-ref $this ,pos)
+              (begin
+                (append (list `(push_this ,fs))
+                        (list `(push_free ,pos)))))
+
              (($cons ,e1 ,e2)
               (begin
                 (set! fs (+ fs 1))

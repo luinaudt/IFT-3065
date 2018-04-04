@@ -45,7 +45,7 @@
                        (begin
                          (set! fs (- fs nargs))
                          (debug fs expr)
-                         (list "pop %rdi\n"
+                         (list "mov (%rsp), %rdi\n"
                                "lea " retLab "(%rip), %rax\n"
                                "push %rax\n"
                                "mov $" (number->string nargs) ", %rax\n"
@@ -117,11 +117,16 @@
                      (begin
                        (list "mov  $" (number->string (* (+ nfree 1) 8)) ", 8*0(%r11)\n"
                              "mov  $0, 8*1(%r11)\n"
-                             (get-fv nfree)
-                             "pop  $8*2($r11)\n"
+                             (get-fv (- nfree 1))
+                             "pop  $8*2(%r11)\n"
                              "push %r11\n"
                              "add  $8*2+1, (%rsp)\n"
                              "add  $8*" (number->string (+ nfree 3)) ", %r11\n")))
+
+                    ((push_this ,offset)
+                     (begin
+                       (set! fs (+ fs 1))
+                       (list "push " (number->string offset) "(%rsp)\n")))
 
                     ((println)
                      (begin
@@ -309,7 +314,7 @@
   (pp (car expr)))
 
 (define (get-fv i)
-  (if (> i 0)
-      (string->append "pop  8*" (number->string (+ i 3)) "(%r11)\n"
-                      (get-fv (- i 1)))
-      "pop  8*3(%r11)\n"))
+  (if (>= i 0)
+      (string-append "pop  8*" (number->string (+ i 3)) "(%r11)\n"
+                     (get-fv (- i 1)))
+      ""))
