@@ -23,8 +23,9 @@
       ;;(set! fs 0)
       )))
 
+(define fs 0)
 
-(define (compile-bloc expr fs)
+(define (compile-bloc expr)
   (if (null? expr)
       (list "add $8*" (number->string fs) ",%rsp \n")
       (let ((code
@@ -47,7 +48,7 @@
                     ((proc ,name ,nb-params)
                      (begin
 		       (push-fs)
-                       (set! fs (+ fs (+ 1 nb-params)))
+                       (set! fs (+ 1 nb-params))
                        (debug fs expr)
                        (list "\n.align 8\n.quad 0\n.quad 0\n.byte 0\n"
                              name ":\n"
@@ -76,7 +77,7 @@
                        ;;(set! fs 0)
 			 (list "mov 8*" (number->string pos) "(%rsp),%rdi\n"
 			       "mov (%rsp), %rax\n"
-			       "add $8*" (number->string (- fs old-fs)) ",%rsp\n"
+			       "add $8*" (number->string old-fs) ",%rsp\n"
 			       "push %rax\n"
 			       "jmp *%rdi\n"))))
 
@@ -289,7 +290,8 @@
                              "mov (%rsp), %rdi\n"
                              "mov %rax, (%rdi)\n"
                              "mov %rbx, 8(%rdi)\n")))
-
+		    ((comment ,val)
+		     (list "#" val "\n"))
                     ((car)
                      (list "mov (%rsp), %rsi\n"
                            "mov (%rsi), %rax\n"
@@ -300,7 +302,7 @@
                            "mov 8(%rsi), %rax\n"
                            "mov %rax, (%rsp)\n")))))
         
-        (append code (compile-bloc (cdr expr) fs)))))
+        (append code (compile-bloc (cdr expr))))))
 
 
 (define (compile-env env)
@@ -317,21 +319,23 @@
 
 
 (define (compile-program exprs lambdas env)
-  (list " .text\n"
-	" .globl _main\n"
-	" .globl main\n"
-	"_main:\n"
-	"main:\n"
-	"push $100*1024*1024\n"
-	"call mmap\n"
-	"mov %rax, %r11\n" ;;registre pour les variable globales
-	(compile-bloc exprs 0)
-	" mov $0, %rax\n"
-	" ret\n \n\n"
-	(compile-bloc lambdas 0)
-	compile-args-error
-	"\n\n.data\n .align 8\n"
-	(map compile-env env)))
+  (begin
+    (set! fs 0)
+    (list " .text\n"
+	  " .globl _main\n"
+	  " .globl main\n"
+	  "_main:\n"
+	  "main:\n"
+	  "push $100*1024*1024\n"
+	  "call mmap\n"
+	  "mov %rax, %r11\n" ;;registre pour les variable globales
+	  (compile-bloc exprs)
+	  " mov $0, %rax\n"
+	  " ret\n \n\n"
+	  (compile-bloc lambdas)
+	  compile-args-error
+	  "\n\n.data\n .align 8\n"
+	  (map compile-env env))))
 
 (define (debug fs expr)
   (display fs)
