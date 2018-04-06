@@ -60,7 +60,7 @@
                        (begin
                          (set! fs (- fs nargs))
                          (debug fs expr)
-                         (list "mov (%rsp), %rdi\n"
+                         (list "#call \nmov (%rsp), %rdi\n"
                                "lea " retLab "(%rip), %rax\n"
                                "push %rax\n"
                                "mov $" (number->string nargs) ", %rax\n"
@@ -85,7 +85,8 @@
                      (begin
                        (set! fs (+ fs 1))
                        (debug fs expr)
-                       (list "lea " label "(%rip), %rax\n"
+                       (list "#push proc \n"
+			     "lea " label "(%rip), %rax\n"
                              "push %rax\n")))
 
                     ((push_lit ,val)
@@ -341,6 +342,7 @@
   (display fs)
   (display "   ")
   (pp (car expr)))
+  ;;(display ""))
 
 (define (get-fv i)
   (if (>= i 0)

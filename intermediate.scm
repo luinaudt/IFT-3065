@@ -41,7 +41,8 @@
                             (set! env-ir (env-extend env-ir `(,var-name) `(,taille-glob)))
                             (set! taille-glob (+ taille-glob 1))
                             (append (compile-ir e1 env)
-                                    (list `(pop_glo ,(- taille-glob 1))))))))
+                                    (list `(comment ,(symbol->string var-name))
+					  `(pop_glo ,(- taille-glob 1))))))))
                 (set! fs (- fs 1))
                 ir-code))
 	     
@@ -61,11 +62,13 @@
                                          (list `(ret ,(- fs (+ nb-params 1))))
                                          lambda-env))
                 (set! fs (+ old-fs 1))  ;; add 1 for lambda-expression address
-                (list `(push_proc ,proc-name))))
+                (list `(comment ("proc" ,proc-name)) `(push_proc ,proc-name))))
 
              ((make-closure ,code . ,fv)
               (begin
                 (set! fs (+ fs 2))
+		;;(set! lambda-env (append (list `(proc ,(lambda-gensym) 
+		;;		  (compile-ir code env)))
                 (append (compile-ir code env)
 			(list '(comment "make closure"))
                         (list `(close ,(length fv))))))
