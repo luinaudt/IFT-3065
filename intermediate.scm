@@ -67,18 +67,20 @@
               (begin
                 (set! fs (+ fs 2))
                 (append (compile-ir code env)
+			(list '(comment "make closure"))
                         (list `(close ,(length fv))))))
 
              ((closure-code $clo)
               (begin
                 (set! fs (+ fs 1))
-                (list `(push_this ,(- fs 1)))))
+                (list '(comment "closure-code")
+		       `(push_this ,(- fs 1)))))
 
              ((closure-ref $this ,pos)
               (begin
                 (set! fs (+ fs 2))
-                (append (list `(push_this ,fs))
-                        (list `(push_free ,pos)))))
+                (list `(push_this ,fs)
+                      `(push_free ,pos))))
 
              (($cons ,e1 ,e2)
               (begin
