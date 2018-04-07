@@ -35,13 +35,14 @@
                      (ir-code
                       (if var-val
                           (begin
-                            (append (compile-ir e1 env)
+                            (append (list `(comment ("re-def " ,var-name)))
+                                    (compile-ir e1 env)
                                     (list `(pop_glo ,(cdr var-val)))))
                           (begin
                             (set! env-ir (env-extend env-ir `(,var-name) `(,taille-glob)))
                             (set! taille-glob (+ taille-glob 1))
                             (append (compile-ir e1 env)
-                                    (list `(comment ,(symbol->string var-name))
+                                    (list `(comment ("def " ,var-name))
 					  `(pop_glo ,(- taille-glob 1))))))))
                 (set! fs (- fs 1))
                 ir-code))
@@ -57,12 +58,13 @@
                      (new-env (append loc-env env))
                      (old-fs fs))
                 (set! fs (+ nb-params 1))  ;; params + return address
-                (set! lambda-env (append (list `(proc ,proc-name ,nb-params))
+                (set! lambda-env (append (list `(comment ("lambda " ,proc-name)))
+                                         (list `(proc ,proc-name ,nb-params))
                                          (compile-ir-bloc body new-env)
                                          (list `(ret ,(- fs (+ nb-params 1))))
                                          lambda-env))
                 (set! fs (+ old-fs 1))  ;; add 1 for lambda-expression address
-                (list `(comment ("proc" ,proc-name)) `(push_proc ,proc-name))))
+                (list `(comment ("push_proc " ,proc-name)) `(push_proc ,proc-name))))
 
              ((make-closure ,code . ,fv)
               (begin
@@ -77,7 +79,7 @@
               (begin
                 (set! fs (+ fs 1))
                 (list '(comment "closure-code")
-		       `(push_this ,(- fs 1)))))
+                      `(push_this ,(- fs 1)))))
 
              ((closure-ref $this ,pos)
               (begin
@@ -257,7 +259,8 @@
               (let ((old-fs fs) (nargs (length Es)))
                 (begin
                   (set! fs nargs)
-                  (append (compile-ir-bloc Es env)
+                  (append (list `(comment "call"))
+                          (compile-ir-bloc Es env)
                           (compile-ir E0 env)
                           (list `(call ,nargs)))))))))
 
@@ -267,13 +270,13 @@
 (define label-gensym
   (lambda ()
     (set! label-count (+ label-count 1))
-    (list "lab_" (number->string (- label-count 1)))))
+    (list "label_" (- label-count 1))))
 
 ;; generation lambda symbol
 (define lambda-gensym 
   (lambda ()
     (begin
       (set! lambda-count (+ lambda-count 1))
-      (string-append "lam" (number->string (- lambda-count 1))))))
+      (string-append "lam_" (number->string (- lambda-count 1))))))
 
 (trace compile-ir)
