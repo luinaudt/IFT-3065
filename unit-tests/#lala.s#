@@ -1,0 +1,566 @@
+.text
+.globl _main
+.globl main
+_main:
+main:
+  push  $100*1024*1024
+  call  mmap
+  mov   %rax, %r10
+
+# fs = 0 (proc lam_0 2)
+  lea   lam_0(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def println)
+  pop   glob_0(%rip)
+
+# fs = 0 (proc lam_1 3)
+  lea   lam_1(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def +)
+  pop   glob_1(%rip)
+
+# fs = 0 (proc lam_2 3)
+  lea   lam_2(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def -)
+  pop   glob_2(%rip)
+
+# fs = 0 (proc lam_3 3)
+  lea   lam_3(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def *)
+  pop   glob_3(%rip)
+
+# fs = 0 (proc lam_4 3)
+  lea   lam_4(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def quotient)
+  pop   glob_4(%rip)
+
+# fs = 0 (proc lam_5 3)
+  lea   lam_5(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def modulo)
+  pop   glob_5(%rip)
+
+# fs = 0 (proc lam_6 3)
+  lea   lam_6(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def =)
+  pop   glob_6(%rip)
+
+# fs = 0 (proc lam_7 3)
+  lea   lam_7(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def <)
+  pop   glob_7(%rip)
+
+# fs = 0 (proc lam_8 2)
+  lea   lam_8(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def number?)
+  pop   glob_8(%rip)
+
+# fs = 0 (proc lam_9 2)
+  lea   lam_9(%rip), %rax
+  push  %rax
+
+# fs = 1 (make closure)
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*1
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*3, %r10
+
+# fs = 1 (def f)
+  pop   glob_9(%rip)
+
+# fs = 0 (let)
+  push  glob_0(%rip)
+
+# fs = 1 (closure-code$clo$clolet$clolet$clofclosure-code$clo$clo10closure-code$clo$clo5)
+
+# fs = 1 (the arguments)
+  push  8*22(%rsp)
+
+# fs = 2 (let)
+
+# fs = 2 (let)
+  push  glob_9(%rip)
+
+# fs = 3 (closure-code$clo$clo10)
+
+# fs = 3 (the arguments)
+  push  8*28(%rsp)
+  push  $8*10
+
+# fs = 5 (the procedure)
+
+# fs = 5 (closure-code)
+  push  8*32(%rsp)
+
+# fs = 6 (the call)
+  mov   (%rsp), %rdi
+  lea   return_0(%rip), %rax
+  push  %rax
+  mov   $2, %rax
+  jmp   *(%rdi)
+.align 8
+.quad 0
+.quad 12
+.byte 0
+return_0:
+  pop   %rax        # pop result
+  add   $8*3, %rsp  # adjust stack
+  push  %rax        # push result
+
+# fs = 1 (closure-code$clo$clo5)
+
+# fs = 1 (the arguments)
+  push  8*33(%rsp)
+  push  $8*5
+
+# fs = 3 (the procedure)
+
+# fs = 3 (closure-code)
+  push  8*37(%rsp)
+
+# fs = 4 (the call)
+  mov   (%rsp), %rdi
+  lea   return_1(%rip), %rax
+  push  %rax
+  mov   $2, %rax
+  jmp   *(%rdi)
+.align 8
+.quad 0
+.quad 12
+.byte 0
+return_1:
+  pop   %rax        # pop result
+  add   $8*1, %rsp  # adjust stack
+  push  %rax        # push result
+
+# fs = 1 (the procedure)
+
+# fs = 1 (closure-code)
+  push  8*38(%rsp)
+
+# fs = 2 (the call)
+  mov   (%rsp), %rdi
+  lea   return_2(%rip), %rax
+  push  %rax
+  mov   $2, %rax
+  jmp   *(%rdi)
+.align 8
+.quad 0
+.quad 12
+.byte 0
+return_2:
+  pop   %rax        # pop result
+  add   $8*-1, %rsp  # adjust stack
+  push  %rax        # push result
+  pop   %rax        # pop result
+  add   $8*1, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   $0, %rax
+  ret
+
+
+
+# fs = 0 (lambda lam_9)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_9:
+  cmp   $2, %rax
+  jnz   nargs_error
+
+# fs = 3 (proc lam_10 2)
+  lea   lam_10(%rip), %rax
+  push  %rax
+
+# fs = 4 (make closure)
+  pop   8*3(%r10)  # free-var
+  pop   8*2(%r10)  # ptr-code
+  push  $0
+  pop   8*1(%r10)  # type
+  push  $8*2
+  pop   8*0(%r10)  # longueur
+  push  %r10
+  add   $8*2, (%rsp)
+  add   $8*4, %r10
+  pop   %rax        # pop result
+  add   $8*2, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*3(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_10)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_10:
+  cmp   $2, %rax
+  jnz   nargs_error
+  push  8*4(%rsp)
+  pop   %rdi
+  push  8*1-1(%rdi)
+  push  8*2(%rsp)
+  pop   %rax
+  add   %rax, (%rsp)
+  pop   %rax        # pop result
+  add   $8*3, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*2(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_8)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_8:
+  cmp   $2, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  and   $7,(%rsp)
+  push  $0
+  pop %  rax
+  pop   %rbx
+  cmp   %rax, %rbx
+  mov   $1, %rax
+  mov   $9, %rbx
+  cmovz %rbx,%rax
+  push  %rax
+  pop   %rax        # pop result
+  add   $8*3, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_7)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_7:
+  cmp   $3, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  push  8*1(%rsp)
+  pop %  rax
+  pop   %rbx
+  cmp   %rax, %rbx
+  mov   $1, %rax
+  mov   $9, %rbx
+  cmovs %rbx, %rax
+  push  %rax
+  pop   %rax        # pop result
+  add   $8*4, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_6)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_6:
+  cmp   $3, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  push  8*1(%rsp)
+  pop %  rax
+  pop   %rbx
+  cmp   %rax, %rbx
+  mov   $1, %rax
+  mov   $9, %rbx
+  cmovz %rbx,%rax
+  push  %rax
+  pop   %rax        # pop result
+  add   $8*4, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_5)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_5:
+  cmp   $3, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  push  8*1(%rsp)
+  pop   %rbx
+  pop   %rax
+  mov   %rax,%r8
+  mov   $0,%r9
+  cqo
+  idiv  %rbx
+  xor   %rbx,%r8
+  cmovns %r9,%rbx
+  add   %rbx,%rdx
+  push  %rdx
+  pop   %rax        # pop result
+  add   $8*4, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_4)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_4:
+  cmp   $3, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  push  8*1(%rsp)
+  pop   %rbx
+  pop   %rax
+  cqo
+  idiv  %rbx
+  sal   $3,%rax
+  push  %rax
+  pop   %rax        # pop result
+  add   $8*4, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_3)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_3:
+  cmp   $3, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  push  8*1(%rsp)
+  pop   %rax
+  pop   %rbx
+  sar   $3, %rbx
+  mul   %rbx
+  push  %rax
+  pop   %rax        # pop result
+  add   $8*4, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_2)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_2:
+  cmp   $3, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  push  8*1(%rsp)
+  pop   %rbx
+  pop   %rax
+  sub   %rbx, %rax
+  push  %rax
+  pop   %rax        # pop result
+  add   $8*4, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_1)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_1:
+  cmp   $3, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  push  8*1(%rsp)
+  pop   %rax
+  add   %rax, (%rsp)
+  pop   %rax        # pop result
+  add   $8*4, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+# fs = 0 (lambda lam_0)
+.align 8
+.quad 0
+.quad 0
+.byte 0
+lam_0:
+  cmp   $2, %rax
+  jnz   nargs_error
+  push  8*1(%rsp)
+  call  print_ln
+  push  $10
+  call  putchar
+  push  $0
+  pop   %rax        # pop result
+  add   $8*3, %rsp  # adjust stack
+  push  %rax        # push result
+  mov   8*1(%rsp), %rdi
+  mov   (%rsp), %rax
+  add   $8*1, %rsp
+  push  %rax
+  jmp   *%rdi
+
+nargs_error:
+  mov   $1, %rax
+  ret
+
+
+.data
+.align 8
+glob_9: .quad 0
+glob_8: .quad 0
+glob_7: .quad 0
+glob_6: .quad 0
+glob_5: .quad 0
+glob_4: .quad 0
+glob_3: .quad 0
+glob_2: .quad 0
+glob_1: .quad 0
+glob_0: .quad 0

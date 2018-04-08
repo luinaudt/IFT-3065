@@ -47,8 +47,8 @@
 (define (compile-ir expr env)
   ;;(pp expr)
   ;;(pp env)
-  ;;(pp fs)
-  ;;(pp expr)
+  (pp fs)
+  (pp expr)
   (if (null? expr)
       '()
       (match expr
@@ -96,7 +96,8 @@
                         (compile-ir-body body (append vars env))
                         (begin
                           (set! fs target-fs)
-                          (list `(check-stack-integrity ,target-fs))))))
+                          (list `(ret ,(- fs 
+                          ;;(list `(check-stack-integrity ,target-fs))))))
 
              ((make-closure ,code . ,fv)
               (let* ((fv-cnt (length fv))

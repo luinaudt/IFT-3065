@@ -1,3 +1,3 @@
-(println 123)
+(println (println (+ 11 22)))
 
-;123
+;#!void

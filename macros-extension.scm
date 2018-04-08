@@ -26,15 +26,15 @@
 
 	 ;; let
          
-         ((let ,bindings . ,body) when (null? bindings)
-          `((lambda ()
-              ,@(expand-macros body))))
+         ;; ((let ,bindings . ,body) when (null? bindings)
+         ;;  `((lambda ()
+         ;;      ,@(expand-macros body))))
          
-         ((let ,bindings . ,body) when (pair? bindings)
-          (expand-macros
-           `((lambda ,(map car bindings)
-               ,@body)
-             ,@(map cadr bindings))))
+         ;; ((let ,bindings . ,body) when (pair? bindings)
+         ;;  (expand-macros
+         ;;   `((lambda ,(map car bindings)
+         ;;       ,@body)
+         ;;     ,@(map cadr bindings))))
          
          ;; let nommé
          

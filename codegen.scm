@@ -19,15 +19,13 @@
 (define push-fs
   (lambda ()
     (begin
-      (set! fs-stack (cons fs fs-stack))
-      ;;(set! fs 0)
-      )))
+      (set! fs-stack (cons fs fs-stack)))))
 
 (define fs 0)
 
 (define (compile-bloc expr)
   (if (null? expr)
-      (list "  add   $8*" fs ", %rsp\n")
+      (list "")
       (let ((code
              (match (car expr)
 
@@ -43,7 +41,21 @@
                     ((fs-adjust)
                      (begin
                        (set! fs (- fs 1))
-                       (list ""))) 
+                       (list "")))
+
+                    ((check-stack-integrity ,expected-size)
+                     (if (= fs expected-size)
+                         (list "")
+                         (let ((delta (- fs expected-size)))
+                           (set! fs expected-size)
+                           (debug fs expr)
+                           (list "  pop   %rax        # pop result\n"
+                                 "  add   $8*" delta ", %rsp  # adjust stack\n"
+                                 (if (= expected-size 0)
+                                     ""
+                                     "  push  %rax        # push result\n")
+                                 ;; "  call  print_rsp\n"))))
+                                 ))))
                     
                     ((proc ,name ,nb-params)
                      (begin
@@ -67,7 +79,7 @@
                                "  lea   " retLab "(%rip), %rax\n"
                                "  push  %rax\n"
                                "  mov   $" nargs ", %rax\n"
-                               "  jmp   *-1(%rdi)\n"
+                               "  jmp   *(%rdi)\n"
                                ".align 8\n"
                                ".quad 0\n"
                                ".quad 12\n"
@@ -77,11 +89,9 @@
                     ((ret ,pos)
                      (let ((old-fs fs))
                        (begin
-			 (debug fs expr)
 			 (pop-fs)
 			 (debug fs expr)
-                         ;;(set! fs 0)
-			 (list "  mov   8*" pos "(%rsp), %rdi\n"
+                         (list "  mov   8*" pos "(%rsp), %rdi\n"
 			       "  mov   (%rsp), %rax\n"
 			       "  add   $8*" old-fs ", %rsp\n"
 			       "  push  %rax\n"
@@ -144,14 +154,14 @@
                      (begin
                        (set! fs (- fs nfree))
                        (debug fs expr)
-                       (list "  push  $0\n"
+                       (list (get-fv (- nfree 1))
+                             "  pop   8*2(%r10)  # ptr-code\n"
+                             "  push  $0\n"
+                             "  pop   8*1(%r10)  # type\n"
                              "  push  $8*" (+ nfree 1) "\n"
                              "  pop   8*0(%r10)  # longueur\n"
-                             "  pop   8*1(%r10)  # type\n"
-                             (get-fv (- nfree 1))
-                             "  pop   8*2(%r10)\n"
                              "  push  %r10\n"
-                             "  add   $8*2+1, (%rsp)\n"
+                             "  add   $8*2, (%rsp)\n"
                              "  add   $8*" (+ nfree 3) ", %r10\n")))
 
                     ((push_this ,offset)
@@ -233,7 +243,7 @@
                      (begin
                        (set! fs (- fs 2))
                        (debug fs expr)
-                       (list "  pop %  rax\n"
+                       (list "  pop   %rax\n"
                              "  pop   %rbx\n"
                              "  cmp   %rax, %rbx\n")))
                     
@@ -326,7 +336,7 @@
 	"  ret\n"))
 
 
-(define (compile-program exprs lambdas env)
+(define (compile-program exprs lambdas)
   (begin
     (set! fs 0)
     (list ".text\n"
@@ -334,24 +344,27 @@
 	  ".globl main\n"
 	  "_main:\n"
 	  "main:\n"
-	  "  push  $100*1024*1024\n"
+	  ;; "  call  print_rsp\n"
+          "  push  $100*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
-	  "  ret\n"
+	  ;; "  call  print_rsp\n"
+          "  ret\n"
           "\n\n"
 	  (compile-bloc lambdas)
 	  compile-args-error
 	  "\n\n"
           ".data\n"
           ".align 8\n"
-	  (map compile-env env))))
+	  (map compile-env genv))))
 
 (define (debug fs expr)
-  (display fs)
-  (display "   ")
-  (pp (car expr)))
+  ;; (display fs)
+  ;; (display "   ")
+  ;; (pp (car expr)))
+  #!void)
 
 (define (get-fv i)
   (if (>= i 0)
