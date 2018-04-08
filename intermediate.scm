@@ -49,6 +49,8 @@
   ;;(pp env)
   ;;(pp fs)
   ;;(pp expr)
+  (pp expr)
+  (pp fs)
   (if (null? expr)
       '()
       (match expr
@@ -78,7 +80,7 @@
                      (old-fs fs))
                 ;; generate ir-code for lambda-expression
                 (set! fs (+ nb-params 1))  ;; params + return address
-                (set! lambda-env (append (list `(comment ("lambda " ,proc-name)))
+                (set! lambda-env (append (list `(comment ("lambda " ,proc-name ,(number->string fs))))
                                          (list `(proc ,proc-name ,nb-params))
                                          (compile-ir-body body proc-env)
                                          (list `(ret ,(- fs (+ nb-params 1))))
@@ -173,55 +175,63 @@
                         (list '(println)))))
              
              (($+ ,p1 ,p2)
-              (begin
-                (set! fs (- fs 1))
-                (append (compile-ir p1 env)
-                        (compile-ir p2 env)
-                        (list '(add)))))
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(add)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
              
              (($- ,p1 ,p2)
-              (begin
-                (set! fs (- fs 1))
-                (append (compile-ir p1 env)
-                        (compile-ir p2 env)
-                        (list '(sub)))))
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(sub)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
              
              (($* ,p1 ,p2)
-              (begin
-                (set! fs (- fs 1))
-                (append (compile-ir p1 env)
-                        (compile-ir p2 env)
-                        (list '(mul)))))
-             
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(mul)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
+	     
              (($quotient ,p1 ,p2)
-              (begin
-                (set! fs (- fs 1))
-                (append (compile-ir p1 env)
-                        (compile-ir p2 env)
-                        (list '(quotient)))))
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(quotient)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
              
              (($modulo ,p1 ,p2)
-              (begin
-                (set! fs (- fs 1))
-                (append (compile-ir p1 env)
-                        (compile-ir p2 env)
-                        (list '(modulo)))))
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(modulo)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
+             
              
              (($= ,p1 ,p2)
-              (begin
-                (set! fs (- fs 1))
-                (append (compile-ir p1 env)
-                        (compile-ir p2 env)
-                        (list '(cmp))
-                        (list '(equal?)))))
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(cmp))
+			     (list '(equal?)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
              
              (($< ,p1 ,p2)
-              (begin
-                (set! fs (- fs 1))
-                (append (compile-ir p1 env)
-                        (compile-ir p2 env)
-                        (list '(cmp))
-                        (list '(less?)))))
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(cmp))
+			     (list '(less?)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
              
              (($number? ,e1)
               (append (compile-ir e1 env)
@@ -286,7 +296,8 @@
                    (let* ((var-pos (assoc var env)))
                      (set! fs (+ fs 1))
                      (if var-pos
-                         (list `(push_loc ,(- (- fs 1) (cdr var-pos))))
+                         (append (list `(push_loc ,(- (- fs 1) (cdr var-pos))))
+				 (list	`(comment ,(string-append (number->string fs) " pushloc"))))
                          (list `(push_glo ,(env-lookup genv var))))))
              
              ((,E0 . ,Es)
@@ -328,3 +339,5 @@
     (if (> start end)
         '()
         (cons start (range (+ start 1) end)))))
+;;(trace compile-ir)
+;;(trace compile-ir-program)
