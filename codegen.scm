@@ -79,7 +79,7 @@
                                "  lea   " retLab "(%rip), %rax\n"
                                "  push  %rax\n"
                                "  mov   $" nargs ", %rax\n"
-                               "  jmp   *(%rdi)\n"
+                               "  jmp   *-1(%rdi)\n"
                                ".align 8\n"
                                ".quad 0\n"
                                ".quad 12\n"
@@ -161,7 +161,7 @@
                              "  push  $8*" (+ nfree 1) "\n"
                              "  pop   8*0(%r10)  # longueur\n"
                              "  push  %r10\n"
-                             "  add   $8*2, (%rsp)\n"
+                             "  add   $8*2+1, (%rsp)\n"
                              "  add   $8*" (+ nfree 3) ", %r10\n")))
 
                     ((push_this ,offset)
@@ -308,7 +308,7 @@
                              "  mov   %rbx, 8(%rdi)\n")))
                     
 		    ((comment ,val)
-		     (list "\n# fs = " fs " (" val ")\n"))
+		     (list ""));;"\n# fs = " fs " (" val ")\n"))
                     
                     ((car)
                      (list "  mov   (%rsp), %rsi\n"
@@ -344,6 +344,8 @@
 	  ".globl main\n"
 	  "_main:\n"
 	  "main:\n"
+	  "push %rbp \n"
+	  "mov %rsp, %rbp\n"
 	  ;;"  call  print_rsp\n"
           "  push  $100*1024*1024\n"
 	  "  call  mmap\n"
@@ -351,6 +353,8 @@
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
 	  ;;"  call  print_rsp\n"
+	  "mov %rbp, %rsp\n"
+	  "pop %rbp\n"
           "  ret\n"
           "\n\n"
 	  (compile-bloc lambdas)
