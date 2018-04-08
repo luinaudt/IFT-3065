@@ -54,7 +54,7 @@
                                  (if (= expected-size 0)
                                      ""
                                      "  push  %rax        # push result\n")
-                                 ;; "  call  print_rsp\n"))))
+                                 ;;"  call  print_rsp\n"))))
                                  ))))
                     
                     ((proc ,name ,nb-params)
@@ -344,13 +344,13 @@
 	  ".globl main\n"
 	  "_main:\n"
 	  "main:\n"
-	  ;; "  call  print_rsp\n"
+	  ;;"  call  print_rsp\n"
           "  push  $100*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
-	  ;; "  call  print_rsp\n"
+	  ;;"  call  print_rsp\n"
           "  ret\n"
           "\n\n"
 	  (compile-bloc lambdas)
@@ -361,10 +361,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  ;; (display fs)
-  ;; (display "   ")
-  ;; (pp (car expr)))
-  #!void)
+  (display fs)
+  (display "   ")
+  (pp (car expr)))
+  ;;#!void)
 
 (define (get-fv i)
   (if (>= i 0)
