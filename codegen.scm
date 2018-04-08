@@ -308,7 +308,7 @@
                              "  mov   %rbx, 8(%rdi)\n")))
                     
 		    ((comment ,val)
-		     (list ""));;"\n# fs = " fs " (" val ")\n"))
+		     (list "\n# fs = " fs " (" val ")\n"))
                     
                     ((car)
                      (list "  mov   (%rsp), %rsi\n"
