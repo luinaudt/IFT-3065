@@ -51,7 +51,7 @@
 			   (set! fs expected-size)
                            (debug fs expr)
                            (list "  pop   %rax        # pop result\n"
-                                 "  add   $8*" delta ", %rsp  # adjust stack   " expected-size "\n"
+                                 "  add   $8*" (- delta 1) ", %rsp  # adjust stack   " expected-size "\n"
                                  (if (= expected-size 0)
                                      ""
                                      "  push  %rax        # push result\n")
