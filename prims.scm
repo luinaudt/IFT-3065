@@ -17,6 +17,7 @@
 		($-)
 		($*)
 		($quotient)
+		($remainder)
 		($modulo)
 		($=)
 		($<)

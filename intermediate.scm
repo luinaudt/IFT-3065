@@ -207,7 +207,13 @@
 			     (list '(mul)))))
 		(begin (set! fs (- fs 1))
 		       comp-ir)))
-	     
+	     (($remainder ,p1 ,p2)
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(remainder)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
              (($quotient ,p1 ,p2)
 	      (let ((comp-ir 
 		     (append (compile-ir p1 env)
