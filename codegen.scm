@@ -51,7 +51,7 @@
 			   (set! fs expected-size)
                            (debug fs expr)
                            (list "  pop   %rax        # pop result\n"
-                                 "  add   $8*" (- delta 1) ", %rsp  # adjust stack   " expected-size "\n"
+                                 "  add   $8*" (- delta 0) ", %rsp  # adjust stack   " expected-size "\n"
                                  (if (= expected-size 0)
                                      ""
                                      "  push  %rax        # push result\n")
@@ -91,6 +91,7 @@
                      (let ((old-fs fs))
                        (begin
 			 (pop-fs)
+			 (set! fs (+ fs 1))
 			 (debug fs expr)
                          (list "  mov   8*" pos "(%rsp), %rdi\n"
 			       "  mov   (%rsp), %rax\n"
@@ -377,10 +378,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  ;;(display fs)
-  ;;(display "   ")
-  ;;(pp (car expr)))
-  #!void)
+  (display fs)
+  (display "   ")
+  (pp (car expr)))
+  ;;#!void)
 
 (define (get-fv i)
   (if (>= i 0)
