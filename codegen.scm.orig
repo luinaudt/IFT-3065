@@ -126,11 +126,7 @@
 
                     ((pop_free ,pos)
                      (begin
-<<<<<<< HEAD
                        (set! fs (- fs 2))
-=======
-		       (set! fs (- fs 2))
->>>>>>> a0960d624fbb24a33c0f8a77a2f72f3452fddcd0
                        (list "pop  %rdi\n"
                              "pop  8*" (number->string (+ pos 1)) "-1(%rdi)\n")))
 

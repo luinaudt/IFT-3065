@@ -50,20 +50,24 @@
 			   (debug fs expr)
 			   (set! fs expected-size)
                            (debug fs expr)
-                           (list "  pop   %rax        # pop result\n"
-                                 "  add   $8*" (- delta 0) ", %rsp  # adjust stack   " expected-size "\n"
+                           (list (if (= expected-size 0)
+                                     ""
+                                     "  pop   %rax        # pop result\n")
+                                 "  add   $8*" delta ", %rsp  # adjust " expected-size "\n"
                                  (if (= expected-size 0)
                                      ""
                                      "  push  %rax        # push result\n")
-                                 ;;"  call  print_rsp\n"))))
+                                 ;; "  call  print_rsp\n"))))
                                  ))))
                     
                     ((proc ,name ,nb-params)
                      (begin
-		       (push-fs)
+                       ;; (set! fs (- fs nb-params))
+                       (push-fs)
                        (set! fs (+ 1 nb-params))
                        (debug fs expr)
-                       (list ".align 8\n"
+                       (list "\n"
+                             ".align 8\n"
                              ".quad 0\n"
                              ".quad 0\n"
                              ".byte 0\n"
@@ -74,7 +78,8 @@
                     ((call ,nargs)
                      (let ((retLab (return-gensym)))
                        (begin
-                         (set! fs (- fs nargs))
+                         (set! fs (- fs (- nargs 1)))
+                         ;; (push-fs)
                          (debug fs expr)
                          (list "  mov   (%rsp), %rdi\n"
                                "  lea   " retLab "(%rip), %rax\n"
@@ -270,7 +275,7 @@
                     ((get_tag)
                      (begin
                        (debug fs expr)
-                       (list "  and   $7,(%rsp)\n")))
+                       (list "  and   $7, (%rsp)\n")))
 
                     ((push_tag ,tag)
                      (begin
@@ -359,18 +364,18 @@
 	  "main:\n"
 	  "push %rbp \n"
 	  "mov %rsp, %rbp\n"
-	  ;;"  call  print_rsp\n"
+	  ;; "  call  print_rsp\n"
           "  push  $100*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
-	  ;;"  call  print_rsp\n"
+	  ;; "  call  print_rsp\n"
 	  "mov %rbp, %rsp\n"
 	  "pop %rbp\n"
           "  ret\n"
           "\n\n"
-	  (compile-bloc lambdas)
+          (compile-bloc lambdas)
 	  compile-args-error
 	  "\n\n"
           ".data\n"
@@ -378,9 +383,9 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  ;;(display fs)
-  ;;(display "   ")
-  ;;(pp (car expr)))
+  ;; (display fs)
+  ;; (display "   ")
+  ;; (pp (car expr)))
   #!void)
 
 (define (get-fv i)

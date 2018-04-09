@@ -70,8 +70,9 @@
                             (append (compile-ir ex env)
                                     (list `(comment ("def " ,var)))
                                     (list `(pop_glo ,(- gcnt 1))))))))
-                (set! fs (- fs 1))
-                ir-code))
+                (begin
+                  (set! fs (- fs 1))
+                  ir-code)))
 	     
              ((lambda ,params . ,body)
               (let* ((proc-name (lambda-gensym))
@@ -79,17 +80,18 @@
                      (ref-ids (range 0 (- nb-params 1)))
                      (proc-env (append (map cons params ref-ids) env))
                      (old-fs fs))
-                ;; generate ir-code for lambda-expression
-                (set! fs (+ nb-params 1))  ;; params + return address
-                (set! lambda-env (append (list `(comment ("lambda " ,proc-name ,(number->string fs))))
-                                         (list `(proc ,proc-name ,nb-params))
-                                         (compile-ir-body body proc-env)
-                                         (list `(ret ,(- fs (+ nb-params 1))))
-                                         lambda-env))
-                ;; generate ir-code to push lambda-expression address
-                (set! fs (+ old-fs 1))
-                (list `(comment ("proc " ,proc-name))
-                      `(push_proc ,proc-name))))
+                (begin
+                  ;; generate ir-code for lambda-expression
+                  (set! fs (+ nb-params 1))  ;; params + return address
+                  (set! lambda-env (append (list `(proc ,proc-name ,nb-params))
+                                           (list `(comment ("lambda " ,proc-name " " ,fs)))
+                                           (compile-ir-body body proc-env)
+                                           (list `(ret ,(- fs (+ nb-params 1))))
+                                           lambda-env))
+                  ;; generate ir-code to push lambda-expression address
+                  (set! fs (+ old-fs 1))
+                  (list `(comment ("proc " ,proc-name))
+                        `(push_proc ,proc-name)))))
 
              ((let ,bindings . ,body)
               (let* ((vars (map car bindings))
@@ -116,15 +118,17 @@
                       (append (compile-ir code env)
                               (list `(comment "make closure"))
                               (list `(close ,fv-cnt)))))
-                (set! fs (- fs fv-cnt))
-                ir-code))
+                (begin
+                  (set! fs (- fs fv-cnt))
+                  ir-code)))
 
              ((closure-code $clo)
               (let ((ir-code
-                     (list `(comment ("proc-code ptr" ,fs))
+                     (list `(comment ("*proc-code " ,fs))
                            `(push_loc ,(- fs (cdr (assoc '$clo env)))))))
-                (set! fs (+ fs 1))
-                ir-code))
+                (begin
+                  (set! fs (+ fs 1))
+                  ir-code)))
 
              ((closure-ref $this ,pos)
               (begin
@@ -207,18 +211,20 @@
 			     (list '(mul)))))
 		(begin (set! fs (- fs 1))
 		       comp-ir)))
-	     (($remainder ,p1 ,p2)
-	      (let ((comp-ir 
-		     (append (compile-ir p1 env)
-			     (compile-ir p2 env)
-			     (list '(remainder)))))
-		(begin (set! fs (- fs 1))
-		       comp-ir)))
+             
              (($quotient ,p1 ,p2)
 	      (let ((comp-ir 
 		     (append (compile-ir p1 env)
 			     (compile-ir p2 env)
 			     (list '(quotient)))))
+		(begin (set! fs (- fs 1))
+		       comp-ir)))
+             
+	     (($remainder ,p1 ,p2)
+	      (let ((comp-ir 
+		     (append (compile-ir p1 env)
+			     (compile-ir p2 env)
+			     (list '(remainder)))))
 		(begin (set! fs (- fs 1))
 		       comp-ir)))
              
@@ -304,17 +310,21 @@
              
              
              (,lit when (constant? lit)
-                   (begin
-                     (set! fs (+ fs 1))
-                     (list `(push_lit ,lit))))
+                   (let* ((ir-code
+                           (list `(push_lit ,lit))))
+                     (begin
+                       (set! fs (+ fs 1))
+                       ir-code)))
 
              (,var when (variable? var)
-                   (let* ((var-pos (assoc var env)))
-                     (set! fs (+ fs 1))
-                     (if var-pos
-                         (append (list `(push_loc ,(- (- fs 1) (cdr var-pos))))
-				 (list	`(comment ,(string-append (number->string fs) " pushloc"))))
-                         (list `(push_glo ,(env-lookup genv var))))))
+                   (let* ((var-pos (assoc var env))
+                          (ir-code
+                           (if var-pos
+                               (list `(push_loc ,(- fs (cdr var-pos))))
+                               (list `(push_glo ,(env-lookup genv var))))))
+                     (begin
+                       (set! fs (+ fs 1))
+                       ir-code)))
              
              ((,E0 . ,Es)
               (let* ((nb-params (length Es))

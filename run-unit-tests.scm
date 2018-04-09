@@ -57,8 +57,7 @@
                (make-string (- bar-width bar-length) #\.)
                (num->string elapsed 6 1)
                "s"
-               (esc "\33[K")
-               "\n\n"))))
+               (esc "\33[K")))))
 
 (define (run path . args)
   (let* ((port
@@ -126,9 +125,10 @@
                         (not (string=? (substring file 0 17) "unit-tests/crash-"))))
                (begin
                  (set! nb-good (+ nb-good 1))
-                 (print "\n")
-                 (print "*********************** PASSED TEST " mode " " file "\n")
-                 (print (cdr result)))
+                 ;; (print "\n")
+                 ;; (print "*********************** PASSED TEST " mode " " file "\n")
+                 ;; (print (cdr result))
+                 )
                (begin
                  (set! nb-fail (+ nb-fail 1))
                  (print "\n")
