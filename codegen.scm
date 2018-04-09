@@ -47,10 +47,11 @@
                      (if (= fs expected-size)
                          (list "")
                          (let ((delta (- fs expected-size)))
-                           (set! fs expected-size)
+			   (debug fs expr)
+			   (set! fs expected-size)
                            (debug fs expr)
                            (list "  pop   %rax        # pop result\n"
-                                 "  add   $8*" delta ", %rsp  # adjust stack\n"
+                                 "  add   $8*" delta ", %rsp  # adjust stack   " expected-size "\n"
                                  (if (= expected-size 0)
                                      ""
                                      "  push  %rax        # push result\n")
@@ -281,7 +282,12 @@
                        (set! fs (+ fs 1))
                        (debug fs expr)
                        (list "  push  $17\n")))
+		    ((save-cont)
+		     (list "push %rbp\n mov %rsp, %rbp\n"))
 
+		     ((rest-cont)
+		      (list "pop %rax \n mov %rbp, %rsp\n pop %rbp\n push %rax\n"))
+		      
                     ((boolean?)
                      (begin
                        (set! fs (+ fs 1))
@@ -308,7 +314,7 @@
                              "  mov   %rbx, 8(%rdi)\n")))
                     
 		    ((comment ,val)
-		     (list "\n# fs = " fs " (" val ")\n"))
+		     (list ""));;à"\n# fs = " fs " (" val ")\n"))
                     
                     ((car)
                      (list "  mov   (%rsp), %rsi\n"
@@ -332,6 +338,8 @@
 (define compile-args-error
   (list "\n"
         "nargs_error:\n"
+	"  mov %rbp, %rsp\n"
+	"  pop %rbp\n"
 	"  mov   $1, %rax\n"
 	"  ret\n"))
 

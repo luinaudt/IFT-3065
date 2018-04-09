@@ -49,12 +49,12 @@
   ;;(pp env)
   ;;(pp fs)
   ;;(pp expr)
-  (pp expr)
-  (pp fs)
+  
   (if (null? expr)
       '()
       (match expr
-             
+             ((comment ,val)
+	      (list expr))
 	     ((define ,var ,ex)
 	      (let* ((var-val (assoc var genv))
                      (ir-code
@@ -98,11 +98,14 @@
                      (target-fs (+ fs 1)))
                 ;; push vals on stack and compile body with extended environment
                 (append (list `(comment "let"))
-                        (push-on-stack-ir vals env)
+			(list '(save-cont))
+			(push-on-stack-ir vals env)
                         (compile-ir-body body extended-env)
+			(list '(rest-cont))
                         (begin
                           (set! fs target-fs)
-                          (list `(check-stack-integrity ,target-fs))))))
+                          '()) ;;list `(check-stack-integrity ,target-fs))
+			  )))
 
              ((make-closure ,code . ,fv)
               (let* ((fv-cnt (length fv))

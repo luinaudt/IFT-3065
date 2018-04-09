@@ -11,7 +11,8 @@
 	  #t
 	  (in-list x (cdr y)))))
 
-(define prims '(($println)
+(define prims '((comment)
+		($println)
 		($+)
 		($-)
 		($*)
