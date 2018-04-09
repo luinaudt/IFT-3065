@@ -98,10 +98,10 @@
                      (target-fs (+ fs 1)))
                 ;; push vals on stack and compile body with extended environment
                 (append (list `(comment "let"))
-			(list '(save-cont))
+			(list '(save-cont 0))
 			(push-on-stack-ir vals env)
                         (compile-ir-body body extended-env)
-			(list '(rest-cont))
+			(list `(rest-cont ,target-fs))
                         (begin
                           (set! fs target-fs)
                           '()) ;;list `(check-stack-integrity ,target-fs))

@@ -282,11 +282,15 @@
                        (set! fs (+ fs 1))
                        (debug fs expr)
                        (list "  push  $17\n")))
-		    ((save-cont)
-		     (list "push %rbp\n mov %rsp, %rbp\n"))
+		    ((save-cont ,new-fs)
+		     (begin
+		       (set! fs new-fs)
+		       (list "push %rbp\n mov %rsp, %rbp\n")))
 
-		     ((rest-cont)
-		      (list "pop %rax \n mov %rbp, %rsp\n pop %rbp\n push %rax\n"))
+		    ((rest-cont ,new-fs)
+		     (begin
+		       (set! fs new-fs)
+		       (list "pop %rax \n mov %rbp, %rsp\n pop %rbp\n push %rax\n")))
 		      
                     ((boolean?)
                      (begin
@@ -373,10 +377,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  (display fs)
-  (display "   ")
-  (pp (car expr)))
-  ;;#!void)
+  ;;(display fs)
+  ;;(display "   ")
+  ;;(pp (car expr)))
+  #!void)
 
 (define (get-fv i)
   (if (>= i 0)
