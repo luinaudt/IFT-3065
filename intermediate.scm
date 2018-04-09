@@ -54,7 +54,8 @@
       '()
       (match expr
              ((comment ,val)
-	      (list expr))
+	      (append (list expr)
+		      (list '(lab "start"))))
 	     ((define ,var ,ex)
 	      (let* ((var-val (assoc var genv))
                      (ir-code
@@ -120,7 +121,7 @@
 
              ((closure-code $clo)
               (let ((ir-code
-                     (list `(comment "proc-code ptr")
+                     (list `(comment ("proc-code ptr" ,fs))
                            `(push_loc ,(- fs (cdr (assoc '$clo env)))))))
                 (set! fs (+ fs 1))
                 ir-code))
@@ -165,14 +166,18 @@
 	      (let ((labfalse (label-gensym)) (labend (label-gensym)))
 		(append (compile-ir cond env)
 			(compile-ir '#f '())
-			(list '(cmp))
+			(begin
+			  (set! fs (- fs 2))
+			  (list '(cmp)))
 			(list `(jmpe ,labfalse))
 			(compile-ir E0 env)
 			(list `(jmp ,labend))
 			(list `(lab ,labfalse)) ;;faux
 			(compile-ir E1 env)
 			(list `(lab ,labend))   ;;fin
-                        (list '(fs-adjust)))))
+			(begin
+			  (set! fs (- fs 1))
+			  (list '(fs-adjust))))))
              
 	     (($println ,ex)
               (begin

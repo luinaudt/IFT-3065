@@ -319,7 +319,7 @@
                              "  mov   %rbx, 8(%rdi)\n")))
                     
 		    ((comment ,val)
-		     (list ""));;à"\n# fs = " fs " (" val ")\n"))
+		     (list "\n# fs = " fs " (" val ")\n"))
                     
                     ((car)
                      (list "  mov   (%rsp), %rsi\n"
@@ -378,10 +378,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  (display fs)
-  (display "   ")
-  (pp (car expr)))
-  ;;#!void)
+  ;;(display fs)
+  ;;(display "   ")
+  ;;(pp (car expr)))
+  #!void)
 
 (define (get-fv i)
   (if (>= i 0)
