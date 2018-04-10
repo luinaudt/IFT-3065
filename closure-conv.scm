@@ -200,7 +200,7 @@
            ,(closurec E new-cenv globals))
          ,@(map cc new-cenv))))
 
-    ((let ,bindings ,E)
+    ((let ,bindings . ,E)
      `(let ,(map (lambda (b) `(,(car b) ,(cc (cadr b)))) bindings)
         ,(cc E)))
 
