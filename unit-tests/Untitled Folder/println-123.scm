@@ -2,6 +2,6 @@
 (println (k 1 5))
 (println #\a)
 (println #t)
-;123
+;21
 ;a
 ;#t
