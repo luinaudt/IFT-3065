@@ -48,19 +48,24 @@
   (let* ((ast           (append (parse-program "lib.scm")
                                 (list '(comment "debut"))
                                 (parse-program filename)))
-         (closed-ast    (map closure-conv
-                             (map assign-conv
-                                  (map alpha-conv ast))))
+
          (expanded-ast  (begin
-			  (display "closed - ast \n")
-			  (pp closed-ast)
-			  (display "\n")
-			  (expand-macros closed-ast)))
+			  ;;(display "ast \n")
+			  ;;(pp ast)
+			  ;;(display "\n")
+			  (expand-macros ast)));;closed-ast)))
+	 (closed-ast    (begin
+			  ;;(display "expanded ast \n")
+			  ;;(pp expanded-ast)
+			  ;;(display "\n")
+			  (map closure-conv
+                             (map assign-conv
+                                  (map alpha-conv expanded-ast)))))
          (ir-code       (begin
- ;;                          (display "expanded ast \n")
- ;;                          (pp expanded-ast)
+ ;;                          (display "closed ast \n")
+ ;;                          (pp closed-ast)
  ;;                          (display "\n")
-                          (compile-ir-program expanded-ast '())))
+                          (compile-ir-program closed-ast '())))
          (code          (begin
 ;;                           (display "ir code \n")
 ;;                           (pp ir-code)
