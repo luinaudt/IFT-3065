@@ -61,14 +61,22 @@
 			  (map closure-conv
                              (map assign-conv
                                   (map alpha-conv expanded-ast)))))
+	 (hoisted-ast (begin
+		       (display "closed-ast \n")
+		       (pp closed-ast)
+		       (display "\n")
+		       (hoist-closure closed-ast)))
+				
          (ir-code       (begin
-;;			  (display "closed ast \n")
-;;			  (pp closed-ast)
-;;			  (display "\n")
+			  (display "hoisted ast \n")
+			  (pp hoisted-ast)
+			  (display "\n")
 			  (compile-ir-program closed-ast '())))
          (code          (begin
 ;;			  (display "ir code \n")
 ;;			  (pp ir-code)
+;;			  (display "\n")
+;;			  (pp lambda-env)
 ;;			  (display "\n")
                           (compile-program ir-code lambda-env))))
     
