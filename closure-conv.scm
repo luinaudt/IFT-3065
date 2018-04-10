@@ -202,7 +202,7 @@
 
     ((let ,bindings . ,E)
      `(let ,(map (lambda (b) `(,(car b) ,(cc (cadr b)))) bindings)
-        ,(cc E)))
+        ,@(map cc E)))
 
     ((if ,E1 ,E2)
      `(if ,(cc E1) ,(cc E2)))
@@ -245,9 +245,9 @@
     ((lambda ,params ,E)
      (difference (fv E) params))
 
-    ((let ,bindings ,E)
+    ((let ,bindings . ,E)
      (union (apply union (map (lambda (b) (fv (cadr b))) bindings))
-            (difference (fv E) (map car bindings))))
+            (difference (map fv E) (map car bindings))))
 
     ((if ,E1 ,E2)
      (union (fv E1) (fv E2)))
