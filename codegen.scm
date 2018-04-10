@@ -44,25 +44,22 @@
                        (list "")))
 
                     ((check-stack-integrity ,expected-size)
-                     (if (= fs expected-size)
-                         (list "")
-                         (let ((delta (- fs expected-size)))
-			   (debug fs expr)
-			   (set! fs expected-size)
-                           (debug fs expr)
-                           (list (if (= expected-size 0)
-                                     ""
-                                     "  pop   %rax        # pop result\n")
-                                 "  add   $8*" delta ", %rsp  # adjust " expected-size "\n"
-                                 (if (= expected-size 0)
-                                     ""
-                                     "  push  %rax        # push result\n")
-                                 ;; "  call  print_rsp\n"))))
-                                 ))))
+                     (let ((delta (- fs expected-size)))
+                       (begin
+                         (set! fs expected-size)
+                         (debug fs expr)
+                         (cond ((= delta 0)
+                                (list ""))
+                               ((= expected-size 0)
+                                (list "  add   $8*" delta ", %rsp  # adjust to " fs "\n"))
+                               (else
+                                (list "  pop   %rax        # pop result\n"
+                                      "  add   $8*" delta ", %rsp  # adjust to " fs "\n"
+                                      "  push  %rax        # push result\n"))))))
                     
                     ((proc ,name ,nb-params)
                      (begin
-                       ;; (set! fs (- fs nb-params))
+                       ;;(set! fs (- fs nb-params))
                        (push-fs)
                        (set! fs (+ 1 nb-params))
                        (debug fs expr)
@@ -79,7 +76,6 @@
                      (let ((retLab (return-gensym)))
                        (begin
                          (set! fs (- fs (- nargs 1)))
-                         ;; (push-fs)
                          (debug fs expr)
                          (list "  mov   (%rsp), %rdi\n"
                                "  lea   " retLab "(%rip), %rax\n"
@@ -96,7 +92,7 @@
                      (let ((old-fs fs))
                        (begin
 			 (pop-fs)
-			 (set! fs (+ fs 1))
+			 ;;(set! fs (+ fs 1))
 			 (debug fs expr)
                          (list "  mov   8*" pos "(%rsp), %rdi\n"
 			       "  mov   (%rsp), %rax\n"
