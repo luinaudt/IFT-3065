@@ -1,5 +1,12 @@
 ;;hoixting for closure
 ;;(define new-define '())
+
+(define (hoist-closure-2 expr)
+  (if (null? expr)
+      '()
+      (append (hoist-closure (car expr))
+	    (hoist-closure-2 (cdr expr))))) 
+
 (define (hoist-closure expr)
   (let* ((new-define '())
 	 (new-code
@@ -11,10 +18,10 @@
 				 ((make-closure ,code . ,fv)
 				  (let ((sym (gensym)))
 				    (begin
-				      (set! new-define (if (null? new-define)
-							   (list (hoist-closing `(define ,sym ,code)))
-							   (append new-define (list (hoist-closing `(define ,sym ,code)))
-							     )))
+				      (let ((to-append (list (hoist-closing `(define ,sym ,code)))))
+					(set! new-define (if (null? new-define)
+							     to-append
+							     (append new-define to-append)))) 
 				      `(make-closure ,sym ,@fv))
 				    
 				    ;;		(map hoist-closure code)
@@ -31,5 +38,6 @@
 				  `(,E0 ,@(map hoist-closing E1))
 				  ))))))
 	    (hoist-closing expr))))
-    (append new-define new-code)))
+    (append new-define (list new-code))))
 ;;(trace hoist-closure)
+;;(trace hoist-closure-2)

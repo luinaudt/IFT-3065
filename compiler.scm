@@ -65,13 +65,13 @@
 		       (display "closed-ast \n")
 		       (pp closed-ast)
 		       (display "\n")
-		       (hoist-closure closed-ast)))
+		       (hoist-closure-2 closed-ast)))
 				
          (ir-code       (begin
 			  (display "hoisted ast \n")
 			  (pp hoisted-ast)
 			  (display "\n")
-			  (compile-ir-program closed-ast '())))
+			  (compile-ir-program hoisted-ast '())))
          (code          (begin
 ;;			  (display "ir code \n")
 ;;			  (pp ir-code)
