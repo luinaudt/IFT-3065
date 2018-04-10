@@ -10,6 +10,29 @@
     (set! return-count (+ return-count 1))
     (string-append "return_" (number->string (- return-count 1)))))
 
+;;fonction pour l'ajout de string
+(define push-char
+  (lambda (str)
+    (letrec ((loop (lambda (str pos)
+		     (append (list "push  $" (char->integer (string-ref str pos)) "\n"
+				   "pop (%r10)\n"
+				   "add $8, %r10\n")
+			     (if (= (string-length str)
+				    (+ pos 1))
+				 '()
+				 (loop str (+ pos 1)))))))
+      (loop str 0))))
+
+(define push-string
+  (lambda (str)
+    (let ((len (string-length str)))
+      (append (list "# string  " str "\n"
+		    "push $" (number->string len) "\n"
+		    "pop (%r10)\n"
+		    "add $8, %r10\n")
+	      (push-char str)))))
+
+
 (define pop-fs
   (lambda ()
     (begin
@@ -117,6 +140,10 @@
                               (list "  push  $17\n"))
                              ((char? val)
                               (list "  push  $2+8*" (char->integer val) "\n"))
+			     ((string? val)
+			       (append (list "push %r10\n"
+					     "add $3, (%rsp)\n")
+				       (list (push-string val))))
                              ((boolean? val)
                               (if val
                                   (list "  push  $9\n")

@@ -50,26 +50,26 @@
                                 (parse-program filename)))
 
          (expanded-ast  (begin
-			  ;;(display "ast \n")
-			  ;;(pp ast)
-			  ;;(display "\n")
+;;			  (display "ast \n")
+;;			  (pp ast)
+;;			  (display "\n")
 			  (expand-macros ast)));;closed-ast)))
 	 (closed-ast    (begin
-			  ;;(display "expanded ast \n")
-			  ;;(pp expanded-ast)
-			  ;;(display "\n")
+;;			  (display "expanded ast \n")
+;;			  (pp expanded-ast)
+;;			  (display "\n")
 			  (map closure-conv
                              (map assign-conv
                                   (map alpha-conv expanded-ast)))))
          (ir-code       (begin
- ;;                          (display "closed ast \n")
- ;;                          (pp closed-ast)
- ;;                          (display "\n")
-                          (compile-ir-program closed-ast '())))
+;;			  (display "closed ast \n")
+;;			  (pp closed-ast)
+;;			  (display "\n")
+			  (compile-ir-program closed-ast '())))
          (code          (begin
-;;                           (display "ir code \n")
-;;                           (pp ir-code)
-;;                           (display "\n")
+;;			  (display "ir code \n")
+;;			  (pp ir-code)
+;;			  (display "\n")
                           (compile-program ir-code lambda-env))))
     
     (let* ((base-filename  (path-strip-extension filename))

@@ -281,6 +281,7 @@ print_word_hex_loop:
         pop     %rax
         popf
         ret     $1*8
+
 	.globl print_ln
 print_ln:
 	pushf
@@ -306,6 +307,8 @@ print_ln:
 	and	$0x07,%rbx	   #mask to get type
 	cmp	$1, %rbx
         jz      print_bool
+	cmp	$3, %rbx
+	jz	print_str
 	sar	$3, %rax
 	cmp	$2, %rbx
 	jz	print_char
@@ -322,6 +325,21 @@ print_bool_true:
 print_bool_end:	
 	push	%rax
 	call	print_string
+	jmp	print_ln_end
+	
+print_str:
+	add	$-3, %rax
+	mov	(%rax), %rcx
+	mov	%rax, %rdx
+	mov	$0, %rbx
+print_str_tmp:	
+	add	$8, %rdx	#rbx string pos
+	push 	(%rdx)
+	call 	putchar
+	inc	%rbx
+	cmp	%rcx, %rbx
+	jne	print_str_tmp
+	
 	jmp	print_ln_end
 print_char:
 	push	%rax
