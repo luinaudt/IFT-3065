@@ -133,7 +133,8 @@
              ((closure-ref $this ,pos)
               (begin
                 (set! fs (+ fs 1))
-                (list `(push_this ,fs)
+                (list `(comment ("closure-ref " ,(number->string pos)))
+		      `(push_this ,fs)
                       `(push_free ,pos))))
 
              (($cons ,e1 ,e2)

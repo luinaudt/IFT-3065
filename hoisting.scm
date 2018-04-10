@@ -11,8 +11,10 @@
 				 ((make-closure ,code . ,fv)
 				  (let ((sym (gensym)))
 				    (begin
-				      (set! new-define (cons new-define (hoist-closing `(define ,sym ,code))
-							     ))
+				      (set! new-define (if (null? new-define)
+							   (list (hoist-closing `(define ,sym ,code)))
+							   (append new-define (list (hoist-closing `(define ,sym ,code)))
+							     )))
 				      `(make-closure ,sym ,@fv))
 				    
 				    ;;		(map hoist-closure code)
