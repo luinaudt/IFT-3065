@@ -1,2 +1,10 @@
 (println '(4 . 5))
+(println (quote (4 . 5)))
+(println '(4 5 . 6))
+(println (quote (4 5 . 6)))
+(println 5)
 ;(4 . 5)
+;(4 . 5)
+;(4 5 . 6)
+;(4 5 . 6)
+;5
