@@ -27,7 +27,7 @@
   (lambda (str)
     (let ((len (string-length str)))
       (append (list "# string  " str "\n"
-		    "push $" (number->string len) "\n"
+		    "push $8*" (number->string len) "\n"
 		    "pop (%r10)\n"
 		    "add $8, %r10\n")
 	      (push-char str)))))
@@ -330,13 +330,23 @@
                        (list "  mov   (%rsp), %rax\n"
                              "  and   $15, %rax\n"
                              "  push  %rax\n")))
-
-                    ((push_heap ,size)
+		    ((pop_heap)
+		     (begin
+		       (set! fs (- fs 1))
+		       (list "pop (%r10)\n")))
+		    ((pop_mem)
+		     (begin
+		       (set! fs (- fs 1))
+		       (list "pop %rax \n"
+			     "pop (%rax)\n")))
+		    
+                    ((push_heap)
                      (begin
                        (set! fs (+ fs 1))
                        (debug fs expr)
                        (list "  mov   %r10, %rax\n"
-                             "  add   $8*" size ", %r10\n"
+			     "  pop   %rbx \n"
+                             "  add   %rbx, %r10\n"
                              "  push  %rax\n")))
                     
                     ((cons)

@@ -348,6 +348,8 @@ print_list_tmp:
 print_fin_list_tmp:	
 	cmp	$17, %rbx
 	je	print_list_end
+	push	$' '
+	call	putchar
 	push    $'.'
 	call	putchar
 	push 	$' '
@@ -361,16 +363,15 @@ print_list_end:
 print_str:
 	add	$-3, %rax
 	mov	(%rax), %rcx
+	add	%rax, %rcx
 	mov	%rax, %rdx
 	mov	$0, %rbx
 print_str_tmp:	
 	add	$8, %rdx	# rbx string pos
 	push 	(%rdx)
 	call 	putchar
-	inc	%rbx
-	cmp	%rcx, %rbx
+	cmp	%rcx, %rdx
 	jne	print_str_tmp
-	
 	jmp	print_ln_end
 print_char:
 	push	%rax
