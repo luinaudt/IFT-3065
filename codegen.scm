@@ -353,12 +353,14 @@
 		     (list "\n# fs = " fs " (" val ")\n"))
                     
                     ((car)
-                     (list "  mov   -6(%rsp), %rax\n"
-                           "  mov   %rax, %rsp\n"))
+                     (list "  pop   %rax\n"
+                           "  add   $-6, %rax\n"
+                           "  push  (%rax)\n"))
 
                     ((cdr)
-                     (list "  mov   2(%rsp), %rax\n"
-                           "  mov   %rax, %rsp\n")))))
+                     (list "  pop   %rax\n"
+                           "  add   $2, %rax\n"
+                           "  push  (%rax)\n")))))
 
         (append code (compile-bloc (cdr expr))))))
 
