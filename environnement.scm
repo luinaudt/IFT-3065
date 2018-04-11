@@ -33,12 +33,15 @@
   (append (map cons vars vals)
           env))
 
-(define (constant? x)
-  (or (number? x)
-      (null? x)
-      (boolean? x)
-      (char? x)
-      (string? x)))
+(define (constant? c)
+  (match c
+         ((quote ,x)
+          #t)
+         (,x
+          (or (number? x)
+              (string? x)
+              (boolean? x)
+              (char? x)))))
 
 (define (variable? x)
   (symbol? x))
