@@ -35,7 +35,7 @@
 (define pair?    (lambda (x)   ($pair? x)))
 
 (define procedure? (lambda (x)   ($procedure? x)))
-;(define eq?        (lambda (x y) ($eq? x y)))
+(define eq?        (lambda (x y) ($eq? x y)))
 
 ;;;============================================================================
 
@@ -71,13 +71,22 @@
 ;;   (lambda (x)
 ;;     (if ($eq? x #f) #t #f)))
 
-;; (define boolean?
-;;   (lambda (x)
-;;     (or ($eq? x #t) ($eq? x #f))))
+(define boolean?
+  (lambda (x)
+    (or ($eq? x #t) ($eq? x #f))))
 
-;; ;; (define null?
-;; ;;   (lambda (x)
-;; ;;     ($eq? x '())))
+(define null?
+  (lambda (x)
+    ($eq? x '())))
+
+(define list?
+  (lambda (x)
+    (cond (($eq? x '())
+           #t)
+          (($pair? x)
+           (list? ($cdr x)))
+          (else
+           #f))))
 
 ;; ;; (define member
 ;; ;;   (lambda (x lst)

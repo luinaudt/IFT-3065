@@ -67,11 +67,13 @@
                           (append (list `(comment ("re-def " ,var)))
                                   (compile-ir ex env)
                                   (list `(pop_glo ,(cdr var-val))))
-                          (append (compile-ir ex env)
-                                  (list `(comment ("def " ,var)))
-                                  (begin (set! genv (cons (cons var gcnt) genv))
-                                         (set! gcnt (+ gcnt 1))
-                                         (list `(pop_glo ,(- gcnt 1))))))))
+                          (let ((name gcnt))
+                            (append (begin
+                                      (set! genv (cons (cons var gcnt) genv))
+                                      (set! gcnt (+ gcnt 1))
+                                      (compile-ir ex env))
+                                    (list `(comment ("def " ,var)))
+                                    (list `(pop_glo ,name)))))))
                 (begin
                   (set! fs (- fs 1))
                   ir-code)))
@@ -320,10 +322,14 @@
                             '(equal?))))
 
              (($eq? ,e1 ,e2)
-              (append (compile-ir e1 env)
-                      (compile-ir e2 env)
-                      (list '(cmp))
-                      (list '(equal?))))
+              (let ((ir-code
+                     (append (compile-ir e1 env)
+                             (compile-ir e2 env)
+                             (list '(cmp))
+                             (list '(equal?)))))
+                (begin
+                  (set! fs (- fs 1))
+                  ir-code)))
 
              ;; pairs and non-empty lists
              ((quote ,lit) when (not (null? lit))

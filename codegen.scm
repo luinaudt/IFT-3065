@@ -299,7 +299,9 @@
                     ((get_tag)
                      (begin
                        (debug fs expr)
-                       (list "  and   $7, (%rsp)\n")))
+                       (list "  pop   %rax\n"
+                             "  and   $7, %rax\n"
+                             "  push  %rax\n")))
 
                     ((push_tag ,tag)
                      (begin
