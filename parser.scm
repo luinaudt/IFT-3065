@@ -41,15 +41,15 @@
 	    (error ", not supported yet")) ;; , et , @
 	  )))
 
-;; (define (read-list port)
-;;   (let ((c (peek-char-non-whitespace port)))
-;;     (cond ((char=? c #\))
-;;            (read-char port) ;; skip ")"
-;;            '())
-;;           ((char=? c #\.)
-;;            )
-;;           (else
-;;            (cons (read port) (read-list port))))))
+; (define (read-list port)
+;   (let ((c (peek-char-non-whitespace port)))
+;     (cond ((char=? c #\))
+;            (read-char port) ;; skip ")"
+;            '())
+;           ((char=? c #\.)
+;            )
+;           (else
+;            (cons (read port) (read-list port))))))
 
 (define (read-list port)
   (let ((c (peek-char-non-whitespace port)))
@@ -83,6 +83,7 @@
           (cond ((eq? datum (string->symbol "."))
                  (error "Datum expected"))
                 ((char=? c #\))
+		 (read-char port)
                  datum)
                 (else
                  (error "End of list expected")))))))
@@ -145,11 +146,11 @@
           (read-char port)
 	  (peek-char-non-whitespace port)))))
 
-;; (trace read-string)
+; (trace read-string)
 ;; (trace read)
 ;; (trace peek-char-non-whitespace)
-;; (trace read-symbol)
-;; (trace read-list)
-;; (trace read-list-mid)
-;; (trace read-list-end)
+; (trace read-symbol)
+; (trace read-list)
+; (trace read-list-mid)
+; (trace read-list-end)
 

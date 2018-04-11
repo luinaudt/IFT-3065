@@ -27,10 +27,11 @@
   (lambda (str)
     (let ((len (string-length str)))
       (append (list "# string  " str "\n"
-		    "push $" (number->string len) "\n"
+		    "push $8*" (number->string len) "\n"
 		    "pop (%r10)\n"
 		    "add $8, %r10\n")
 	      (push-char str)))))
+
 
 
 (define pop-fs
@@ -141,9 +142,9 @@
                              ((char? val)
                               (list "  push  $2+8*" (char->integer val) "\n"))
 			     ((string? val)
-			       (append (list "push %r10\n"
-					     "add $3, (%rsp)\n")
-				       (list (push-string val))))
+                              (append (list "push %r10\n"
+                                            "add $3, (%rsp)\n")
+                                      (list (push-string val))))
                              ((boolean? val)
                               (if val
                                   (list "  push  $9\n")
@@ -185,7 +186,7 @@
                        (set! fs (- fs nfree))
                        (debug fs expr)
                        (list (get-fv (- nfree 1))
-                             "  pop   8*2(%r10)  # ptr-code\n"
+                             "  pop   8*2(%r10)  # code-ptr\n"
                              "  push  $0\n"
                              "  pop   8*1(%r10)  # type\n"
                              "  push  $8*" (+ nfree 1) "\n"
@@ -311,6 +312,7 @@
                        (set! fs (+ fs 1))
                        (debug fs expr)
                        (list "  push  $17\n")))
+                    
 		    ((save-cont ,new-fs)
 		     (begin
 		       (set! fs new-fs)
@@ -320,7 +322,7 @@
 		     (begin
 		       (set! fs new-fs)
 		       (list "pop %rax \n mov %rbp, %rsp\n pop %rbp\n push %rax\n")))
-		      
+                    
                     ((boolean?)
                      (begin
                        (set! fs (+ fs 1))
@@ -328,37 +330,48 @@
                        (list "  mov   (%rsp), %rax\n"
                              "  and   $15, %rax\n"
                              "  push  %rax\n")))
-
-                    ((push_heap ,size)
+		    ((pop_heap)
+		     (begin
+		       (set! fs (- fs 1))
+		       (list "pop (%r10)\n")))
+		    ((pop_mem)
+		     (begin
+		       (set! fs (- fs 1))
+		       (list "pop %rax \n"
+			     "pop (%rax)\n")))
+		    
+                    ((push_heap)
                      (begin
                        (set! fs (+ fs 1))
                        (debug fs expr)
-                       (list "  mov   (%r10), %rax\n"
-                             "  add   $8*" size ", %r10\n"
+                       (list "  mov   %r10, %rax\n"
+			     "  pop   %rbx \n"
+                             "  add   %rbx, %r10\n"
                              "  push  %rax\n")))
                     
                     ((cons)
                      (begin
-                       (set! fs (- fs 2))
-                       (list "  pop   %rbx\n"
-                             "  pop   %rax\n"
-                             "  mov   (%rsp), %rdi\n"
-                             "  mov   %rax, (%rdi)\n"
-                             "  mov   %rbx, 8(%rdi)\n")))
+                       (set! fs (- fs 1))
+                       (debug fs expr)
+                       (list "  pop   8(%r10)\n"
+                             "  pop   (%r10)\n"
+                             "  push  %r10\n"
+                             "  add   $6, (%rsp)  # tag for a pair\n"
+                             "  add   $16, %r10   # update heap-ptr\n")))
                     
 		    ((comment ,val)
 		     (list "\n# fs = " fs " (" val ")\n"))
                     
                     ((car)
-                     (list "  mov   (%rsp), %rsi\n"
-                           "  mov   (%rsi), %rax\n"
-                           "  mov   %rax, (%rsp)\n"))
+                     (list "  pop   %rax\n"
+                           "  add   $-6, %rax\n"
+                           "  push  (%rax)\n"))
 
                     ((cdr)
-                     (list "  mov   (%rsp), %rsi\n"
-                           "  mov   8(%rsi), %rax\n"
-                           "  mov   %rax, (%rsp)\n")))))
-        
+                     (list "  pop   %rax\n"
+                           "  add   $2, %rax\n"
+                           "  push  (%rax)\n")))))
+
         (append code (compile-bloc (cdr expr))))))
 
 
@@ -406,10 +419,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  ;; (display fs)
-  ;; (display "   ")
-  ;; (pp (car expr)))
-  #!void)
+;  (display fs)
+;  (display "   ")
+;  (pp (car expr)))
+   #!void)
 
 (define (get-fv i)
   (if (>= i 0)

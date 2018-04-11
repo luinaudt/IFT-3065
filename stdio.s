@@ -303,16 +303,20 @@ print_ln:
         push    %r15
 
 	mov     17*8(%rsp), %rax   # get value
-	mov	%rax,%rbx
-	and	$0x07,%rbx	   #mask to get type
+        cmp     $17, %rax
+        jz      print_empty_list
+	mov	%rax, %rbx
+	and	$0x07,%rbx	   # mask to get type
 	cmp	$1, %rbx
         jz      print_bool
 	cmp	$3, %rbx
 	jz	print_str
+	cmp	$6,%rbx
+	jz	print_list
 	sar	$3, %rax
 	cmp	$2, %rbx
 	jz	print_char
-	push	%rax
+	push	%rax		#default : print num
 	call	print_word_dec
 	jmp	print_ln_end
 print_bool:
@@ -326,24 +330,58 @@ print_bool_end:
 	push	%rax
 	call	print_string
 	jmp	print_ln_end
-	
+print_list:
+	mov	%rax, %rbx
+	push	$'('
+	call	putchar
+print_list_tmp:
+	push	-6(%rbx) #car 
+	call	print_ln #on affiche le car
+	mov	2(%rbx), %rbx #cdr
+	mov	%rbx, %rcx 
+	and	$0x07, %rcx
+	cmp	$6, %rcx
+	jne	print_fin_list_tmp
+	push	$' '
+	call 	putchar
+	jmp	print_list_tmp
+print_fin_list_tmp:	
+	cmp	$17, %rbx
+	je	print_list_end
+	push	$' '
+	call	putchar
+	push    $'.'
+	call	putchar
+	push 	$' '
+	call 	putchar
+	push	%rbx
+	call	print_ln
+print_list_end:
+	push 	$')'
+	call	putchar
+	jmp	print_ln_end
 print_str:
 	add	$-3, %rax
 	mov	(%rax), %rcx
+	add	%rax, %rcx
 	mov	%rax, %rdx
 	mov	$0, %rbx
 print_str_tmp:	
-	add	$8, %rdx	#rbx string pos
+	add	$8, %rdx	# rbx string pos
 	push 	(%rdx)
 	call 	putchar
-	inc	%rbx
-	cmp	%rcx, %rbx
+	cmp	%rcx, %rdx
 	jne	print_str_tmp
-	
 	jmp	print_ln_end
 print_char:
 	push	%rax
 	call 	putchar
+        jmp     print_ln_end
+
+print_empty_list:
+        lea     string_empty_list(%rip), %rax
+        push    %rax
+        call    print_string
 	
 	
 print_ln_end:	
@@ -661,6 +699,7 @@ string_r15: .asciz "r15"
 string_rip: .asciz "rip"
 string_true:	.asciz "#t"
 string_false:	.asciz "#f"
+string_empty_list:      .asciz "()"
 	
 
 # The print_regs function sends a hexadecimal integer representation
