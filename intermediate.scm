@@ -346,7 +346,39 @@
                   ;; (display " --> ")
                   ;; (pp lit)
                   ir-code)))
-             
+             (($make-string ,size)
+	      (append (compile-ir size env) ;;on calcul la taille
+		      (list '(comment "debut make-string ")
+			    `(get_heap)
+			    `(pop_mem);;on assigne la taille
+			    `(get_heap);;on retourne la position du heap
+			    `(push_tag 3)
+			    `(add)
+			    `(get_heap)
+			    `(push_mem);;on recupere la taille
+			    `(push_lit 1)
+			    `(add);;on ajoute 1 a la taille
+			    `(get_heap)
+			    `(add);;on calcul la nouvelle position du heap
+			    `(set_heap);;on positionne le heap
+			    '(comment "fin make-string")
+			    ))) ;;on crée la chaîne
+	      
+	     (($string-set! ,s ,pos ,c) 
+	      (begin (set! fs (+ 0 fs))
+		     (append (list `(comment ,(string-append "string set " (string c))))
+			     (compile-ir c env)
+			     (compile-ir s env);;on récupère la position de str
+			     (compile-ir pos env);;on calcul la position du caractère a modifier
+			     (begin
+			       (set! fs (- fs 3))
+			       (list '(push_lit 1)
+				     '(add)
+				     '(push_tag -3)
+				     '(add)
+				     '(add) ;;on détermine l'adresse (la représentation nous la garde
+				     '(pop_mem)))))) ;;on doit mettre dans le tas à la position
+	     
              ;; other litterals
              (,lit when (constant? lit)
                    (let ((ir-code (list `(push_lit ,lit))))
