@@ -105,7 +105,7 @@
                                "  lea   " retLab "(%rip), %rax\n"
                                "  push  %rax\n"
                                "  mov   $" nargs ", %rax\n"
-                               "  jmp   *-1(%rdi)\n"
+                               "  jmp   *-7(%rdi)\n"
                                ".align 8\n"
                                ".quad 0\n"
                                ".quad 12\n"
@@ -172,14 +172,14 @@
                      (begin
                        (debug fs expr)
                        (list "  pop   %rdi\n"
-                             "  push  8*" (+ pos 1) "-1(%rdi)\n")))
+                             "  push  8*" (+ pos 1) "-7(%rdi)\n")))
 
                     ((pop_free ,pos)
                      (begin
                        (set! fs (- fs 2))
                        (debug fs expr)
                        (list "  pop   %rdi\n"
-                             "  pop   8*" (+ pos 1) "-1(%rdi)\n")))
+                             "  pop   8*" (+ pos 1) "-7(%rdi)\n")))
 
                     ((close ,nfree)
                      (begin
@@ -192,7 +192,7 @@
                              "  push  $8*" (+ nfree 1) "\n"
                              "  pop   8*0(%r10)  # longueur\n"
                              "  push  %r10\n"
-                             "  add   $8*2+1, (%rsp)\n"
+                             "  add   $8*2+7, (%rsp)\n"
                              "  add   $8*" (+ nfree 3) ", %r10\n")))
 
                     ((push_this ,offset)
@@ -365,27 +365,23 @@
 
                     ((car)
                      (list "  pop   %rax\n"
-                           "  add   $-6, %rax\n"
-                           "  push  (%rax)\n"))
+                           "  push  -6(%rax)\n"))
 
                     ((cdr)
                      (list "  pop   %rax\n"
-                           "  add   $2, %rax\n"
-                           "  push  (%rax)\n"))
+                           "  push  2(%rax)\n"))
 
                     ((set-car!)
                      (begin
                        (set! fs (- fs 2))
                        (list "  pop   %rdi\n"
-                             "  add   $-6, %rdi\n"
-                             "  pop   (%rdi)\n")))
+                             "  pop   -6(%rdi)\n")))
 
                     ((set-cdr!)
                      (begin
                        (set! fs (- fs 2))
                        (list "  pop   %rdi\n"
-                             "  add   $2, %rdi\n"
-                             "  pop   (%rdi)\n")))
+                             "  pop   2(%rdi)\n")))
                     
 		    ((comment ,val)
 		     (list "\n# fs = " fs " (" val ")\n")))))
