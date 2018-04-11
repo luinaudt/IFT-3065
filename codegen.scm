@@ -14,7 +14,7 @@
 (define push-char
   (lambda (str)
     (letrec ((loop (lambda (str pos)
-		     (append (list "push  $" (char->integer (string-ref str pos)) "\n"
+		     (append (list "push  $2+8*" (char->integer (string-ref str pos)) "\n"
 				   "pop (%r10)\n"
 				   "add $8, %r10\n")
 			     (if (= (string-length str)
