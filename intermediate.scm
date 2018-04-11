@@ -375,10 +375,11 @@
 			     (list '(push_tag -3)
 				   '(add)
 				   '(push_mem)))))
-	     
+	     (($string-ref ,s ,pos)
+	      )
 	     (($string-set! ,s ,pos ,c) 
 	      (begin (set! fs (+ 0 fs))
-		     (append (list `(comment ,(string-append "string set " (string c))))
+		     (append ;;(list `(comment ,(string-append "string set " (string c))))
 			     (compile-ir c env)
 			     (compile-ir s env);;on récupère la position de str
 			     (compile-ir pos env);;on calcul la position du caractère a modifier

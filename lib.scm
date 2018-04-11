@@ -22,8 +22,8 @@
 (define char?         (lambda (x) ($char? x)))
 
 ;(define make-string   (lambda (x)   ($make-string x)))
-;(define string-ref    (lambda (x y) ($string-ref x y)))
-;(define string-set!   (lambda (x y) ($string-set! x y)))
+(define string-ref    (lambda (x y) ($string-ref x y)))
+(define string-set!   (lambda (x y z) ($string-set! x y z)))
 (define string-length (lambda (x) ($string-length x)))
 (define string?       (lambda (x)   ($string? x)))
 
