@@ -303,8 +303,10 @@ print_ln:
         push    %r15
 
 	mov     17*8(%rsp), %rax   # get value
-	mov	%rax,%rbx
-	and	$0x07,%rbx	   #mask to get type
+        cmp     $17, %rax
+        jz      print_empty_list
+	mov	%rax, %rbx
+	and	$0x07,%rbx	   # mask to get type
 	cmp	$1, %rbx
         jz      print_bool
 	cmp	$3, %rbx
@@ -333,7 +335,7 @@ print_str:
 	mov	%rax, %rdx
 	mov	$0, %rbx
 print_str_tmp:	
-	add	$8, %rdx	#rbx string pos
+	add	$8, %rdx	# rbx string pos
 	push 	(%rdx)
 	call 	putchar
 	inc	%rbx
@@ -344,6 +346,12 @@ print_str_tmp:
 print_char:
 	push	%rax
 	call 	putchar
+        jmp     print_ln_end
+
+print_empty_list:
+        lea     string_empty_list(%rip), %rax
+        push    %rax
+        call    print_string
 	
 	
 print_ln_end:	
@@ -661,6 +669,7 @@ string_r15: .asciz "r15"
 string_rip: .asciz "rip"
 string_true:	.asciz "#t"
 string_false:	.asciz "#f"
+string_empty_list:      .asciz "()"
 	
 
 # The print_regs function sends a hexadecimal integer representation

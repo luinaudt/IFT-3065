@@ -60,16 +60,14 @@
 	      (let* ((var-val (assoc var genv))
                      (ir-code
                       (if var-val
-                          (begin
-                            (append (list `(comment ("re-def " ,var)))
-                                    (compile-ir ex env)
-                                    (list `(pop_glo ,(cdr var-val)))))
-                          (begin
-                            (set! genv (cons (cons var gcnt) genv))
-                            (set! gcnt (+ gcnt 1))
-                            (append (compile-ir ex env)
-                                    (list `(comment ("def " ,var)))
-                                    (list `(pop_glo ,(- gcnt 1))))))))
+                          (append (list `(comment ("re-def " ,var)))
+                                  (compile-ir ex env)
+                                  (list `(pop_glo ,(cdr var-val))))
+                          (append (compile-ir ex env)
+                                  (list `(comment ("def " ,var)))
+                                  (begin (set! genv (cons (cons var gcnt) genv))
+                                         (set! gcnt (+ gcnt 1))
+                                         (list `(pop_glo ,(- gcnt 1))))))))
                 (begin
                   (set! fs (- fs 1))
                   ir-code)))
@@ -146,18 +144,14 @@
                         (list '(cons)))))
 
              (($car ,p)
-              (begin
-                (set! fs (+ fs 1))
-                (append (compile-ir p env)
-                        (list '(car)))))
+              (append (compile-ir p env)
+                      (list '(car))))
 
              (($cdr ,p)
-              (begin
-                (set! fs (+ fs 1))
-                (append (compile-ir p env)
-                        (list '(cdr)))))
+              (append (compile-ir p env)
+                      (list '(cdr))))
              
-	     ((if ,cond ,E0)
+             ((if ,cond ,E0)
               (compile-ir `(if ,cond ,E0 #!void)))
              ;;(let ((labend (label-gensym)))
              ;;  (append (compile-ir cond env)
