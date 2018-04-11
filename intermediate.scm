@@ -376,7 +376,17 @@
 				   '(add)
 				   '(push_mem)))))
 	     (($string-ref ,s ,pos)
-	      )
+	      (begin (set! fs (+ 0 fs))
+		     (append (compile-ir s env)
+			     (compile-ir pos env)
+			     (begin
+			       (set! fs (- fs 1))
+			       (list '(push_lit 1)
+				     '(add)
+				     '(push_tag 3)
+				     '(sub)
+				     '(add)
+				     '(push_mem))))))
 	     (($string-set! ,s ,pos ,c) 
 	      (begin (set! fs (+ 0 fs))
 		     (append ;;(list `(comment ,(string-append "string set " (string c))))
@@ -387,8 +397,8 @@
 			       (set! fs (- fs 3))
 			       (list '(push_lit 1)
 				     '(add)
-				     '(push_tag -3)
-				     '(add)
+				     '(push_tag 3)
+				     '(sub)
 				     '(add) ;;on détermine l'adresse (la représentation nous la garde
 				     '(pop_mem)))))) ;;on doit mettre dans le tas à la position
 	     
