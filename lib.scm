@@ -24,7 +24,7 @@
 ;(define make-string   (lambda (x)   ($make-string x)))
 ;(define string-ref    (lambda (x y) ($string-ref x y)))
 ;(define string-set!   (lambda (x y) ($string-set! x y)))
-;(define string-length (lambda (x y) ($string-length x y)))
+(define string-length (lambda (x) ($string-length x)))
 (define string?       (lambda (x)   ($string? x)))
 
 (define cons     (lambda (x y) ($cons x y)))
