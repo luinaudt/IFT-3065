@@ -1,3 +1,6 @@
-(println '(1 2 3))
+(let ((x 111) (y 222))
+  (println x)
+  (println y))
 
-;(1 2 3)
+;111
+;222

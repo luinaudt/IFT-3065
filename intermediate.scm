@@ -11,7 +11,6 @@
 ;; retourne une liste AST avec le langage intermédiaire
 (include "environnement.scm")
 (include "match.scm")
-(include "genconst.scm")
 
 
 (define lambda-env '())
@@ -20,26 +19,22 @@
 (define fs 0)
 
 
-;; Called only by compiler.scm or recursively.
+;; Called only a single time, by compiler.scm.
 ;; Makes sure stack is empty at the end.
 (define (compile-ir-program exprs env)
   (if (null? exprs)
       '()
       (append (compile-ir (car exprs) env)
               (begin
-                ;;(set! fs 0)
+                (set! fs 0)
                 (list `(check-stack-integrity 0)))
               (compile-ir-program (cdr exprs) env))))
 
 
 ;; Called whenever a bloc of code is being compiled (lets and lambda).
 ;; Makes sure the result of each expression is being consumed and returns
-;; with a single value on the stack.
+;; wit a single value on the stack.
 (define (compile-ir-body exprs env)
-  ;; (display fs)
-  ;; (display "   ")
-  ;; (if (not (null? exprs))
-  ;;     (pp (car exprs)))
   (cond ((null? exprs)
          (error "empty body"))
         ((null? (cdr exprs))
@@ -50,16 +45,17 @@
 
 
 (define (compile-ir expr env)
-  (display fs)
-  (display "   ")
-  (pp expr)
+  ;;(pp expr)
+  ;;(pp env)
+  ;;(pp fs)
+  ;;(pp expr)
+  
   (if (null? expr)
       '()
       (match expr
              ((comment ,val)
 	      (append (list expr)
 		      (list '(lab "start"))))
-             
 	     ((define ,var ,ex)
 	      (let* ((var-val (assoc var genv))
                      (ir-code
@@ -142,13 +138,12 @@
                       `(push_free ,pos))))
 
              (($cons ,e1 ,e2)
-              (let ((ir-code
-                     (append (compile-ir e1 env)
-                             (compile-ir e2 env)
-                             (list '(cons)))))
-                (begin
-                  (set! fs (- fs 1))
-                  ir-code)))
+              (begin
+                (set! fs (+ fs 1))
+                (append (list '(push_heap 2))
+                        (compile-ir e1 env)
+                        (compile-ir e2 env)
+                        (list '(cons)))))
 
              (($car ,p)
               (begin
@@ -313,40 +308,15 @@
                       (compile-ir e2 env)
                       (list '(cmp))
                       (list '(equal?))))
-
-             ;; pairs and non-empty lists
-             ((quote ,lit) when (not (null? lit))
-              (let* ((const (gen-const lit))
-                     (const-defs
-                      (if (null? const-code)
-                          '()
-                          (compile-ir-body (reverse const-code) env)))
-                     (const-ir (compile-ir const env)))
-                (begin
-                  ;;(set! fs (+ fs 1))
-                  (append const-defs const-ir))))
-
-             ;; empty list
-             ((quote ,lit) when (null? lit)
-              (let ((ir-code (list `(push_lit ,lit))))
-                (begin
-                  (set! fs (+ fs 1))
-                  ;; (display fs)
-                  ;; (display " --> ")
-                  ;; (pp lit)
-                  ir-code)))
              
-             ;; other litterals
+             
              (,lit when (constant? lit)
-                   (let ((ir-code (list `(push_lit ,lit))))
+                   (let* ((ir-code
+                           (list `(push_lit ,lit))))
                      (begin
                        (set! fs (+ fs 1))
-                       ;; (display fs)
-                       ;; (display " --> ")
-                       ;; (pp lit)
                        ir-code)))
 
-             ;; variables
              (,var when (variable? var)
                    (let* ((var-pos (assoc var env))
                           (ir-code
@@ -355,30 +325,19 @@
                                (list `(push_glo ,(env-lookup genv var))))))
                      (begin
                        (set! fs (+ fs 1))
-                       ;; (display fs)
-                       ;; (display " --> ")
-                       ;; (pp var)
                        ir-code)))
-
-             ;; procedure calls
+             
              ((,E0 . ,Es)
               (let* ((nb-params (length Es))
 		     (old-fs fs)
                      (ir-code
                       (append (list `(comment ,expr))
                               (list `(comment "the arguments"))
-                              (begin ;; (pp "debut args")
-                                     (push-on-stack-ir Es env))
-                              (begin ;; (pp "fin args")
-                                     (compile-ir E0 env))
+                              (push-on-stack-ir Es env)
+                              (compile-ir E0 env)
                               (list `(comment "the call"))
                               (list `(call ,nb-params)))))
-                ;; (pp "proc")
-                ;; (pp fs)
                 (set! fs (- fs nb-params))
-                ;; (display "call ")
-                ;; (pp nb-params)
-                ;; (pp fs)
                 ir-code)))))
 
 (define lambda-count 0)
@@ -409,6 +368,3 @@
         (cons start (range (+ start 1) end)))))
 ;;(trace compile-ir)
 ;;(trace compile-ir-program)
-;;(trace gen-const)
-;;(trace gen-const-helper)
-;;(trace compile-ir-body)

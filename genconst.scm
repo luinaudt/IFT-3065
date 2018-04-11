@@ -33,16 +33,11 @@
     var))
 
 (define (gen-const obj)
-  (begin
-    (set! const-code '())
-    (gen-const-helper obj)))
-
-(define (gen-const-helper obj)
 
   (cond ((pair? obj)
          (def-const
-           `($cons ,(gen-const-helper (car obj))
-                   ,(gen-const-helper (cdr obj)))))
+           `($cons ,(gen-const (car obj))
+                   ,(gen-const (cdr obj)))))
 
         ((string? obj)
          (def-const
@@ -63,8 +58,8 @@
         (loop (- i 1) (cons i lst))
         lst)))
 
-;; (pretty-print (gen-const '(5 ("allo" #\x))))
+(pretty-print (gen-const '(5 ("allo" #\x))))
 
-;; (for-each
-;;  pretty-print
-;;  (reverse const-code))
+(for-each
+ pretty-print
+ (reverse const-code))
