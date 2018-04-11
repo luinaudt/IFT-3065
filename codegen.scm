@@ -332,24 +332,26 @@
                        (list "  mov   (%rsp), %rax\n"
                              "  and   $15, %rax\n"
                              "  push  %rax\n")))
-		    ((pop_heap)
+		    ((set_heap)
 		     (begin
 		       (set! fs (- fs 1))
-		       (list "pop (%r10)\n")))
+		       (list "pop %r10\n")))
+		    
+		    ((push_mem)
+		     (list "pop %rax\n"
+			   "push (%rax)\n"))
+
 		    ((pop_mem)
 		     (begin
-		       (set! fs (- fs 1))
+		       (set! fs (- fs 2))
 		       (list "pop %rax \n"
 			     "pop (%rax)\n")))
 		    
-                    ((push_heap)
+                    ((get_heap)
                      (begin
                        (set! fs (+ fs 1))
                        (debug fs expr)
-                       (list "  mov   %r10, %rax\n"
-			     "  pop   %rbx \n"
-                             "  add   %rbx, %r10\n"
-                             "  push  %rax\n")))
+                       (list "  push   %r10\n")))
                     
                     ((cons)
                      (begin
