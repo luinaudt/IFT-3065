@@ -369,7 +369,7 @@ print_str:
 print_str_tmp:	
 	add	$8, %rdx	# rbx string pos
 	push 	(%rdx)
-	call 	putchar
+	call 	print_ln
 	cmp	%rcx, %rdx
 	jne	print_str_tmp
 	jmp	print_ln_end
