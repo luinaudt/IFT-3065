@@ -174,6 +174,16 @@
                 (begin
                   (set! fs (- fs 2))
                   ir-code)))
+
+             (($integer->char ,e)
+              (append (compile-ir e env)
+                      (list `(push_tag 2)
+                            `(add))))
+
+             (($char->integer ,e)
+              (append (compile-ir e env)
+                      (list `(push_tag 2)
+                            `(sub))))
              
              ((if ,cond ,E0)
               (compile-ir `(if ,cond ,E0 #!void)))
