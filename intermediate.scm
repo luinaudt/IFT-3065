@@ -50,9 +50,9 @@
 
 
 (define (compile-ir expr env)
-  (display fs)
-  (display "   ")
-  (pp expr)
+  ;; (display fs)
+  ;; (display "   ")
+  ;; (pp expr)
   (if (null? expr)
       '()
       (match expr
