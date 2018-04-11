@@ -369,7 +369,13 @@
 			    `(set_heap);;on positionne le heap
 			    '(comment "fin make-string")
 			    ))) ;;on crée la chaîne
-	      
+	     (($string-length ,s)
+	      (begin (set! fs (+ 0 fs))
+		     (append (compile-ir s env)
+			     (list '(push_tag -3)
+				   '(add)
+				   '(push_mem)))))
+	     
 	     (($string-set! ,s ,pos ,c) 
 	      (begin (set! fs (+ 0 fs))
 		     (append (list `(comment ,(string-append "string set " (string c))))
