@@ -48,6 +48,7 @@
   (let* ((ast           (append (parse-program "lib.scm")
                                 ;; (list '(comment "debut"))
                                 (parse-program filename)))
+
          (expanded-ast  (begin
 			  ;; (display "ast \n")
 			  ;; (pp ast)
@@ -60,15 +61,23 @@
 			  (map closure-conv
                              (map assign-conv
                                   (map alpha-conv expanded-ast)))))
+	 (hoisted-ast (begin
+		       (display "closed-ast \n")
+		       (pp closed-ast)
+		       (display "\n")
+		       (hoist-closure-2 closed-ast)))
+				
          (ir-code       (begin
-			  (display "closed ast \n")
-			  (pp closed-ast)
+			  (display "hoisted ast \n")
+			  (pp hoisted-ast)
 			  (display "\n")
-			  (compile-ir-program closed-ast '())))
+			  (compile-ir-program hoisted-ast '())))
          (code          (begin
-			  (display "\n")
-			  (pp ir-code)
-			  (display "\n")
+;;			  (display "ir code \n")
+;;			  (pp ir-code)
+;;			  (display "\n")
+;;			  (pp lambda-env)
+;;			  (display "\n")
                           (compile-program ir-code lambda-env))))
     
     (let* ((base-filename  (path-strip-extension filename))
