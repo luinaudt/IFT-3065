@@ -30,7 +30,9 @@
 		    "push $8*" (number->string len) "\n"
 		    "pop (%r10)\n"
 		    "add $8, %r10\n")
-	      (push-char str)))))
+	      (if (= 0 len)
+		  '()
+		  (push-char str))))))
 
 
 
@@ -269,7 +271,18 @@
                              "  cmovns %r9,%rbx\n"
                              "  add   %rbx,%rdx\n"
                              "  push  %rdx\n")))
-                    
+                    ((getchar)
+		     (begin (set! fs (+ fs 1))
+			    (list "  call getchar\n"
+				  "  sal $3, %rax\n"
+				  "  add $2,%rax\n"
+				  "  push %rax\n")))
+		    ((putchar)
+		     (begin (set! fs (- fs 1))
+			    (list "  pop %rax\n"
+				  "  sar $3, %rax\n"
+				  "  push %rax\n"
+				  "  call putchar\n")))
                     ((cmp)
                      (begin
                        (set! fs (- fs 2))
