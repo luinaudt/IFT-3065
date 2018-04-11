@@ -27,12 +27,12 @@
 ;(define string-length (lambda (x y) ($string-length x y)))
 ;(define string?       (lambda (x)   ($string? x)))
 
-;(define cons     (lambda (x y) ($cons x y)))
-;(define car      (lambda (x)   ($car x)))
-;(define cdr      (lambda (x)   ($cdr x)))
-;(define set-car! (lambda (x y) ($set-car! x y)))
-;(define set-cdr! (lambda (x y) ($set-cdr! x y)))
-;(define pair?    (lambda (x)   ($pair? x)))
+(define cons     (lambda (x y) ($cons x y)))
+(define car      (lambda (x)   ($car x)))
+(define cdr      (lambda (x)   ($cdr x)))
+(define set-car! (lambda (x y) ($set-car! x y)))
+(define set-cdr! (lambda (x y) ($set-cdr! x y)))
+(define pair?    (lambda (x)   ($pair? x)))
 
 ;(define procedure? (lambda (x)   ($procedure? x)))
 ;(define eq?        (lambda (x y) ($eq? x y)))

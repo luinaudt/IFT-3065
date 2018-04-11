@@ -358,10 +358,7 @@
                              "  push  %r10\n"
                              "  add   $6, (%rsp)  # tag for a pair\n"
                              "  add   $16, %r10   # update heap-ptr\n")))
-                    
-		    ((comment ,val)
-		     (list "\n# fs = " fs " (" val ")\n"))
-                    
+
                     ((car)
                      (list "  pop   %rax\n"
                            "  add   $-6, %rax\n"
@@ -370,7 +367,24 @@
                     ((cdr)
                      (list "  pop   %rax\n"
                            "  add   $2, %rax\n"
-                           "  push  (%rax)\n")))))
+                           "  push  (%rax)\n"))
+
+                    ((set-car!)
+                     (begin
+                       (set! fs (- fs 2))
+                       (list "  pop   %rdi\n"
+                             "  add   $-6, %rdi\n"
+                             "  pop   (%rdi)\n")))
+
+                    ((set-cdr!)
+                     (begin
+                       (set! fs (- fs 2))
+                       (list "  pop   %rdi\n"
+                             "  add   $2, %rdi\n"
+                             "  pop   (%rdi)\n")))
+                    
+		    ((comment ,val)
+		     (list "\n# fs = " fs " (" val ")\n")))))
 
         (append code (compile-bloc (cdr expr))))))
 

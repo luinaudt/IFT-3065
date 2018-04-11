@@ -154,6 +154,24 @@
              (($cdr ,p)
               (append (compile-ir p env)
                       (list '(cdr))))
+
+             (($set-car! ,p ,e)
+              (let ((ir-code
+                     (append (compile-ir e env)
+                             (compile-ir p env)
+                             (list `(set-car!)))))
+                (begin
+                  (set! fs (- fs 2))
+                  ir-code)))
+
+             (($set-cdr! ,p ,e)
+              (let ((ir-code
+                     (append (compile-ir e env)
+                             (compile-ir p env)
+                             (list `(set-cdr!)))))
+                (begin
+                  (set! fs (- fs 2))
+                  ir-code)))
              
              ((if ,cond ,E0)
               (compile-ir `(if ,cond ,E0 #!void)))
