@@ -50,14 +50,14 @@
                                 (parse-program filename)))
 
          (expanded-ast  (begin
-			  ;; (display "ast \n")
-			  ;; (pp ast)
-			  ;; (display "\n")
+;			  (display "ast \n")
+;			  (pp ast)
+;			  (display "\n")
                           (expand-macros ast)))
 	 (closed-ast    (begin
-			  ;; (display "expanded ast \n")
-			  ;; (pp expanded-ast)
-			  ;; (display "\n")
+;			  (display "expanded ast \n")
+;			  (pp expanded-ast)
+;			  (display "\n")
 			  (map closure-conv
                              (map assign-conv
                                   (map alpha-conv expanded-ast)))))

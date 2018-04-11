@@ -150,7 +150,7 @@
 ;; (trace read)
 ;; (trace peek-char-non-whitespace)
 ; (trace read-symbol)
- (trace read-list)
- (trace read-list-mid)
- (trace read-list-end)
+; (trace read-list)
+; (trace read-list-mid)
+; (trace read-list-end)
 
