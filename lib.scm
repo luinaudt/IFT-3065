@@ -17,8 +17,8 @@
 
 ;(define read-char     (lambda ()  ($read-char)))
 ;(define write-char    (lambda (x) ($write-char x)))
-;(define integer->char (lambda (x) ($integer->char x)))
-;(define char->integer (lambda (x) ($char->integer x)))
+(define integer->char (lambda (x) ($integer->char x)))
+(define char->integer (lambda (x) ($char->integer x)))
 (define char?         (lambda (x) ($char? x)))
 
 ;(define make-string   (lambda (x)   ($make-string x)))
