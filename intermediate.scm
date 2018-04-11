@@ -27,7 +27,7 @@
       '()
       (append (compile-ir (car exprs) env)
               (begin
-                ;;(set! fs 0)
+                (set! fs 0)
                 (list `(check-stack-integrity 0)))
               (compile-ir-program (cdr exprs) env))))
 
