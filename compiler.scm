@@ -62,15 +62,15 @@
                              (map assign-conv
                                   (map alpha-conv expanded-ast)))))
 	 (hoisted-ast (begin
-		       (display "closed-ast \n")
-		       (pp closed-ast)
-		       (display "\n")
+;		       (display "closed-ast \n")
+;		       (pp closed-ast)
+;		       (display "\n")
 		       (hoist-closure-2 closed-ast)))
 				
          (ir-code       (begin
-			  (display "hoisted ast \n")
-			  (pp hoisted-ast)
-			  (display "\n")
+;			  (display "hoisted ast \n")
+;			  (pp hoisted-ast)
+;			  (display "\n")
 			  (compile-ir-program hoisted-ast '())))
          (code          (begin
 ;;			  (display "ir code \n")

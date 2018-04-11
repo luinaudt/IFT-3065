@@ -2,10 +2,11 @@
 ;;(define new-define '())
 
 (define (hoist-closure-2 expr)
-  (if (null? expr)
-      '()
-      (append (hoist-closure (car expr))
-	    (hoist-closure-2 (cdr expr))))) 
+  expr)
+;  (if (null? expr)
+;      '()
+;      (append (hoist-closure (car expr))
+;	    (hoist-closure-2 (cdr expr))))) 
 
 (define (hoist-closure expr)
   (let* ((new-define '())

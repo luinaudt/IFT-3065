@@ -409,10 +409,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  (display fs)
-  (display "   ")
-  (pp (car expr)))
-  ;; #!void)
+;  (display fs)
+;  (display "   ")
+;  (pp (car expr)))
+   #!void)
 
 (define (get-fv i)
   (if (>= i 0)
