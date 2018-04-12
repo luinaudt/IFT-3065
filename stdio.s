@@ -303,8 +303,10 @@ print_ln:
         push    %r15
 
 	mov     17*8(%rsp), %rax   # get value
-        cmp     $17, %rax
-        jz      print_empty_list
+        cmp     $25, %rax
+        jz      print_void
+	cmp	$17, %rax
+	jz	print_empty_list
 	mov	%rax, %rbx
 	and	$0x07,%rbx	   # mask to get type
 	cmp	$1, %rbx
@@ -384,7 +386,11 @@ print_empty_list:
         lea     string_empty_list(%rip), %rax
         push    %rax
         call    print_string
-	
+	jmp	print_ln_end
+print_void:	
+	lea	string_void(%rip), %rax
+	push	%rax
+	call	print_string
 	
 print_ln_end:	
 	pop     %r15
@@ -702,7 +708,7 @@ string_rip: .asciz "rip"
 string_true:	.asciz "#t"
 string_false:	.asciz "#f"
 string_empty_list:      .asciz "()"
-	
+string_void:	.asciz "#!void"
 
 # The print_regs function sends a hexadecimal integer representation
 # of the content of all the registers to the standard output (stdout).

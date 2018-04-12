@@ -136,7 +136,9 @@
                      (begin
                        (set! fs (+ fs 1))
                        (debug fs expr)
-                       (cond ((number? val)
+                       (cond ((equal? val #!void)
+			      (list "  push $25\n"))
+			     ((number? val)
                               (list "  push  $8*" val "\n"))
                              ((null? val)
                               (list "  push  $17\n"))

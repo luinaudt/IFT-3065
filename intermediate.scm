@@ -206,10 +206,10 @@
                             `(sub))))
 	     
              ((if ,cond ,E0)
-              (compile-ir `(if ,cond ,E0 #!void)))
+              (compile-ir `(if ,cond ,E0 #!void) env))
              ;;(let ((labend (label-gensym)))
              ;;  (append (compile-ir cond env)
-             ;;          (compile-ir '#f '())
+             ;;         (compile-ir '#f '())
              ;;          (list '(cmp))
              ;;  	 (list `(jmpe ,labend))
              ;;          (compile-ir E0 env)

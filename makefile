@@ -8,8 +8,8 @@ all: stdio.o mmap.o
 .s.o:
 	gcc -c -o $*.o $*.s
 
-test: ut
-
+test: all
+	./run-unit-tests.scm $2
 ut: all
 	./run-unit-tests.scm
 

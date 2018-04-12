@@ -139,7 +139,7 @@
 
 
 (define ($instantiate x)
-  (cons x (list #!unbound)))
+  (list x 0))
 
 (define ($set! var val)
   `(set! ,var ,val))

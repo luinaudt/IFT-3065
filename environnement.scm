@@ -36,6 +36,7 @@
 (define (constant? x)
   (or (number? x)
       (null? x)
+      (equal? x #!void)
       (boolean? x)
       (char? x)
       (string? x)))

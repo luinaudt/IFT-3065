@@ -41,13 +41,21 @@
 
 ;; Fonctions prédéfinies
 
-;; (define string=?
-;;   (lambda (x y)
-;;     (if (and ($string? x)
-;;              ($string? y)
-;;              ($= ($string-length x) ($string-length y)))
-;;         ;; compare here
-;;         #f)))
+ (define string=?
+   (lambda (x y)
+     (if (and ($string? x)
+              ($string? y)
+              ($= ($string-length x) ($string-length y)))
+ 	 (letrec ((loop
+  		   (lambda (pos)
+  		     (if (= pos ($string-length x))
+  			 #t
+  			 (if ($= ($string-ref x pos) ($string-ref y pos))
+  			     (loop ($+ pos 1))
+  			     #f
+  			     )))))
+  	   (loop 0))	     
+          #f)))
 
 ;; (define eqv?
 ;;   (lambda (x y)
@@ -79,22 +87,15 @@
   (lambda (x)
     ($eq? x '())))
 
+
 (define list?
   (lambda (x)
-    (if (eq? x '())
-	#t
-	(if (pair? x)
-	    (list? (cdr x))
-	    #f))))
-
-;(define list?
-;  (lambda (x)
-;      (cond (($eq? x '())
-;	     #t)
-;	    (($pair? x) 
-;	       (list? ($cdr x)))
-;	    (else
-;	     #f))))
+      (cond (($eq? x '())
+	     #t)
+	    (($pair? x) 
+	       (list? ($cdr x)))
+	    (else
+	     #f))))
 
 ;; ;; (define member
 ;; ;;   (lambda (x lst)
