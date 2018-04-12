@@ -118,28 +118,40 @@
 
 ;; (define string=?
 ;;   (lambda (x y)
-;;     (let ((len ($string-length x)))
-;;       (and ($= len ($string-length y))
-;;            (let loop ((i 0))
-;;              (or ($= i len)
-;;                  (let ((cx ($char->integer ($string-ref x i)))
-;;                        (cy ($char->integer ($string-ref y i))))
-;;                    (and ($= cx cy)
-;;                         (loop ($+ i 1))))))))))
+;;     (if (and ($string? x)
+;;              ($string? y)
+;;              ($= ($string-length x) ($string-length y)))
+;;         (let loop ((pos 0))
+;;           (if ($= pos ($string-length x))
+;;               #t
+;;               (if ($= ($string-ref x pos) ($string-ref y pos))
+;;                   (loop ($+ pos 1))
+;;                   #f
+;;                   )))
+;;         #f)))
 
-;; (define string<?
-;;   (lambda (x y)
-;;     (let* ((len-x ($string-length x))
-;;            (len-y ($string-length y))
-;;            (len (if ($< len-x len-y) len-x len-y)))
-;;       (let loop ((i 0))
-;;         (if ($= i len)
-;;             ($< len-x len-y)
-;;             (let ((cx ($char->integer ($string-ref x i)))
-;;                   (cy ($char->integer ($string-ref y i))))
-;;               (or ($< cx cy)
-;;                   (and ($= cx cy)
-;;                        (loop ($+ i 1))))))))))
+(define string=?
+  (lambda (x y)
+    (let ((len ($string-length x)))
+      (and ($= len ($string-length y))
+           (let loop ((i 0))
+             (or ($= i len)
+                 (and ($eq? ($string-ref x i) ($string-ref y i))
+                      (loop ($+ i 1))))))))))
+
+(define string<?
+  (lambda (x y)
+    (let* ((len-x ($string-length x))
+           (len-y ($string-length y))
+           (len (if ($< len-x len-y) len-x len-y)))
+      (let loop ((i 0))
+        (if ($= i len)
+            ($< len-x len-y)
+            (let ((cx ($char->integer ($string-ref x i)))
+                  (cy ($char->integer ($string-ref y i))))
+              (or ($< cx cy)
+                  (and ($= cx cy)
+                       (loop ($+ i 1))))))))))
 
 ;; (define string=?
 ;;   (lambda (x y)
@@ -215,19 +227,7 @@
 ;;           (loop 0))	     
 ;;         #f)))
 
-(define string=?
-  (lambda (x y)
-    (if (and ($string? x)
-             ($string? y)
-             ($= ($string-length x) ($string-length y)))
-        (let loop ((pos 0))
-          (if ($= pos ($string-length x))
-              #t
-              (if ($= ($string-ref x pos) ($string-ref y pos))
-                  (loop ($+ pos 1))
-                  #f
-                  )))
-        #f)))
+
 
 (define append
   (lambda (x y)
