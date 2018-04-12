@@ -62,10 +62,10 @@
                              (map assign-conv
                                   (map alpha-conv expanded-ast)))))
 	 (hoisted-ast (begin
-;		        (display "closed-ast \n")
-;			(pp closed-ast)
-;			(display "\n")
-		       (hoist-closure-2 closed-ast)))
+		        ;; (display "closed-ast \n")
+			;; (pp closed-ast)
+			;; (display "\n")
+                        (hoist-closure-2 closed-ast)))
 				
          (ir-code       (begin
 ;			  (display "hoisted ast \n")

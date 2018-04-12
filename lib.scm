@@ -44,11 +44,11 @@
 (define string=?
   (lambda (x y)
     (let ((len ($string-length x)))
-      (and ($= len ($string-length y))
+      (and (= len ($string-length y))
            (let loop ((i 0))
-             (let ((cx ($char->integer ($string-ref x i)))
-                   (cy ($char->integer ($string-ref y i))))
-               (or ($= i len)
+             (or ($= i len)
+                 (let ((cx ($char->integer ($string-ref x i)))
+                       (cy ($char->integer ($string-ref y i))))
                    (and ($= cx cy)
                         (loop ($+ i 1))))))))))
 
@@ -150,16 +150,17 @@
 
 (define string<?
   (lambda (x y)
-    (let ((len (if ($< ($string-length x) ($string-length y))
-                   ($string-length x)
-                   ($string-length y))))
+    (let* ((len-x ($string-length x))
+           (len-y ($string-length y))
+           (len (if ($< len-x len-y) len-x len-y)))
       (let loop ((i 0))
-        (let ((cx ($char->integer ($string-ref x i)))
-              (cy ($char->integer ($string-ref y i))))
-          (and ($< i len)
-               (or ($< cx cy)
-                   (and ($= cx cy)
-                        (loop ($+ i 1))))))))))
+        (if ($= i len)
+            (< len-x len-y)
+            (let ((cx ($char->integer ($string-ref x i)))
+                  (cy ($char->integer ($string-ref y i))))
+              (or ($< cx cy)
+                  (and ($= cx cy)
+                       (loop ($+ i 1))))))))))
 
 ;; ;; (define read
 ;; ;;   (lambda ()
