@@ -50,7 +50,7 @@
                    (cy ($char->integer ($string-ref y i))))
                (or ($= i len)
                    (and ($= cx cy)
-                        (loop (+ i 1))))))))))
+                        (loop ($+ i 1))))))))))
 
 (define eqv?
   (lambda (x y)
@@ -84,7 +84,7 @@
 
 (define list?
   (lambda (x)
-    (or (eq? x '())
+    (or ($eq? x '())
         (and ($pair? x)
              (list? ($cdr x))))))
 
@@ -159,7 +159,7 @@
           (and ($< i len)
                (or ($< cx cy)
                    (and ($= cx cy)
-                        (loop (+ i 1))))))))))
+                        (loop ($+ i 1))))))))))
 
 ;; ;; (define read
 ;; ;;   (lambda ()
