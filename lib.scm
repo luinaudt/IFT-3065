@@ -41,17 +41,6 @@
 
 ;; Fonctions prédéfinies
 
-(define string=?
-  (lambda (x y)
-    (let ((len ($string-length x)))
-      (and (= len ($string-length y))
-           (let loop ((i 0))
-             (or ($= i len)
-                 (let ((cx ($char->integer ($string-ref x i)))
-                       (cy ($char->integer ($string-ref y i))))
-                   (and ($= cx cy)
-                        (loop ($+ i 1))))))))))
-
 (define eqv?
   (lambda (x y)
     (if (and ($number? x) ($number? y))
@@ -112,27 +101,6 @@
 ;;               first
 ;;               (assoc k ($cdr lst)))))))
 
-(define append
-  (lambda (x y)
-    (if ($eq? x '())
-        y
-        ($cons ($car x)
-               (append ($cdr x) y)))))
-
-(define reverse
-  (lambda (x)
-    (let loop ((x x) (acc '()))
-      (if ($eq? x '())
-          acc
-          (loop ($cdr x)
-                ($cons ($car x) acc))))))
-
-(define length
-  (lambda (x)
-    (if ($eq? x '())
-        0
-        ($+ 1 (length ($cdr x))))))
-
 (define map
   (lambda (f lst)
     (if ($eq? lst '())
@@ -161,6 +129,38 @@
               (or ($< cx cy)
                   (and ($= cx cy)
                        (loop ($+ i 1))))))))))
+
+(define string=?
+  (lambda (x y)
+    (let ((len ($string-length x)))
+      (and (= len ($string-length y))
+           (let loop ((i 0))
+             (or ($= i len)
+                 (let ((cx ($char->integer ($string-ref x i)))
+                       (cy ($char->integer ($string-ref y i))))
+                   (and ($= cx cy)
+                        (loop ($+ i 1))))))))))
+
+(define append
+  (lambda (x y)
+    (if ($eq? x '())
+        y
+        ($cons ($car x)
+               (append ($cdr x) y)))))
+
+(define reverse
+  (lambda (x)
+    (let loop ((x x) (acc '()))
+      (if ($eq? x '())
+          acc
+          (loop ($cdr x)
+                ($cons ($car x) acc))))))
+
+(define length
+  (lambda (x)
+    (if ($eq? x '())
+        0
+        ($+ 1 (length ($cdr x))))))
 
 ;; ;; (define read
 ;; ;;   (lambda ()
