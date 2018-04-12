@@ -118,7 +118,6 @@
                      (let ((old-fs fs))
                        (begin
 			 (pop-fs)
-			 ;;(set! fs (+ fs 1))
 			 (debug fs expr)
                          (list "  mov   8*" pos "(%rsp), %rdi\n"
 			       "  mov   (%rsp), %rax\n"

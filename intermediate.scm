@@ -105,12 +105,8 @@
                      (target-fs (+ fs 1)))
                 ;; push vals on stack and compile body with extended environment
                 (append (list `(comment "let"))
-			;;(begin
-			;;  (set! fs (+ fs 1))
-			;;  (list '(save-cont 0)))
 			(push-on-stack-ir vals env)
                         (compile-ir-body body extended-env)
-			;;(list `(rest-cont ,target-fs))
                         (begin
                           (set! fs target-fs)
                           (list `(check-stack-integrity ,target-fs))
@@ -120,8 +116,9 @@
               (let* ((fv-cnt (length fv))
                      (ir-code
                       (append (compile-ir code env)
-                              (list `(comment "make closure"))
-                              (list `(close ,fv-cnt)))))
+			      (push-on-stack-ir fv env)
+			      (list `(comment "make closure"))
+			      (list `(close ,fv-cnt)))))
                 (begin
                   (set! fs (- fs fv-cnt))
                   ir-code)))
@@ -456,7 +453,8 @@
                               (begin ;; (pp "fin args")
                                      (compile-ir E0 env))
                               (list `(comment "the call"))
-                              (list `(call ,nb-params)))))
+			      (begin (set! fs (+ fs 1))
+				     (list `(call ,nb-params))))))
                 ;; (pp "proc")
                 ;; (pp fs)
                 (set! fs (- fs nb-params))
@@ -491,7 +489,7 @@
     (if (> start end)
         '()
         (cons start (range (+ start 1) end)))))
-;;(trace compile-ir)
+;(trace compile-ir)
 ;;(trace compile-ir-program)
 ;;(trace gen-const)
 ;;(trace gen-const-helper)
