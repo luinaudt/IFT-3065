@@ -131,7 +131,7 @@
 	  ((char=? c #\f)
            (read-char port)
            '#f)
-	  ((char=? #\!)
+	  ((char=? c #\!)
 	   (read-char port)
 	   (read-special-value port))
 	  ((char=? c #\\)
