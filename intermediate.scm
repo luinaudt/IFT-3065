@@ -153,7 +153,30 @@
              (($cdr ,p)
               (append (compile-ir p env)
                       (list '(cdr))))
-
+	     ((set! ,v ,c)
+	      (let ((var (assoc v genv)))
+		(if var
+		    (compile-ir `(define ,v ,c) env) 
+		    (append (compile-ir c env)
+			    (compile-ir v env)
+			    (begin
+			      (set! fs (- fs 2))
+			      (list '(pop_mem)))
+			    ))))
+	     (($string-set! ,s ,pos ,c) 
+	      (begin (set! fs (+ 0 fs))
+		     (append ;;(list `(comment ,(string-append "string set " (string c))))
+		      (compile-ir c env)
+		      (compile-ir s env);;on récupère la position de str
+		      (compile-ir pos env);;on calcul la position du caractère a modifier
+		      (begin
+			(set! fs (- fs 3))
+			(list '(push_lit 1)
+			      '(add)
+			      '(push_tag 3)
+			      '(sub)
+			      '(add) ;;on détermine l'adresse (la représentation nous la garde
+			      '(pop_mem)))))) ;;on doit mettre dans le tas à la position
              (($set-car! ,p ,e)
               (let ((ir-code
                      (append (compile-ir e env)
@@ -181,7 +204,7 @@
               (append (compile-ir e env)
                       (list `(push_tag 2)
                             `(sub))))
-             
+	     
              ((if ,cond ,E0)
               (compile-ir `(if ,cond ,E0 #!void)))
              ;;(let ((labend (label-gensym)))
@@ -402,20 +425,6 @@
 				     '(sub)
 				     '(add)
 				     '(push_mem))))))
-	     (($string-set! ,s ,pos ,c) 
-	      (begin (set! fs (+ 0 fs))
-		     (append ;;(list `(comment ,(string-append "string set " (string c))))
-			     (compile-ir c env)
-			     (compile-ir s env);;on récupère la position de str
-			     (compile-ir pos env);;on calcul la position du caractère a modifier
-			     (begin
-			       (set! fs (- fs 3))
-			       (list '(push_lit 1)
-				     '(add)
-				     '(push_tag 3)
-				     '(sub)
-				     '(add) ;;on détermine l'adresse (la représentation nous la garde
-				     '(pop_mem)))))) ;;on doit mettre dans le tas à la position
 	     
              ;; other litterals
              (,lit when (constant? lit)
