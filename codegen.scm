@@ -373,9 +373,9 @@
                        (debug fs expr)
                        (list "  pop   8(%r10)\n"
                              "  pop   (%r10)\n"
-                             "  push  %r10\n"
-                             "  add   $6, (%rsp)  # tag for a pair\n"
-                             "  add   $16, %r10   # update heap-ptr\n")))
+                             "  lea   6(%r10), %rax\n"
+                             "  add   $16, %r10   # update heap-ptr\n"
+                             "  push  %rax\n")))
 
                     ((car)
                      (list "  pop   %rax\n"
@@ -398,7 +398,8 @@
                              "  pop   2(%rdi)\n")))
                     
 		    ((comment ,val)
-		     (list "");"\n# fs = " fs " (" val ")\n")
+		     ;;(list "")
+                     (list "\n# fs = " fs " (" val ")\n")
 		     ))))
 
         (append code (compile-bloc (cdr expr))))))

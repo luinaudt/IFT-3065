@@ -72,8 +72,8 @@
                                       (set! genv (cons (cons var gcnt) genv))
                                       (set! gcnt (+ gcnt 1))
                                       (compile-ir ex env))
-                                    (list `(comment ("def " ,var)))
-                                    (list `(pop_glo ,name)))))))
+                                    (list `(comment ("def " ,var))
+                                          `(pop_glo ,name)))))))
                 (begin
                   (set! fs (- fs 1))
                   ir-code)))
@@ -153,16 +153,19 @@
              (($cdr ,p)
               (append (compile-ir p env)
                       (list '(cdr))))
+             
 	     ((set! ,v ,c)
 	      (let ((var (assoc v genv)))
 		(if var
-		    (compile-ir `(define ,v ,c) env) 
+		    (append (compile-ir `(define ,v ,c) env)
+                            (list `(push_lit #!void)))
 		    (append (compile-ir c env)
 			    (compile-ir v env)
 			    (begin
-			      (set! fs (- fs 2))
-			      (list '(pop_mem)))
-			    ))))
+			      (set! fs (- fs 1))
+			      (list '(pop_mem)
+                                    `(push_lit #!void)))))))
+             
 	     (($string-set! ,s ,pos ,c) 
 	      (begin (set! fs (+ 0 fs))
 		     (append ;;(list `(comment ,(string-append "string set " (string c))))
@@ -170,29 +173,32 @@
 		      (compile-ir s env);;on récupère la position de str
 		      (compile-ir pos env);;on calcul la position du caractère a modifier
 		      (begin
-			(set! fs (- fs 3))
+			(set! fs (- fs 2))
 			(list '(push_lit 1)
 			      '(add)
 			      '(push_tag 3)
 			      '(sub)
 			      '(add) ;;on détermine l'adresse (la représentation nous la garde
-			      '(pop_mem)))))) ;;on doit mettre dans le tas à la position
+			      '(pop_mem)
+                              `(push_lit #!void)))))) ;;on doit mettre dans le tas à la position
              (($set-car! ,p ,e)
               (let ((ir-code
                      (append (compile-ir e env)
                              (compile-ir p env)
-                             (list `(set-car!)))))
+                             (list `(set-car!)
+                                   `(push_lit #!void)))))
                 (begin
-                  (set! fs (- fs 2))
+                  (set! fs (- fs 1))
                   ir-code)))
 
              (($set-cdr! ,p ,e)
               (let ((ir-code
                      (append (compile-ir e env)
                              (compile-ir p env)
-                             (list `(set-cdr!)))))
+                             (list `(set-cdr!)
+                                   `(push_lit #!void)))))
                 (begin
-                  (set! fs (- fs 2))
+                  (set! fs (- fs 1))
                   ir-code)))
 
              (($integer->char ,e)
@@ -225,13 +231,12 @@
 			(list `(jmpe ,labfalse))
 			(compile-ir E0 env)
 			(list `(jmp ,labend))
-			(list `(lab ,labfalse)) ;;faux
+			(list `(lab ,labfalse))   ;; faux
 			(begin
 			  (set! fs (- fs 1))
 			  (list '(fs-adjust)))
 			(compile-ir E1 env)
-			(list `(lab ,labend))   ;;fin
-		)))
+			(list `(lab ,labend)))))  ;; fin
              
 	     (($println ,ex)
               (begin
