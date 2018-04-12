@@ -2,6 +2,6 @@
 (println (char<? #\a #\b))
 (println (char<? #\b #\a))
 
-;#t
 ;#f
+;#t
 ;#f
