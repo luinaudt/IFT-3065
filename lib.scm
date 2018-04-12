@@ -77,6 +77,19 @@
         (and ($pair? x)
              (list? ($cdr x))))))
 
+(define length
+  (lambda (x)
+    (if ($eq? x '())
+        0
+        ($+ 1 (length ($cdr x))))))
+
+(define map
+  (lambda (f lst)
+    (if ($eq? lst '())
+        '()
+        ($cons (f ($car lst))
+               (map f ($cdr lst))))))
+
 ;; (define member
 ;;   (lambda (x lst)
 ;;     (cond ((null? lst)
@@ -100,13 +113,6 @@
 ;;                   )
 ;;               first
 ;;               (assoc k ($cdr lst)))))))
-
-(define map
-  (lambda (f lst)
-    (if ($eq? lst '())
-        '()
-        ($cons (f ($car lst))
-               (map f ($cdr lst))))))
 
 (define char=?
   (lambda (x y)
@@ -141,10 +147,10 @@
 
 (define append
   (lambda (x y)
-    (if (eq? x '())
+    (if ($eq? x '())
         y
-        (cons (car x)
-               (append (cdr x) y)))))
+        ($cons ($car x)
+               (append ($cdr x) y)))))
 
 (define reverse
   (lambda (x)
@@ -153,12 +159,6 @@
           acc
           (loop ($cdr x)
                 ($cons ($car x) acc))))))
-
-(define length
-  (lambda (x)
-    (if ($eq? x '())
-        0
-        ($+ 1 (length ($cdr x))))))
 
 ;; ;; (define read
 ;; ;;   (lambda ()
