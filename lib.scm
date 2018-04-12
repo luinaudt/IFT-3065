@@ -123,7 +123,7 @@
            (let loop ((i 0))
              (or ($= i len)
                  (and ($eq? ($string-ref x i) ($string-ref y i))
-                      (loop ($+ i 1))))))))))
+                      (loop ($+ i 1)))))))))
 
 (define string<?
   (lambda (x y)
