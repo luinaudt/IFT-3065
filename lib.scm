@@ -21,11 +21,11 @@
 (define char->integer (lambda (x) ($char->integer x)))
 (define char?         (lambda (x) ($char? x)))
 
-(define make-string   (lambda (x)   ($make-string x)))
-(define string-ref    (lambda (x y) ($string-ref x y)))
+(define make-string   (lambda (x)     ($make-string x)))
+(define string-ref    (lambda (x y)   ($string-ref x y)))
 (define string-set!   (lambda (x y z) ($string-set! x y z)))
-(define string-length (lambda (x) ($string-length x)))
-(define string?       (lambda (x)   ($string? x)))
+(define string-length (lambda (x)     ($string-length x)))
+(define string?       (lambda (x)     ($string? x)))
 
 (define cons     (lambda (x y) ($cons x y)))
 (define car      (lambda (x)   ($car x)))
@@ -37,37 +37,15 @@
 (define procedure? (lambda (x)   ($procedure? x)))
 (define eq?        (lambda (x y) ($eq? x y)))
 
-;;(define make-vector (lambda (l d) ($make-vector l d)))
-;;(define vector-length (lambda (x) ($vector-length x)))
-;;(define vector-ref (lambda (vec p) ($vector-ref vec p)))
-;;(define vector-set! (lambda (vec p o) ($vector-set! vec p o)))
-;;(define vector? (lambda (vec) ($vector? vec)))
-
 ;;;============================================================================
 
 ;; Fonctions prédéfinies
 
- (define string=?
-   (lambda (x y)
-     (if (and ($string? x)
-              ($string? y)
-              ($= ($string-length x) ($string-length y)))
- 	 (letrec ((loop
-  		   (lambda (pos)
-  		     (if (= pos ($string-length x))
-  			 #t
-  			 (if ($= ($string-ref x pos) ($string-ref y pos))
-  			     (loop ($+ pos 1))
-  			     #f
-  			     )))))
-  	   (loop 0))	     
-          #f)))
-
- (define eqv?
-   (lambda (x y)
-     (if (and ($number? x) ($number? y))
-         ($= x y)
-         ($eq? x y))))
+(define eqv?
+  (lambda (x y)
+    (if (and ($number? x) ($number? y))
+        ($= x y)
+        ($eq? x y))))
 
 ;; (define equal?
 ;;   (lambda (x y)
@@ -81,9 +59,9 @@
 ;;           (else
 ;;            (eqv? x y)))))
 
-;; (define not
-;;   (lambda (x)
-;;     (if ($eq? x #f) #t #f)))
+(define not
+  (lambda (x)
+    ($eq? x #f)))
 
 (define boolean?
   (lambda (x)
@@ -93,76 +71,154 @@
   (lambda (x)
     ($eq? x '())))
 
-
 (define list?
   (lambda (x)
-      (cond (($eq? x '())
-	     #t)
-	    (($pair? x) 
-	       (list? ($cdr x)))
-	    (else
-	     #f))))
+    (or ($eq? x '())
+        (and ($pair? x)
+             (list? ($cdr x))))))
 
-;; ;; (define member
-;; ;;   (lambda (x lst)
-;; ;;     (cond ((null? lst)
-;; ;;            #f)
-;; ;;           ((equal? x ($car lst))
-;; ;;            lst)
-;; ;;           (else
-;; ;;            (member x ($cdr lst))))))
+;; (define member
+;;   (lambda (x lst)
+;;     (cond ((null? lst)
+;;            #f)
+;;           ((equal? x ($car lst))
+;;            lst)
+;;           (else
+;;            (member x ($cdr lst))))))
 
-;; ;; (define assoc
-;; ;;   (lambda (k lst)
-;; ;;     (cond ((null? lst)
-;; ;;            #f)
-;; ;;           ((equal? k ($car ($car lst)))
-;; ;;            ($car lst))
-;; ;;           (else
-;; ;;            (assoc k ($cdr lst))))))
+;; (define assoc
+;;   (lambda (x lst)
+;;     (if ($eq? lst '())
+;;         #f
+;;         (let* ((first ($car lst))
+;;                (key ($car first)))
+;;           (if (or (and ($string? x)
+;;                        ($string? key)_
+;;                        (string=? lst ($car first)))
+;;                   (and ($pair? lst)
+;;                        ($pair? first)
+;;                   )
+;;               first
+;;               (assoc k ($cdr lst)))))))
 
-;; ;; (define append
-;; ;;   (lambda (x y)
-;; ;;     (if (null? x)
-;; ;;         y
-;; ;;         ($cons ($car x)
-;; ;;                (append ($cdr x) y)))))
+(define map
+  (lambda (f lst)
+    (if ($eq? lst '())
+        '()
+        ($cons (f ($car lst))
+               (map f ($cdr lst))))))
 
-;; ;; (define reverse
-;; ;;   (lambda (x)
-;; ;;     (let loop ((x x) (acc '()))
-;; ;;       (if (null? x)
-;; ;;           acc
-;; ;;           (loop ($cdr x)
-;; ;;                 ($cons ($car x) acc))))))
+(define char=?
+  (lambda (x y)
+    ($= ($char->integer x) ($char->integer y))))
 
-;; ;; (define length
-;; ;;   (lambda (x)
-;; ;;     (if (null? x)
-;; ;;         0
-;; ;;         ($+ 1 (length ($cdr x))))))
+(define char<?
+  (lambda (x y)
+    ($< ($char->integer x) ($char->integer y))))
 
-;; ;; (define map
-;; ;;   (lambda (f lst)
-;; ;;     (if (null? lst)
-;; ;;         '()
-;; ;;         ($cons (f ($car lst))
-;; ;;                (map f ($cdr lst))))))
+;; (define string=?
+;;   (lambda (x y)
+;;     (let ((len ($string-length x)))
+;;       (and ($= len ($string-length y))
+;;            (let loop ((i 0))
+;;              (or ($= i len)
+;;                  (let ((cx ($char->integer ($string-ref x i)))
+;;                        (cy ($char->integer ($string-ref y i))))
+;;                    (and ($= cx cy)
+;;                         (loop ($+ i 1))))))))))
 
-;; ;; (define char=?
-;; ;;   (lambda (x y)
-;; ;;     ($= ($char->integer x) ($char->integer y))))
+;; (define string<?
+;;   (lambda (x y)
+;;     (let* ((len-x ($string-length x))
+;;            (len-y ($string-length y))
+;;            (len (if ($< len-x len-y) len-x len-y)))
+;;       (let loop ((i 0))
+;;         (if ($= i len)
+;;             ($< len-x len-y)
+;;             (let ((cx ($char->integer ($string-ref x i)))
+;;                   (cy ($char->integer ($string-ref y i))))
+;;               (or ($< cx cy)
+;;                   (and ($= cx cy)
+;;                        (loop ($+ i 1))))))))))
 
-;; ;; (define char<?
-;; ;;   (lambda (x y)
-;; ;;     ($< ($char->integer x) ($char->integer y))))
+;; (define string=?
+;;   (lambda (x y)
+;;     (let ((len (string-length x)))
+;;       (and (= len (string-length y))
+;;            (letrec ((loop
+;;                      (lambda (i)
+;;                        (or (= i len)
+;;                            (let ((cx (char->integer (string-ref x i)))
+;;                                  (cy (char->integer (string-ref y i))))
+;;                              (and (= cx cy)
+;;                                   (loop (+ i 1))))))))
+;;              (loop 0))))))
 
-;; ;; (define string<?
-;; ;;   (lambda (x y)
-;; ;;     (if (and ($string? x)
-;; ;;              ($string? y))
-;; ;;         ;; compare here
-;; ;;         #f)))
+;; (define string<?
+;;   (lambda (x y)
+;;     (let* ((len-x (string-length x))
+;;            (len-y (string-length y))
+;;            (len (if (< len-x len-y) len-x len-y)))
+;;       (letrec ((loop
+;;                 (lambda (i)
+;;                   (if (= i len)
+;;                       (< len-x len-y)
+;;                       (let ((cx (char->integer (string-ref x i)))
+;;                             (cy (char->integer (string-ref y i))))
+;;                         (or (< cx cy)
+;;                             (and (= cx cy)
+;;                                  (loop (+ i 1)))))))))
+;;         (loop 0)))))
+
+(define string=?
+  (lambda (x y)
+    (let ((len ($string-length x)))
+      (and ($= len ($string-length y))
+           (letrec ((loop
+                     (lambda (i)
+                       (or ($= i len)
+                           (let ((cx ($char->integer ($string-ref x i)))
+                                 (cy ($char->integer ($string-ref y i))))
+                             (and ($= cx cy)
+                                  (loop ($+ i 1))))))))
+             (loop 0))))))
+
+(define string<?
+  (lambda (x y)
+    (let* ((len-x ($string-length x))
+           (len-y ($string-length y))
+           (len (if ($< len-x len-y) len-x len-y)))
+      (letrec ((loop
+                (lambda (i)
+                  (if ($= i len)
+                      ($< len-x len-y)
+                      (let ((cx ($char->integer ($string-ref x i)))
+                            (cy ($char->integer ($string-ref y i))))
+                        (or ($< cx cy)
+                            (and ($= cx cy)
+                                 (loop ($+ i 1)))))))))
+        (loop 0)))))
+
+(define append
+  (lambda (x y)
+    (if ($eq? x '())
+        y
+        ($cons ($car x)
+               (append ($cdr x) y)))))
+
+(define reverse
+  (lambda (x)
+    (let loop ((x x) (acc '()))
+      (if ($eq? x '())
+          acc
+          (loop ($cdr x)
+                ($cons ($car x) acc))))))
+
+(define length
+  (lambda (x)
+    (if ($eq? x '())
+        0
+        ($+ 1 (length ($cdr x))))))
 
 ;; ;; (define read
 ;; ;;   (lambda ()
