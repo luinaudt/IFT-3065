@@ -47,17 +47,24 @@
         ($= x y)
         ($eq? x y))))
 
-;; (define equal?
-;;   (lambda (x y)
-;;     (cond (($pair? x)
-;;            (and ($pair? y)
-;;                 (equal? ($car x) ($car y))
-;;                 (equal? ($cdr x) ($cdr y))))
-;;           ;;(($string? x)
-;;           ;; (and ($string? y)
-;;           ;;      (string=? x y)))
-;;           (else
-;;            (eqv? x y)))))
+(define equal?
+   (lambda (x y)
+     (cond (($pair? x)
+            (and ($pair? y)
+                 (equal? ($car x) ($car y))
+                 (equal? ($cdr x) ($cdr y))))
+           (($string? x)
+             (and ($string? y)
+		  (let ((len ($string-length x)))
+		    (and ($= len ($string-length y))
+			 (let loop ((i 0))
+			   (or ($= i len)
+			       (and ($eq? ($string-ref x i) ($string-ref y i))
+				    (loop ($+ i 1)))))))))
+           (else
+	    (if (and ($number? x) ($number? y))
+		($= x y)
+		($eq? x y))))))
 
 (define not
   (lambda (x)
