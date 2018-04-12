@@ -81,12 +81,20 @@
 
 (define list?
   (lambda (x)
-    (cond (($eq? x '())
-           #t)
-          (($pair? x)
-           (list? ($cdr x)))
-          (else
-           #f))))
+    (if (eq? x '())
+	#t
+	(if (pair? x)
+	    (list? (cdr x))
+	    #f))))
+
+;(define list?
+;  (lambda (x)
+;      (cond (($eq? x '())
+;	     #t)
+;	    (($pair? x) 
+;	       (list? ($cdr x)))
+;	    (else
+;	     #f))))
 
 ;; ;; (define member
 ;; ;;   (lambda (x lst)

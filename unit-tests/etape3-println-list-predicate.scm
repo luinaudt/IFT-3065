@@ -6,7 +6,8 @@
 (define p '(1 . 2))
 (define l '(1 2 3))
 (define f println)
-
+(println (car l))
+(println (cdr l))
 (println (list? x))
 (println (list? b))
 (println (list? c))
@@ -16,6 +17,8 @@
 (println (list? l))
 (println (list? f))
 
+;1
+;(2 3)
 ;#f
 ;#f
 ;#f

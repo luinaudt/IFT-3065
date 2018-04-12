@@ -203,11 +203,12 @@
 			(compile-ir E0 env)
 			(list `(jmp ,labend))
 			(list `(lab ,labfalse)) ;;faux
-			(compile-ir E1 env)
-			(list `(lab ,labend))   ;;fin
 			(begin
 			  (set! fs (- fs 1))
-			  (list '(fs-adjust))))))
+			  (list '(fs-adjust)))
+			(compile-ir E1 env)
+			(list `(lab ,labend))   ;;fin
+		)))
              
 	     (($println ,ex)
               (begin
@@ -314,7 +315,6 @@
                       (list '(push_tag 6))
                       (list '(cmp))
                       (list '(equal?))))
-             
              (($procedure? ,e1)
               (append (compile-ir e1 env)
                       (list '(get_tag))
@@ -453,11 +453,11 @@
                               (begin ;; (pp "fin args")
                                      (compile-ir E0 env))
                               (list `(comment "the call"))
-			      (begin (set! fs (+ fs 1))
+			      (begin ;;(set! fs (+ fs 1))
 				     (list `(call ,nb-params))))))
                 ;; (pp "proc")
                 ;; (pp fs)
-                (set! fs (- fs nb-params))
+                (set! fs ( + 1 old-fs));(- fs nb-params))
                 ;; (display "call ")
                 ;; (pp nb-params)
                 ;; (pp fs)
