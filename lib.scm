@@ -92,14 +92,14 @@
 
 (define map
   (lambda (f lst)
-    (if (eq? lst '())
+    (if ($eq? lst '())
         '()
-        (cons (f (car lst))
-               (map f (cdr lst))))))
+        (cons (f ($car lst))
+               (map f ($cdr lst))))))
 
 (define member
    (lambda (x lst)
-     (cond ((null? lst)
+     (cond (($eq? lst '())
             #f)
            ((let equal? ((x x) (y ($car lst)))
 	      (cond (($pair? x)
