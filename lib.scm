@@ -36,6 +36,10 @@
 
 (define procedure? (lambda (x)   ($procedure? x)))
 (define eq?        (lambda (x y) ($eq? x y)))
+(define make-vector (lambda (l d) ($make-vector l d)))
+(define vector-length (lambda (x) ($vector-length x)))
+(define vector-ref (lambda (vec p) ($vector-ref vec p)))
+(define vector-set! (lambda (vec p o) ($vector-set! vec p o)))
 
 ;;;============================================================================
 
@@ -58,7 +62,7 @@
           #f)))
 
  (define eqv?
-  (lambda (x y)
+   (lambda (x y)
      (if (and ($number? x) ($number? y))
          ($= x y)
          ($eq? x y))))
