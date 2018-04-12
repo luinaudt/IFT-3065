@@ -97,14 +97,30 @@
         (cons (f (car lst))
                (map f (cdr lst))))))
 
-;; (define member
-;;   (lambda (x lst)
-;;     (cond ((null? lst)
-;;            #f)
-;;           ((equal? x ($car lst))
-;;            lst)
-;;           (else
-;;            (member x ($cdr lst))))))
+(define member
+   (lambda (x lst)
+     (cond ((null? lst)
+            #f)
+           ((let equal? ((x x) (y ($car lst)))
+	      (cond (($pair? x)
+		     (and ($pair? y)
+			  (equal? ($car x) ($car y))
+			  (equal? ($cdr x) ($cdr y))))
+		    (($string? x)
+		     (and ($string? y)
+			  (let ((len ($string-length x)))
+			    (and ($= len ($string-length y))
+				 (let loop ((i 0))
+				   (or ($= i len)
+				       (and ($eq? ($string-ref x i) ($string-ref y i))
+					    (loop ($+ i 1)))))))))
+		    (else
+		     (if (and ($number? x) ($number? y))
+			 ($= x y)
+			 ($eq? x y)))))
+            lst)
+           (else
+            (member x ($cdr lst))))))
 
 ;; (define assoc
 ;;   (lambda (x lst)
