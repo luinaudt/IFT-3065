@@ -398,7 +398,8 @@
                              "  pop   2(%rdi)\n")))
                     
 		    ((comment ,val)
-		     (list "");"\n# fs = " fs " (" val ")\n")
+		     ;;(list "")
+                     (list "\n# fs = " fs " (" val ")\n")
 		     ))))
 
         (append code (compile-bloc (cdr expr))))))
