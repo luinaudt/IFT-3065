@@ -141,10 +141,10 @@
 
 (define append
   (lambda (x y)
-    (if ($eq? x '())
+    (if (eq? x '())
         y
-        ($cons ($car x)
-               (append ($cdr x) y)))))
+        (cons (car x)
+               (append (cdr x) y)))))
 
 (define reverse
   (lambda (x)
