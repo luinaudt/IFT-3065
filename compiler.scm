@@ -55,12 +55,12 @@
 ;			  (display "\n")
                           (expand-macros ast)))
 	 (closed-ast    (begin
-;			  (display "expanded ast \n")
-;			  (pp expanded-ast)
-;			  (display "\n")
+			  (display "expanded ast \n")
+			  (pp expanded-ast)
+			  (display "\n")
 			  (map closure-conv
-                             (map assign-conv
-                                  (map alpha-conv expanded-ast)))))
+                               (map assign-conv
+                                    (map alpha-conv expanded-ast)))))
 	 (hoisted-ast (begin
 		        (display "closed-ast \n")
 			(pp closed-ast)
