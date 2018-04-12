@@ -123,7 +123,7 @@
            (len (if ($< len-x len-y) len-x len-y)))
       (let loop ((i 0))
         (if ($= i len)
-            (< len-x len-y)
+            ($< len-x len-y)
             (let ((cx ($char->integer ($string-ref x i)))
                   (cy ($char->integer ($string-ref y i))))
               (or ($< cx cy)
@@ -133,7 +133,7 @@
 (define string=?
   (lambda (x y)
     (let ((len ($string-length x)))
-      (and (= len ($string-length y))
+      (and ($= len ($string-length y))
            (let loop ((i 0))
              (or ($= i len)
                  (let ((cx ($char->integer ($string-ref x i)))
