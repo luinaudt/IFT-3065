@@ -57,11 +57,11 @@
   	   (loop 0))	     
           #f)))
 
-; (define eqv?
- ;  (lambda (x y)
-;     (if (and ($number? x) ($number? y))
-;         ($= x y)
-;         ($eq? x y))))
+ (define eqv?
+  (lambda (x y)
+     (if (and ($number? x) ($number? y))
+         ($= x y)
+         ($eq? x y))))
 
 ;; (define equal?
 ;;   (lambda (x y)
