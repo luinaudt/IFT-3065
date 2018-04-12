@@ -61,20 +61,22 @@
 		      (list '(lab "start"))))
              
 	     ((define ,var ,ex)
-	      (let ((var-val (assoc var genv)))
-                (if var-val
-                    (append (list `(comment ("re-def " ,var)))
-                            (compile-ir ex env)
-                            (list `(pop_glo ,(cdr var-val))
-                                  `(push_lit #!void)))
-                    (let ((name gcnt))
-                      (append (begin
-                                (set! genv (cons (cons var gcnt) genv))
-                                (set! gcnt (+ gcnt 1))
-                                (compile-ir ex env))
-                              (list `(comment ("def " ,var))
-                                    `(pop_glo ,name)
-                                    `(push_lit #!void)))))))
+	      (let* ((var-val (assoc var genv))
+                     (ir-code
+                      (if var-val
+                          (append (list `(comment ("re-def " ,var)))
+                                  (compile-ir ex env)
+                                  (list `(pop_glo ,(cdr var-val))))
+                          (let ((name gcnt))
+                            (append (begin
+                                      (set! genv (cons (cons var gcnt) genv))
+                                      (set! gcnt (+ gcnt 1))
+                                      (compile-ir ex env))
+                                    (list `(comment ("def " ,var))
+                                          `(pop_glo ,name)))))))
+                (begin
+                  (set! fs (- fs 1))
+                  ir-code)))
 	     
              ((lambda ,params . ,body)
               (let* ((proc-name (lambda-gensym))
@@ -155,7 +157,8 @@
 	     ((set! ,v ,c)
 	      (let ((var (assoc v genv)))
 		(if var
-		    (compile-ir `(define ,v ,c) env)
+		    (append (compile-ir `(define ,v ,c) env)
+                            (list `(push_lit #!void)))
 		    (append (compile-ir c env)
 			    (compile-ir v env)
 			    (begin
