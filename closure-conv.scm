@@ -248,7 +248,7 @@
 
     ((let ,bindings . ,E)
      (union (apply union (map (lambda (b) (fv (cadr b))) bindings))
-            (difference (map fv E) (map car bindings))))
+            (difference (apply union (map fv E)) (map car bindings))))
 
     ((if ,E1 ,E2)
      (union (fv E1) (fv E2)))
