@@ -102,10 +102,15 @@
           ((char=? c #\\)
            (read-char port) ;; consume "\"
            (let ((esc-c (peek-char port)))
-             (if (or (char=? esc-c #\")
-                     (char=? esc-c #\\))
-                 (cons (read-char port) (read-string2 port))
-                 (cons c (read-string2 port)))))
+             (cond ((or (char=? esc-c #\")
+			(char=? esc-c #\\))
+		    (cons (read-char port) (read-string2 port)))
+		   ((char=? esc-c #\n)
+		    (begin
+		      (read-char port)
+		      (cons #\newline (read-string2 port))))
+		   (else 
+		    (cons c (read-string2 port))))))
           (else
            (read-char port) ;; consume c
            (cons c (read-string2 port))))))

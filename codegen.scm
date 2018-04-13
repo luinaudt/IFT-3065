@@ -145,7 +145,7 @@
 			     ((symbol? val)
 			      (append (list "push %r10\n"
                                             "add $4, (%rsp)\n"
-					    "# string  " (symbol->string val) "\n")
+					    "# symbole  " (symbol->string val) "\n")
                                       (list (push-string (symbol->string val)))))
 			     ((number? val)
                               (list "  push  $8*" val "\n"))
@@ -155,8 +155,8 @@
                               (list "  push  $2+8*" (char->integer val) "\n"))
 			     ((string? val)
                               (append (list "push %r10\n"
-                                            "add $3, (%rsp)\n"
-					    "# string  " val "\n")
+                                            "add $3, (%rsp)\n")
+				      ;;"# string  " val "\n")
                                       (list (push-string val))))
                              ((boolean? val)
                               (if val
