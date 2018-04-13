@@ -120,8 +120,9 @@
 
     ((define ,v ,E1)
      `(define ,v ,(ac E1)))
-
-    ((lambda ,params ,E)
+    
+    
+    ((lambda ,params ,E) when (list? params)
      (let* ((mut-params
              (map (lambda (p) (cons p (gensym)))
                   (keep mutable? params)))
@@ -136,7 +137,39 @@
                (ac E)
                `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
                            mut-params)
-                   ,(ac E))))))
+		  ,(ac E))))))
+    
+    ((lambda ,params-p ,E) when (pair? params-p)
+     (let* ((params
+	     (begin ;;(pp params-p)
+		    (let map ((lst params-p))
+		      (if (pair? lst)
+			  (cons (car lst) (map (cdr lst)))
+			  (cons lst '())))))
+	    (mut-params
+	     (begin
+	       ;;(pp params)
+	       (map (lambda (p) (cons p (gensym)))
+		    (keep mutable? params))))
+            (params2
+             (map (lambda (p)
+                    (if (mutable? p)
+                        (cdr (assq p mut-params))
+                        p))
+                  params))
+	    (new-params
+	     (begin ;;(pp params2)
+	     (let map ((lst params2))
+	       (if (pair?  (cdr lst))
+		   (cons (car lst) (map (cdr lst)))
+		   (car lst))))))
+       (begin ;;(pp new-params)
+       `(lambda ,new-params
+          ,(if (null? mut-params)
+               (ac E)
+               `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
+                           mut-params)
+		  ,(ac E)))))))
 
     ((let ,bindings ,E)
      (let* ((vars
@@ -260,8 +293,16 @@
     ((define ,v ,E1)
      (union (list v) (fv E1)))
 
-    ((lambda ,params ,E)
+    ((lambda ,params ,E) when (list? params)
      (difference (fv E) params))
+    
+    ((lambda ,params ,E) when (pair? params)
+     (difference (fv E)
+		 (let map ((lst params))
+		   (if (pair? lst)
+		       (cons (cons (car lst) (gensym))
+			     (map (cdr lst)))
+		       (cons (cons lst (gensym)) '())))))
 
     ((let ,bindings . ,E)
      (union (apply union (map (lambda (b) (fv (cadr b))) bindings))
