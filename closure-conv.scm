@@ -194,11 +194,12 @@
     ((define ,v ,E1)
      `(define ,v ,(cc E1)))
 
-    ((lambda ,params ,E)
+    ((lambda ,params . ,E)
      (let ((new-cenv (difference (fv expr) globals)))
        `(make-closure
          (lambda ($this ,@params)
-           ,(closurec E new-cenv globals))
+	   ,@(map (lambda (b) (closurec b new-cenv globals)) E))
+           ;,(closurec E new-cenv globals))
          ,@(map cc new-cenv))))
 
     ((let ,bindings . ,E)

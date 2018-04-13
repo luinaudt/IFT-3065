@@ -58,8 +58,8 @@
 ;			  (display "expanded ast \n")
 ;			  (pp expanded-ast)
 ;			  (display "\n")
-			 (map closure-conv
-                               (map assign-conv
+			  (map closure-conv
+			       (map assign-conv
                                     (map alpha-conv expanded-ast)))))
 	 (hoisted-ast (begin
 ;			(display "closed-ast \n")
