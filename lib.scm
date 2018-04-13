@@ -226,6 +226,22 @@
 		   (begin
 		     (write (quotient x 10))
 		     (write (modulo x 10))))))
+	   (($eq? x #t)
+	    ($write-char #\#)
+	    ($write-char #\t))
+	   (($eq? x #f)
+	    ($write-char #\#)
+	    ($write-char #\f))
+	   (($pair? x)
+	    ($write-char #\()
+	    (let write-pair ((p x))
+	      (begin
+		(write ($car p))
+		(if (not (null? ($cdr p)))
+		    (begin 
+		      ($write-char #\space)
+		      (write-pair ($cdr p))))))
+	    ($write-char #\)))
 	   (else
 	    ($write-char #\#))
 	   )))

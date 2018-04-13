@@ -317,12 +317,6 @@
                       (list '(cmp))
                       (list '(equal?))))
              
-             (($boolean? ,e1)
-              (append (compile-ir e1 env)
-                      (list '(boolean?)
-                            '(cmp)
-                            '(equal?))))
-             
              (($char? ,e1)
               (append (compile-ir e1 env)
                       (list '(get_tag))
