@@ -37,6 +37,8 @@
 (define procedure? (lambda (x)   ($procedure? x)))
 (define eq?        (lambda (x y) ($eq? x y)))
 
+(define symbol? (lambda (x) ($symbol? x)))
+(define symbol->string (lambda (x) ($symbol->string x)))
 ;;;============================================================================
 
 ;; Fonctions prédéfinies
@@ -210,43 +212,50 @@
 		     (write-string x ($+ 1 pos)))))
 	     ($write-char #\")
 	     ))
-	   (($char? x)
-	    (begin
-	      ($write-char #\#)
-	      ($write-char #\\)
-	      ($write-char x)))
-	   (($number? x)
-	    (cond (($< x 0)
-		   (begin
-		     ($write-char #\-)
-		     (write ($- 0 x))))
-		  (($< x 10)
-		   ($write-char ($integer->char ($+ 48 x))))
-		  (else
-		   (begin
-		     (write (quotient x 10))
-		     (write (modulo x 10))))))
-	   (($eq? x #t)
-	    ($write-char #\#)
-	    ($write-char #\t))
-	   (($eq? x #f)
-	    ($write-char #\#)
-	    ($write-char #\f))
-	   (($eq? x '())
-	    ($write-char #\()
-	    ($write-char #\)))
-	   (($pair? x)
-	    ($write-char #\()
-	    (let write-pair ((p x))
-	      (begin
-		(write ($car p))
-		(if (not ($eq? '() ($cdr p)))
-		    (begin 
-		      ($write-char #\space)
-		      (write-pair ($cdr p))))))
-	    ($write-char #\)))
-	   (else
-	    ($write-char #\#))
-	   )))
+	  (($symbol? x)
+	   (let write-string ((x ($symbol->string x)) (pos 0))
+	     (if ($< pos ($string-length x))
+		 (begin
+		   ($write-char ($string-ref x pos))
+		   (write-string x ($+ 1 pos))))))
+	  (($char? x)
+	   (begin
+	     ($write-char #\#)
+	     ($write-char #\\)
+	     ($write-char x)))
+	  (($number? x)
+	   (cond (($< x 0)
+		  (begin
+		    ($write-char #\-)
+		    (write ($- 0 x))))
+		 (($< x 10)
+		  ($write-char ($integer->char ($+ 48 x))))
+		 (else
+		  (begin
+		    (write (quotient x 10))
+		    (write (modulo x 10))))))
+	  
+	  (($eq? x #t)
+	   ($write-char #\#)
+	   ($write-char #\t))
+	  (($eq? x #f)
+	   ($write-char #\#)
+	   ($write-char #\f))
+	  (($eq? x '())
+	   ($write-char #\()
+	   ($write-char #\)))
+	  (($pair? x)
+	   ($write-char #\()
+	   (let write-pair ((p x))
+	     (begin
+	       (write ($car p))
+	       (if (not ($eq? '() ($cdr p)))
+		   (begin 
+		     ($write-char #\space)
+		     (write-pair ($cdr p))))))
+	   ($write-char #\)))
+	  (else
+	   ($write-char #\#))
+	  )))
 
 ;; ;;;============================================================================

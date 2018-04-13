@@ -43,5 +43,7 @@
 		($vector-ref)
 		($vector-set!)
 		($vector?)
+		($symbol?)
+		($symbol->string)
 		($procedure?)
 		($eq?)))

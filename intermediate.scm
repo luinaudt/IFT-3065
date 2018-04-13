@@ -201,6 +201,11 @@
                   (set! fs (- fs 1))
                   ir-code)))
 
+	     (($symbol->string ,e)
+              (append (compile-ir e env)
+                      (list `(push_tag ,1) ;;(+ 2 (* 8 48)))
+                            `(sub))))
+	     
              (($integer->char ,e)
               (append (compile-ir e env)
                       (list `(push_tag ,2) ;;(+ 2 (* 8 48)))
@@ -330,6 +335,12 @@
                       (list '(push_tag 3))
                       (list '(cmp))
                       (list '(equal?))))
+	     (($symbol? ,e1)
+              (append (compile-ir e1 env)
+                      (list '(get_tag))
+                      (list '(push_tag 4))
+                      (list '(cmp))
+                      (list '(equal?))))
              
              (($pair? ,e1)
               (append (compile-ir e1 env)
@@ -360,7 +371,7 @@
                 (begin
                   (set! fs (- fs 1))
                   ir-code)))
-
+	     
              ;; pairs and non-empty lists
              ((quote ,lit) when (not (or (null? lit) (symbol? lit)))
               (let* ((const (gen-const lit))

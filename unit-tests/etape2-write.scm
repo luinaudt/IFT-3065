@@ -22,8 +22,8 @@
 (write-char #\newline)
 (write '( ))
 (write-char #\newline)
-;(write 'bonbon)
-;(write-char #\newline)
+(write 'bonbon)
+(write-char #\newline)
 
 
 ;5
@@ -37,3 +37,4 @@
 ;(4 5 "456" 9)
 ;(4 5 "456" (98 89 9 "hjds"))
 ;()
+;bonbon
