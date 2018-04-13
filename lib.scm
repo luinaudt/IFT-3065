@@ -216,7 +216,16 @@
 	      ($write-char #\\)
 	      ($write-char x)))
 	   (($number? x)
-	    ($write-char x))
+	    (cond (($< x 0)
+		   (begin
+		     ($write-char #\-)
+		     (write ($- 0 x))))
+		  (($< x 10)
+		   ($write-char ($integer->char x)))
+		  (else
+		   (begin
+		     (write (quotient x 10))
+		     (write (modulo x 10))))))
 	   (else
 	    ($write-char #\#))
 	   )))

@@ -203,12 +203,12 @@
 
              (($integer->char ,e)
               (append (compile-ir e env)
-                      (list `(push_tag 2)
+                      (list `(push_tag ,(+ 2 (* 8 48)))
                             `(add))))
 
              (($char->integer ,e)
               (append (compile-ir e env)
-                      (list `(push_tag 2)
+                      (list `(push_tag (+ 2 (* 8 48)))
                             `(sub))))
 	     
              ((if ,cond ,E0)
