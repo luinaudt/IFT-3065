@@ -24,8 +24,8 @@
 (write-char #\newline)
 (write 'bonbon)
 (write-char #\newline)
-
-
+(write println)
+(write-char #\newline)
 ;5
 ;5
 ;#\5
@@ -38,3 +38,4 @@
 ;(4 5 "456" (98 89 9 "hjds"))
 ;()
 ;bonbon
+;#<procedure >

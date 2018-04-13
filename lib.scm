@@ -254,6 +254,14 @@
 		     ($write-char #\space)
 		     (write-pair ($cdr p))))))
 	   ($write-char #\)))
+	  (($procedure? x)
+	   (let write-string ((x "#<procedure ") (pos 0))
+	       (if ($< pos ($string-length x))
+		   (begin
+		     ($write-char ($string-ref x pos))
+		     (write-string x ($+ 1 pos)))))
+	   ($write-char #\>)
+	   )
 	  (else
 	   ($write-char #\#))
 	  )))
