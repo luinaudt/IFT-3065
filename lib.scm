@@ -211,8 +211,18 @@
 	     ($write-char #\")
 	     (let write-string ((x x) (pos 0))
 	       (if ($< pos ($string-length x))
-		   (begin
-		     ($write-char ($string-ref x pos))
+		   (let ((c ($string-ref x pos)))
+		     (cond (($eq? c #\newline)
+			    (begin ($write-char #\\)
+				   ($write-char #\n)))
+			   (($eq? c #\")
+			    (begin ($write-char #\\)
+				   ($write-char c)))
+			   (($eq? c #\\)
+			    (begin ($write-char #\\)
+				   ($write-char c)))
+			   (else
+			      ($write-char c)))
 		     (write-string x ($+ 1 pos)))))
 	     ($write-char #\")
 	     ))
@@ -226,7 +236,15 @@
 	   (begin
 	     ($write-char #\#)
 	     ($write-char #\\)
-	     ($write-char x)))
+	     (cond (($eq? x #\newline) 
+		    ($write-char #\n) ($write-char #\e) ($write-char #\w)
+		    ($write-char #\l) ($write-char #\i) 
+		    ($write-char #\n) ($write-char #\e))
+		   (($eq? x #\space)
+		    ($write-char #\s) ($write-char #\p) ($write-char #\a)
+		    ($write-char #\c) ($write-char #\e))
+		   (else
+		    ($write-char x)))))
 	  (($number? x)
 	   (cond (($< x 0)
 		  (begin

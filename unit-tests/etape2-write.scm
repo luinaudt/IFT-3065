@@ -26,7 +26,7 @@
 (write-char #\newline)
 (write println)
 (write-char #\newline)
-(write "bonjour\n hello")
+(write "bon\"jour\n hello")
 (write-char #\newline)
 ;5
 ;5
@@ -41,4 +41,4 @@
 ;()
 ;bonbon
 ;#<procedure >
-;"bonjour\n hello"
+;"bon\"jour\n hello"
