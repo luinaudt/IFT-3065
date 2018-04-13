@@ -54,10 +54,13 @@
 		   (cons (cons (car lst) (gensym))
 			   (map (cdr lst)))
 		   (cons (cons lst (gensym)) '()))))
-	    (new-env
-	     (begin (pp fresh-params)
-		    (append fresh-params env))))
-       `(lambda ,(map cdr fresh-params)
+	    (new-env (append fresh-params env))
+	    (new-params
+	     (let map ((lst fresh-params))
+	       (if (pair?  (cdr lst))
+		   (cons (cdr (car lst)) (map (cdr lst)))
+		   (cdr (car lst))))))
+       `(lambda (,new-params)
 	  ,(alphac E new-env))))
     
     ((let ,bindings ,E)
