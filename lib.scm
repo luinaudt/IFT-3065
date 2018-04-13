@@ -221,7 +221,7 @@
 		     ($write-char #\-)
 		     (write ($- 0 x))))
 		  (($< x 10)
-		   ($write-char ($integer->char x)))
+		   ($write-char ($integer->char ($+ 48 x))))
 		  (else
 		   (begin
 		     (write (quotient x 10))
