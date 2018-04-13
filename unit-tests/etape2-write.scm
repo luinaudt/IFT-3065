@@ -38,6 +38,10 @@
 (write-char #\newline)
 (write #\newline)
 (write-char #\newline)
+(define str "test---")
+(string-set! str 5 #\space)
+(write str)
+(write-char #\newline)
 ;  5
 ;  5
 ;#\5
@@ -55,3 +59,4 @@
 ;#\space
 ;(1 2 . 3)
 ;#\newline
+;"test- -"

@@ -203,17 +203,17 @@
 
 	     (($symbol->string ,e)
               (append (compile-ir e env)
-                      (list `(push_tag ,1) ;;(+ 2 (* 8 48)))
+                      (list `(push_tag 1)
                             `(sub))))
 	     
              (($integer->char ,e)
               (append (compile-ir e env)
-                      (list `(push_tag ,2) ;;(+ 2 (* 8 48)))
+                      (list `(push_tag 2)
                             `(add))))
 
              (($char->integer ,e)
               (append (compile-ir e env)
-                      (list `(push_tag 2);;(+ 2 (* 8 48)))
+                      (list `(push_tag 2)
                             `(sub))))
 	     
              ((if ,cond ,E0)
@@ -234,14 +234,14 @@
 			  (set! fs (- fs 2))
 			  (list '(cmp)))
 			(list `(jmpe ,labfalse))
-			(compile-ir E0 env)
+			(compile-ir E0 env)  ;; expression si vrai
 			(list `(jmp ,labend))
-			(list `(lab ,labfalse))   ;; faux
+			(list `(lab ,labfalse))
 			(begin
 			  (set! fs (- fs 1))
 			  (list '(fs-adjust)))
-			(compile-ir E1 env)
-			(list `(lab ,labend)))))  ;; fin
+			(compile-ir E1 env)  ;; expression si faux
+			(list `(lab ,labend)))))
              
 	     (($println ,ex)
               (begin
