@@ -38,7 +38,7 @@
     ((define ,v ,E1)
      `(define ,(rename v) ,(ac E1)))
 
-    ((lambda ,params ,E)
+    ((lambda ,params ,E) when (list? params)
      (let* ((fresh-params
              (map (lambda (p) (cons p (gensym)))
                   params))
@@ -47,6 +47,19 @@
        `(lambda ,(map cdr fresh-params)
           ,(alphac E new-env))))
 
+    ((lambda ,params ,E) when (pair? params)
+     (let* ((fresh-params
+	     (let map ((lst params))
+	       (if (pair? lst)
+		   (cons (cons (car lst) (gensym))
+			   (map (cdr lst)))
+		   (cons (cons lst (gensym)) '()))))
+	    (new-env
+	     (begin (pp fresh-params)
+		    (append fresh-params env))))
+       `(lambda ,(map cdr fresh-params)
+	  ,(alphac E new-env))))
+    
     ((let ,bindings ,E)
      (let* ((fresh-vars
              (map (lambda (b) (cons (car b) (gensym)))
