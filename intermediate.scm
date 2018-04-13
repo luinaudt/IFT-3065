@@ -415,6 +415,7 @@
 		      (begin
 			(set! fs (- fs 1))
 			(list '(putchar)))))
+	     
 	     (($read-char)
 	      (begin (set! fs (+ fs 1))
 		     (list '(getchar))))

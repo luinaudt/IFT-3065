@@ -188,9 +188,23 @@
 ;; ;;     ;; TODO
 ;; ;;     ))
 
-;; ;; (define write
-;; ;;   (lambda (x)
-;; ;;     ;; TODO
-;; ;;     ))
+(define write
+  (lambda (x)
+    (cond (($string? x)
+	   (begin
+	     ($write-char #\")
+	     (let write-string ((str x) (pos 0))
+	       (if ($< pos ($string-length x))
+		   (begin
+		     ($write-char ($string-ref str pos))
+		     (write-string str ($+ 1 pos)))))
+	     ($write-char #\")))
+	  
+	  (($char? x)
+	   ($write-char #\#)
+	   ($write-char #\\)
+	   ($write-char x))
+	  (($number? x)
+	   ($write-char #\#)))))
 
 ;; ;;;============================================================================
