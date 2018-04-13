@@ -1,7 +1,11 @@
+(write-char #\ )
+(write-char #\space)
 (write-char #\5)
 (write-char #\newline)
+($write-char #\ )
+($write-char #\space)
 ($write-char #\5)
-(write-char #\newline)
+($write-char #\newline)
 (write #\5)
 (write-char #\newline)
 (write "bonjour")
@@ -28,8 +32,14 @@
 (write-char #\newline)
 (write "bon\"jour\n hello")
 (write-char #\newline)
-;5
-;5
+(write #\space)
+(write-char #\newline)
+(write '(1 2 . 3))
+(write-char #\newline)
+(write #\newline)
+(write-char #\newline)
+;  5
+;  5
 ;#\5
 ;"bonjour"
 ;-5
@@ -42,3 +52,6 @@
 ;bonbon
 ;#<procedure >
 ;"bon\"jour\n hello"
+;#\space
+;(1 2 . 3)
+;#\newline

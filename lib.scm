@@ -224,8 +224,7 @@
 			   (else
 			      ($write-char c)))
 		     (write-string x ($+ 1 pos)))))
-	     ($write-char #\")
-	     ))
+	     ($write-char #\")))
 	  (($symbol? x)
 	   (let write-string ((x ($symbol->string x)) (pos 0))
 	     (if ($< pos ($string-length x))
@@ -236,13 +235,15 @@
 	   (begin
 	     ($write-char #\#)
 	     ($write-char #\\)
-	     (cond (($eq? x #\newline) 
-		    ($write-char #\n) ($write-char #\e) ($write-char #\w)
-		    ($write-char #\l) ($write-char #\i) 
-		    ($write-char #\n) ($write-char #\e))
+	     (cond (($eq? x #\newline)
+                    (begin
+                      ($write-char #\n) ($write-char #\e) ($write-char #\w)
+                      ($write-char #\l) ($write-char #\i) 
+                      ($write-char #\n) ($write-char #\e)))
 		   (($eq? x #\space)
-		    ($write-char #\s) ($write-char #\p) ($write-char #\a)
-		    ($write-char #\c) ($write-char #\e))
+                    (begin
+                      ($write-char #\s) ($write-char #\p) ($write-char #\a)
+                      ($write-char #\c) ($write-char #\e)))
 		   (else
 		    ($write-char x)))))
 	  (($number? x)
@@ -254,35 +255,47 @@
 		  ($write-char ($integer->char ($+ 48 x))))
 		 (else
 		  (begin
-		    (write (quotient x 10))
-		    (write (modulo x 10))))))
-	  
+		    (write ($quotient x 10))
+		    (write ($modulo x 10))))))
 	  (($eq? x #t)
-	   ($write-char #\#)
-	   ($write-char #\t))
+           (begin
+             ($write-char #\#)
+             ($write-char #\t)))
 	  (($eq? x #f)
-	   ($write-char #\#)
-	   ($write-char #\f))
+           (begin
+             ($write-char #\#)
+             ($write-char #\f)))
 	  (($eq? x '())
-	   ($write-char #\()
-	   ($write-char #\)))
+           (begin
+             ($write-char #\()
+             ($write-char #\))))
 	  (($pair? x)
-	   ($write-char #\()
-	   (let write-pair ((p x))
-	     (begin
-	       (write ($car p))
-	       (if (not ($eq? '() ($cdr p)))
-		   (begin 
-		     ($write-char #\space)
-		     (write-pair ($cdr p))))))
-	   ($write-char #\)))
+           (begin
+             ($write-char #\()
+             (write ($car x))
+             (let write-pair ((cdr-x ($cdr x)))
+               (cond (($eq? cdr-x '())
+                      ($write-char #\)))
+                     (($pair? cdr-x)
+                      (begin
+                        ($write-char #\ )
+                        (write ($car cdr-x))
+                        (write-pair ($cdr cdr-x))))
+                     (else
+                      (begin
+                        ($write-char #\ )
+                        ($write-char #\.)
+                        ($write-char #\ )
+                        (write cdr-x)
+                        ($write-char #\))))))))
 	  (($procedure? x)
-	   (let write-string ((x "#<procedure ") (pos 0))
+           (begin
+             (let write-string ((x "#<procedure ") (pos 0))
 	       (if ($< pos ($string-length x))
 		   (begin
 		     ($write-char ($string-ref x pos))
 		     (write-string x ($+ 1 pos)))))
-	   ($write-char #\>))
+             ($write-char #\>)))
 	  (else
 	   ($write-char #\#))
 	  )))
