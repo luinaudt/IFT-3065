@@ -313,7 +313,9 @@ print_ln:
         jz      print_bool
 	cmp	$3, %rbx
 	jz	print_str
-	cmp	$6,%rbx
+	cmp	$4, %rbx
+	jz	print_sym
+	cmp	$6,%rbx	
 	jz	print_list
 	sar	$3, %rax
 	cmp	$2, %rbx
@@ -377,6 +379,22 @@ print_str_tmp:
 	cmp	%rcx, %rdx
 	jne	print_str_tmp
 	jmp	print_ln_end
+print_sym:
+	add	$-4, %rax
+	mov	(%rax), %rcx
+	add	%rax, %rcx
+	mov	%rax, %rdx
+	mov	$0, %rbx
+	cmp	%rcx, %rdx
+	je	print_ln_end
+print_sym_tmp:	
+	add	$8, %rdx	# rbx string pos
+	push 	(%rdx)
+	call 	print_ln
+	cmp	%rcx, %rdx
+	jne	print_sym_tmp
+	jmp	print_ln_end
+	
 print_char:
 	push	%rax
 	call 	putchar

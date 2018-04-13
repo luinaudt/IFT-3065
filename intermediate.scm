@@ -362,7 +362,7 @@
                   ir-code)))
 
              ;; pairs and non-empty lists
-             ((quote ,lit) when (not (null? lit))
+             ((quote ,lit) when (not (or (null? lit) (symbol? lit)))
               (let* ((const (gen-const lit))
                      (const-defs
                       (if (null? const-code)
@@ -382,6 +382,11 @@
                   ;; (display " --> ")
                   ;; (pp lit)
                   ir-code)))
+	     ((quote ,lit) when (symbol? lit)
+	      (begin
+		(set! fs (+ fs 1))
+		(list `(push_lit ,lit))))
+	     
              (($make-string ,size)
 	      (append (compile-ir size env) ;;on calcul la taille
 		      (list '(comment "debut make-string ")

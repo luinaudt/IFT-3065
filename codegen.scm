@@ -26,14 +26,12 @@
 (define push-string
   (lambda (str)
     (let ((len (string-length str)))
-      (append (list "# string  " str "\n"
-		    "push $8*" (number->string len) "\n"
+      (append (list "push $8*" (number->string len) "\n"
 		    "pop (%r10)\n"
 		    "add $8, %r10\n")
 	      (if (= 0 len)
 		  '()
 		  (push-char str))))))
-
 
 
 (define pop-fs
@@ -138,6 +136,11 @@
                        (debug fs expr)
                        (cond ((equal? val #!void)
 			      (list "  push $25\n"))
+			     ((symbol? val)
+			      (append (list "push %r10\n"
+                                            "add $4, (%rsp)\n"
+					    "# string  " (symbol->string val) "\n")
+                                      (list (push-string (symbol->string val)))))
 			     ((number? val)
                               (list "  push  $8*" val "\n"))
                              ((null? val)
@@ -146,7 +149,8 @@
                               (list "  push  $2+8*" (char->integer val) "\n"))
 			     ((string? val)
                               (append (list "push %r10\n"
-                                            "add $3, (%rsp)\n")
+                                            "add $3, (%rsp)\n"
+					    "# string  " val "\n")
                                       (list (push-string val))))
                              ((boolean? val)
                               (if val
