@@ -415,8 +415,9 @@
 	     (($write-char ,c)
 	      (append (compile-ir c env)
 		      (begin
-			(set! fs (- fs 1))
-			(list '(putchar)))))
+			(set! fs (+ fs 0))
+			(list '(putchar)
+			      '(push_lit #!void)))))
 	     
 	     (($read-char)
 	      (begin (set! fs (+ fs 1))

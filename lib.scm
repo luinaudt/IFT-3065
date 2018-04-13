@@ -203,18 +203,22 @@
     (cond (($string? x)
 	   (begin
 	     ($write-char #\")
-	     (let write-string ((str x) (pos 0))
+	     (let write-string ((x x) (pos 0))
 	       (if ($< pos ($string-length x))
 		   (begin
-		     ($write-char ($string-ref str pos))
-		     (write-string str ($+ 1 pos)))))
-	     ($write-char #\")))
-	  
-	  (($char? x)
-	   ($write-char #\#)
-	   ($write-char #\\)
-	   ($write-char x))
-	  (($number? x)
-	   ($write-char #\#)))))
+		     ($write-char ($string-ref x pos))
+		     (write-string x ($+ 1 pos)))))
+	     ($write-char #\")
+	     ))
+	   (($char? x)
+	    (begin
+	      ($write-char #\#)
+	      ($write-char #\\)
+	      ($write-char x)))
+	   (($number? x)
+	    ($write-char x))
+	   (else
+	    ($write-char #\#))
+	   )))
 
 ;; ;;;============================================================================
