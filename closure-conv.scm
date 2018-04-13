@@ -60,7 +60,7 @@
 	       (if (pair?  (cdr lst))
 		   (cons (cdr (car lst)) (map (cdr lst)))
 		   (cdr (car lst))))))
-       `(lambda (,new-params)
+       `(lambda ,new-params
 	  ,(alphac E new-env))))
     
     ((let ,bindings ,E)
