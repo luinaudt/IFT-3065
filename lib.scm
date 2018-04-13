@@ -232,12 +232,15 @@
 	   (($eq? x #f)
 	    ($write-char #\#)
 	    ($write-char #\f))
+	   (($eq? x '())
+	    ($write-char #\()
+	    ($write-char #\)))
 	   (($pair? x)
 	    ($write-char #\()
 	    (let write-pair ((p x))
 	      (begin
 		(write ($car p))
-		(if (not (null? ($cdr p)))
+		(if (not ($eq? '() ($cdr p)))
 		    (begin 
 		      ($write-char #\space)
 		      (write-pair ($cdr p))))))
