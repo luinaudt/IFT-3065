@@ -317,6 +317,8 @@ print_ln:
 	jz	print_sym
 	cmp	$6,%rbx	
 	jz	print_list
+	cmp	$7,%rbx
+	jz	print_proc
 	sar	$3, %rax
 	cmp	$2, %rbx
 	jz	print_char
@@ -400,6 +402,15 @@ print_char:
 	call 	putchar
         jmp     print_ln_end
 
+print_proc:
+	push 	%rax
+	lea 	string_proc(%rip), %rax
+	push	%rax
+	call	print_string
+	call	print_word_hex
+	push	$'>'
+	call 	putchar
+	jmp	print_ln_end
 print_empty_list:
         lea     string_empty_list(%rip), %rax
         push    %rax
@@ -727,7 +738,8 @@ string_true:	.asciz "#t"
 string_false:	.asciz "#f"
 string_empty_list:      .asciz "()"
 string_void:	.asciz "#!void"
-
+string_proc:	.asciz "#<procedure "
+	
 # The print_regs function sends a hexadecimal integer representation
 # of the content of all the registers to the standard output (stdout).
 # The calling convention is to execute a "call print_regs".
