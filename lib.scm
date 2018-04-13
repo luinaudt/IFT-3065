@@ -195,10 +195,14 @@
           (loop ($cdr x)
                 ($cons ($car x) acc))))))
 
-;; ;; (define read
-;; ;;   (lambda ()
-;; ;;     ;; TODO
-;; ;;     ))
+(define read
+  (lambda ()
+   ;(let get-vals
+    (let read-chaine ((x ($read-char)))
+      (if ($eq? x 0)
+	  '()
+	  ($cons x (read-chaine ($read-char)))))
+  ))
 
 (define write
   (lambda (x)
@@ -260,8 +264,7 @@
 		   (begin
 		     ($write-char ($string-ref x pos))
 		     (write-string x ($+ 1 pos)))))
-	   ($write-char #\>)
-	   )
+	   ($write-char #\>))
 	  (else
 	   ($write-char #\#))
 	  )))

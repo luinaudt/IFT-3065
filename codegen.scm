@@ -9,7 +9,7 @@
 
 (define spec-lab-gensym
   (lambda ()
-    (set! spec-lab (+ spec-lab return-count 1))
+    (set! spec-lab (+ spec-lab 1))
     (string-append "spec_" (number->string spec-lab))))
 (define return-gensym
   (lambda ()
@@ -286,7 +286,9 @@
 		     (let ((lab (spec-lab-gensym)))
 		       (begin (set! fs (+ fs 1))
 			      (list "  call getchar\n"
-				    "  cmp $0, %rax\n"
+				    "  mov $0, %rbx\n"
+				    "  cmp $-1, %rax\n"
+				    "  cmovz %rbx, %rax\n"
 				    "  je  " lab "\n"
 				    "  sal $3, %rax\n"
 				    "  add $2,%rax\n"
