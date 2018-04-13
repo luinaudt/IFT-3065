@@ -343,6 +343,7 @@
                       (list '(push_tag 6))
                       (list '(cmp))
                       (list '(equal?))))
+             
              (($procedure? ,e1)
               (append (compile-ir e1 env)
                       (list '(get_tag))
@@ -404,6 +405,7 @@
 			    `(set_heap);;on positionne le heap
 			    '(comment "fin make-string")
 			    ))) ;;on crée la chaîne
+             
 	     (($string-length ,s)
 	      (begin (set! fs (+ 0 fs))
 		     (append (compile-ir s env)
