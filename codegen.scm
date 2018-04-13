@@ -3,12 +3,18 @@
 (include "match.scm")
 
 
-(define return-count 0)
+(define return-count -1)
+(define spec-lab -1)
 (define fs-stack '())
+
+(define spec-lab-gensym
+  (lambda ()
+    (set! spec-lab (+ spec-lab return-count 1))
+    (string-append "spec_" (number->string spec-lab))))
 (define return-gensym
   (lambda ()
     (set! return-count (+ return-count 1))
-    (string-append "return_" (number->string (- return-count 1)))))
+    (string-append "return_" (number->string return-count))))
 
 ;;fonction pour l'ajout de string
 (define push-char
@@ -277,11 +283,15 @@
                              "  add   %rbx,%rdx\n"
                              "  push  %rdx\n")))
                     ((getchar)
-		     (begin (set! fs (+ fs 1))
-			    (list "  call getchar\n"
-				  "  sal $3, %rax\n"
-				  "  add $2,%rax\n"
-				  "  push %rax\n")))
+		     (let ((lab (spec-lab-gensym)))
+		       (begin (set! fs (+ fs 1))
+			      (list "  call getchar\n"
+				    "  cmp $0, %rax\n"
+				    "  je  " lab "\n"
+				    "  sal $3, %rax\n"
+				    "  add $2,%rax\n"
+				    lab ":\n"
+				    "  push %rax\n"))))
 		    ((putchar)
 		     (begin (set! fs (- fs 1))
 			    (list "  pop %rax\n"
