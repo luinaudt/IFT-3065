@@ -4,7 +4,9 @@
 		    (if (not (null? e))
 			(+ (car e) (loop (cdr e)))
 			0)))))
+(println (test 5 6))
 (println (test 5))
 (println (test 5 6 7 8 9))
+;11
 ;5
 ;35
