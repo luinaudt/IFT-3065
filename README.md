@@ -13,12 +13,13 @@ todo Parseur : pour define macro
 
 #todo :
 -read (en cours)
--parametre reste (test unitaire ajoute)
-	   Il va falloir modifier closure-conv (toutes les fonctions)
 -gc (code c du cours disponible)
 -define-macro
 -write (reste les vecteurs)
 -vecteurs
+
+resultat make ut :
+113 4 3
 
 
 

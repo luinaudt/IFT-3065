@@ -101,7 +101,55 @@
                              name ":\n"
                              "  cmp   $" nb-params ", %rax\n"
                              "  jnz   nargs_error\n")))
-
+		    ((proc_reste ,name ,nb-params)
+		     (begin
+		       (push-fs)
+                       (set! fs (+ 1 nb-params))
+                       (debug fs expr)
+		       (let ((lab (spec-lab-gensym))
+			     (labf (spec-lab-gensym)))
+			 (list "\n"
+			       ".align 8\n"
+			       ".quad 0\n"
+			       ".quad 0\n"
+			       ".byte 0\n"
+			       name ":\n"
+			       "  cmp   $" (- nb-params 1) ", %rax\n"
+			       "  jl   nargs_error\n" ;; traiter cas vide
+			       "  mov %rsp, %rbx \n"
+			       "  add $8*2,%rbx\n" ;premier argument
+			       "  mov %rax, %rcx\n"
+			       "  sub $" (- nb-params 1) ", %rcx\n"
+			       "  sal $3, %rcx\n"
+			       "  add %rbx, %rcx\n" ;;calcul fin
+			       "  push $17 \n"
+			       "  cmp   $" (- nb-params 1) ", %rax\n"
+			       "  je " labf "\n"
+			       lab ":\n" ;;tant que rbx<>rcx faire liste
+			       "  push  (%rbx)\n"
+			       "  pop   (%r10)\n"
+			       "  pop   8(%r10)\n"
+			       "  lea   6(%r10), %rdx\n"
+			       "  push  %rdx\n"
+			       "  add   $16, %r10   # update heap-ptr\n"
+			       "  add $8, %rbx\n"
+			       "  cmp %rbx, %rcx\n"
+			       "  jne " lab "\n"
+			       labf ":\n"
+			    ;;fin   
+			       "  pop %rdx\n"
+			       "  pop %rcx\n"
+			       "  pop %rbx\n"
+			       "  sub $" (- nb-params 1) ", %rax\n"
+			       "  sal $3, %rax\n"
+			       "  add %rax, %rsp\n"
+			       "  mov (%rsp), %rax\n"
+			       "  push  %rdx\n";; 2*8(%rsp)\n"
+			       "  push %rbx\n"
+			       "  push %rcx\n"
+			       
+			       ))))
+		    
                     ((call ,nargs)
                      (let ((retLab (return-gensym)))
                        (begin
