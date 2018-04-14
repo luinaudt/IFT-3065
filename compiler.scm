@@ -68,9 +68,9 @@
                         (hoist-closure-2 closed-ast)))
 				
          (ir-code       (begin
-			  (display "hoisted ast \n")
-			  (pp hoisted-ast)
-			  (display "\n")
+			  ;; (display "hoisted ast \n")
+			  ;; (pp hoisted-ast)
+			  ;; (display "\n")
 			  (compile-ir-program hoisted-ast '())))
          (code          (begin
 			  ;; (display "ir code \n")

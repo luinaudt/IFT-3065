@@ -288,10 +288,10 @@
           (union (list v) (fv E1)))
 
          ((lambda ,params . ,E) when (list? params)
-          (difference `,@(map fv E) params))
+          (difference (apply union (map fv E)) params))
          
          ((lambda ,params . ,E) when (pair? params)
-          (difference `,@(map fv E)
+          (difference (apply union (map fv E))
                       (let map ((lst params))
                         (if (pair? lst)
                             (cons (cons (car lst) (gensym))
@@ -401,11 +401,11 @@
         (else          (keep f (cdr lst)))))
 
 ;;;----------------------------------------------------------------------------
-;;(trace alpha-conv)
-;;(trace alphac)
-;;(trace assign-conv)
-;;(trace assignc)
-;;(trace closure-conv)
-;;(trace closurec)
-(trace fv)
-;;(trace mv)
+;; (trace alpha-conv)
+;; (trace alphac)
+;; (trace assign-conv)
+;; (trace assignc)
+;; (trace closure-conv)
+;; (trace closurec)
+;; (trace fv)
+;; (trace mv)
