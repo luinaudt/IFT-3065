@@ -9,7 +9,7 @@ Francis de Ladurantaye
 -read (en cours)
 -gc (code c du cours disponible)
 -define-macro
--continuations
+-appel terminal
 -autogene ?
 
 resultat make ut :
