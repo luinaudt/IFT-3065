@@ -37,7 +37,7 @@
 (define procedure? (lambda (x)   ($procedure? x)))
 (define eq?        (lambda (x y) ($eq? x y)))
 
-(define make-vector (lambda (len) ($make-vector len)))
+(define make-vector (lambda (len val) ($make-vector len val)))
 (define vector-length (lambda (x) ($vector-length x)))
 (define	vector-ref (lambda (vec pos) ($vector-ref vec pos)))
 (define	vector-set! (lambda (vec pos obj) ($vector-set! vec pos obj)))

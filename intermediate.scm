@@ -288,7 +288,7 @@
               (append (compile-ir e env)
                       (list `(push_tag 2)
                             `(add))))
-	     (($make-vector ,len)
+	     (($make-vector ,len ,val)
 	      (append (compile-ir len env)
 		      (list `(get_heap)
 			    `(pop_mem);;on assigne la taille
@@ -302,7 +302,12 @@
 			    `(get_heap)
 			    `(add);;on calcul la nouvelle position du heap
 			    `(set_heap);;on positionne le heap
-			    )))
+			    )
+		      (compile-ir val env)
+		      (begin
+			(set! fs (- fs 1))
+			(list `(assign_vec)))
+		      ))
 	     (($vector-length ,v)
 	      (append (compile-ir v env)
 		      (list '(push_tag 5)

@@ -1,4 +1,4 @@
-(define a (make-vector 10))
+(define a (make-vector 10 5))
 (println (vector? a))
 (println (vector? "456"))
 (vector-set! a 4 "456")
