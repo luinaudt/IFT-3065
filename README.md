@@ -10,6 +10,8 @@ Francis de Ladurantaye
 -gc (code c du cours disponible)
 -define-macro
 
+-autogene ?
+
 resultat make ut :
 114 3 3
 
