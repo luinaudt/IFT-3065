@@ -401,27 +401,27 @@
 
                     ((car)
                      (begin
-                       (debut fs expr)
+                       (debug fs expr)
                        (list "  pop   %rax\n"
                              "  push  -6(%rax)\n")))
 
                     ((cdr)
                      (begin
-                       (debut fs expr)
+                       (debug fs expr)
                        (list "  pop   %rax\n"
                              "  push  2(%rax)\n")))
 
                     ((set-car!)
                      (begin
                        (set! fs (- fs 2))
-                       (debut fs expr)
+                       (debug fs expr)
                        (list "  pop   %rdi\n"
                              "  pop   -6(%rdi)\n")))
 
                     ((set-cdr!)
                      (begin
                        (set! fs (- fs 2))
-                       (debut fs expr)
+                       (debug fs expr)
                        (list "  pop   %rdi\n"
                              "  pop   2(%rdi)\n")))
                     
@@ -477,10 +477,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-  (display fs)
-  (display "   ")
-  (pp (car expr)))
-  ;;#!void)
+  ;; (display fs)
+  ;; (display "   ")
+  ;; (pp (car expr)))
+  #!void)
 
 (define (get-fv i)
   (if (>= i 0)

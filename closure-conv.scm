@@ -63,7 +63,7 @@
        `(lambda ,new-params
 	  ,(alphac E new-env))))
     
-    ((let ,bindings . ,E)
+    ((let ,bindings ,E)
      (let* ((fresh-vars
              (map (lambda (b) (cons (car b) (gensym)))
                   bindings))
@@ -72,7 +72,7 @@
        `(let ,(map (lambda (v e) `(,(cdr v) ,(ac (cadr e))))
                    fresh-vars
                    bindings)
-          ,@(map (lambda (e) (alphac e new-env)) E))))
+          ,(alphac E new-env))))
 
     ((if ,E1 ,E2)
      `(if ,(ac E1) ,(ac E2)))
@@ -187,7 +187,7 @@
                    vars2
                    bindings)
           ,(if (null? mut-vars)
-               `,@(map ac E)
+               `(let () ,@(map ac E))
                `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
                            mut-vars)
                   ,@(map ac E))))))
@@ -343,9 +343,9 @@
     ((lambda ,params ,E)
      (mv E))
 
-    ((let ,bindings . ,E)
+    ((let ,bindings ,E)
      (union (apply union (map (lambda (b) (mv (cadr b))) bindings))
-            `,@(map mv E)))
+            (mv E)))
 
     ((if ,E1 ,E2)
      (union (mv E1) (mv E2)))
@@ -407,11 +407,11 @@
         (else          (keep f (cdr lst)))))
 
 ;;;----------------------------------------------------------------------------
-(trace alpha-conv)
-(trace alphac)
-(trace assign-conv)
-(trace assignc)
-(trace closure-conv)
-(trace closurec)
-(trace fv)
-(trace mv)
+;;(trace alpha-conv)
+;;(trace alphac)
+;;(trace assign-conv)
+;;(trace assignc)
+;;(trace closure-conv)
+;;(trace closurec)
+;;(trace fv)
+;;(trace mv)
