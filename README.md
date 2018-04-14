@@ -19,7 +19,7 @@ todo Parseur : pour define macro
 -vecteurs
 
 resultat make ut :
-113 4 3
+114 3 3
 
 
 
