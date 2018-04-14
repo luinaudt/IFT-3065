@@ -1,26 +1,38 @@
 (define x 11)
 ((lambda (x)
-   ((lambda (x)
-    (println x)
-    (set! x 44)
-    (println x)) 33)
-  (println x)) 22)
+   (begin
+     ((lambda (x)
+        (begin
+          (println x)
+          (set! x 44)
+          (println x)))
+      33)
+     (println x)))
+ 22)
 (println x)
 
 ((lambda (x)
-   ((lambda (y)
-    (println x)
-    (set! x 44)
-    (println x)) 33)
-  (println x)) 22)
+   (begin
+     ((lambda (y)
+        (begin
+          (println x)
+          (set! x 44)
+          (println x)))
+      33)
+     (println x)))
+ 22)
 (println x)
 
 ((lambda (z)
-   ((lambda (y)
-    (println x)
-    (set! x 44)
-    (println x)) 33)
-  (println x)) 22)
+   (begin
+     ((lambda (y)
+        (begin
+          (println x)
+          (set! x 44)
+          (println x)))
+      33)
+     (println x)))
+ 22)
 (println x)
 
 ;33
