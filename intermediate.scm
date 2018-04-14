@@ -120,7 +120,6 @@
   ;; (display fs)
   ;; (display "   ")
   ;; (pp expr)
-  ;; (pp env)
   (if (null? expr)
       '()
       (match expr
@@ -129,26 +128,7 @@
 		      (list '(lab "start"))))
              
 	     ((define ,var ,ex)
-              (car "ill-placed define"))
-              ;;(error "ill-placed define"))
-
-             
-	      ;; (let* ((var-val (assoc var genv))
-              ;;        (ir-code
-              ;;         (if var-val
-              ;;             (append (list `(comment ("re-def " ,var)))
-              ;;                     (compile-ir ex env)
-              ;;                     (list `(pop_glo ,(cdr var-val))))
-              ;;             (let ((name gcnt))
-              ;;               (append (begin
-              ;;                         (set! genv (cons (cons var gcnt) genv))
-              ;;                         (set! gcnt (+ gcnt 1))
-              ;;                         (compile-ir ex env))
-              ;;                       (list `(comment ("def " ,var))
-              ;;                             `(pop_glo ,name)))))))
-              ;;   (begin
-              ;;     (set! fs (- fs 1))
-              ;;     ir-code)))
+              (error "ill-placed define"))
 	     
              ((lambda ,params . ,body)
               (let* ((proc-name (lambda-gensym))

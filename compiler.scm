@@ -73,11 +73,11 @@
 ;			  (display "\n")
 			  (compile-ir-program hoisted-ast '())))
          (code          (begin
-;			  (display "ir code \n")
-;			  (pp ir-code)
-;			  (display "\n")
-;			  (pp lambda-env)
-;			  (display "\n")
+			  ;; (display "ir code \n")
+			  ;; (pp ir-code)
+			  ;; (display "\n")
+			  ;; (pp lambda-env)
+			  ;; (display "\n")
                           (compile-program ir-code lambda-env))))
     
     (let* ((base-filename  (path-strip-extension filename))
