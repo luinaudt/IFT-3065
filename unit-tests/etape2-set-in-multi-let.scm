@@ -1,26 +1,32 @@
 (define x 11)
 (let ((x 22))
-  (let ((x 33))
-    (println x)
-    (set! x 44)
-    (println x))
-  (println x))
+  (begin
+    (let ((x 33))
+      (begin
+        (println x)
+        (set! x 44)
+        (println x)))
+    (println x)))
 (println x)
 
 (let ((x 22))
-  (let ((y 33))
-    (println x)
-    (set! x 44)
-    (println x))
-  (println x))
+  (begin
+    (let ((y 33))
+      (begin
+        (println x)
+        (set! x 44)
+        (println x)))
+    (println x)))
 (println x)
 
 (let ((z 22))
-  (let ((y 33))
-    (println x)
-    (set! x 44)
-    (println x))
-  (println x))
+  (begin
+    (let ((y 33))
+      (begin
+        (println x)
+        (set! x 44)
+        (println x)))
+    (println x)))
 (println x)
 
 ;33
