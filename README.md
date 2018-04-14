@@ -11,14 +11,12 @@ todo Parseur : pour define macro
 -support de #!unbound (pour autogene plutot)
 -support de `
 
-voir pour transformer les (define (nom var)) en (define nom (lambda (var)...))
-
 #todo :
 -read (en cours)
 -parametre reste (test unitaire ajoute)
 	   Il va falloir modifier closure-conv (toutes les fonctions)
 -gc (code c du cours disponible)
--define macro
+-define-macro
 -write (reste les vecteurs)
 -vecteurs
 

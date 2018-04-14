@@ -35,6 +35,14 @@
          ;;   `((lambda ,(map car bindings)
          ;;       ,@body)
          ;;     ,@(map cadr bindings))))
+
+         ;; define
+
+         ((define ,f-params . ,body) when (list? f-params)
+          (expand-macros
+           `(define ,(car f-params)
+              (lambda ,(cdr f-params)
+                ,@body))))
          
          ;; let nommé
          
