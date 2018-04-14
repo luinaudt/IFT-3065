@@ -5,12 +5,6 @@ belize : Compilateur Scheme à x86-64
 Thomas Luinaud
 Francis de Ladurantaye
 
-todo Parseur : pour define macro
--support des , dans le parseur
--support des @ dans le parseur
--support de #!unbound (pour autogene plutot)
--support de `
-
 #todo :
 -read (en cours)
 -gc (code c du cours disponible)
@@ -20,6 +14,5 @@ todo Parseur : pour define macro
 
 resultat make ut :
 114 3 3
-
 
 
