@@ -421,7 +421,7 @@
                     
 		    ((comment ,val)
 		     ;;(list "")
-                     (list "") ;"\n# fs = " fs " (" val ")\n")
+                     (list "\n# fs = " fs " (" val ")\n")
 		     ))))
 
         (append code (compile-bloc (cdr expr))))))
@@ -471,10 +471,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-;  (display fs)
-;  (display "   ")
-;  (pp (car expr)))
-   #!void)
+                                        ;  (display fs)
+                                        ;  (display "   ")
+                                        ;  (pp (car expr)))
+  #!void)
 
 (define (get-fv i)
   (if (>= i 0)
