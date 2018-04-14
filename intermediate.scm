@@ -19,40 +19,108 @@
 (define gcnt 0)
 (define fs 0)
 
-
 ;; Called only by compiler.scm or recursively.
-;; Makes sure stack is empty at the end.
+;; Ensures that the stack is emptied after each expression.
 (define (compile-ir-program exprs env)
-  (if (null? exprs)
-      '()
-      (append (compile-ir (car exprs) env)
-              (begin
-                (set! fs 0)
-                (list `(check-stack-integrity 0)))
-              (compile-ir-program (cdr exprs) env))))
+
+  (define (compile-ir-define expr env)
+    (if (not (= (length expr) 3))
+        (error "ill-formed special form: define")
+        (let* ((var (cadr expr))
+               (val (caddr expr))
+               (var-pos (assoc var genv))
+               (ir-code
+                (if var-pos
+                    (append (list `(comment ("re-def " ,var)))
+                            (compile-ir val env)
+                            (list `(pop_glo ,(cdr var-pos))))
+                    (let ((name gcnt))
+                      (append (begin
+                                (set! genv (cons (cons var gcnt) genv))
+                                (set! gcnt (+ gcnt 1))
+                                (compile-ir val env))
+                              (list `(comment ("def " ,var))
+                                    `(pop_glo ,name)))))))
+          (begin
+            (set! fs (- fs 1))
+            ir-code))))
+  
+  (cond ((null? exprs)
+         '())
+        ((and (pair? (car exprs))
+              (eq? (car (car exprs)) 'define))
+         (append (compile-ir-define (car exprs) env)
+                 (compile-ir-program (cdr exprs) env)))
+        (else
+         (append (compile-ir (car exprs) env)
+                 (begin
+                   (set! fs 0)
+                   (list `(check-stack-integrity 0)))
+                 (compile-ir-program (cdr exprs) env)))))
 
 
-;; Called whenever a bloc of code is being compiled (lets and lambda).
-;; Makes sure the result of each expression is being consumed and returns
-;; with a single value on the stack.
+;; Called whenever a bloc of code is being compiled (lets and lambdas).
+;; Ensures that the result of each expression is being consumed and
+;; that the body ends with a single value on the stack.
 (define (compile-ir-body exprs env)
+
+  (define body-defs '())
+  
+  (define (compile-ir-body-defs exprs env)
+    (cond ((null? exprs)
+           (error "body must contain at least one expr"))
+          ((and (pair? (car exprs))
+                (eq? (car (car exprs)) 'define))
+           (append (compile-ir-define (car exprs) env)
+                   (compile-ir-body-defs (cdr exprs) env)))
+          (else
+           (compile-ir-body-exprs exprs (append body-defs env)))))
+
+  (define (compile-ir-define expr env)
+    (let ((var (cadr expr)))
+      (cond ((not (= (length expr) 3))
+             (error "ill-formed special form: define"))
+            ((assoc var body-defs)
+             (error "duplicate definition of a variable"))
+            (else
+             (begin
+               (set! body-defs (cons (cons var (+ fs 1)) body-defs))
+               (compile-ir (caddr expr) env))))))
+  
+  (define (compile-ir-body-exprs exprs env)
+    (if (null? (cdr exprs))
+        (compile-ir (car exprs) env)
+        (append (compile-ir (car exprs) env)
+                (compile-ir-body-exprs (cdr exprs) env))))
+    
   ;; (display fs)
   ;; (display "   ")
   ;; (if (not (null? exprs))
   ;;     (pp (car exprs)))
-  (cond ((null? exprs)
-         (error "empty body"))
-        ((null? (cdr exprs))
-         (compile-ir (car exprs) env))
-        (else
-         (append (compile-ir (car exprs) env)
-                 (compile-ir-body (cdr exprs) env)))))
+
+  
+  ;; (trace compile-ir-body-defs)
+  ;; (trace compile-ir-define)
+  ;; (trace compile-ir-body-exprs)
+  (begin
+    (set! body-defs '())
+    (if (null? exprs)
+        (error "empty body")
+        (compile-ir-body-defs exprs env))))
+
+
+
+
+;; (trace compile-ir-body)
+;; (trace compile-ir-program)
+
 
 
 (define (compile-ir expr env)
   ;; (display fs)
   ;; (display "   ")
   ;; (pp expr)
+  ;; (pp env)
   (if (null? expr)
       '()
       (match expr
@@ -61,22 +129,26 @@
 		      (list '(lab "start"))))
              
 	     ((define ,var ,ex)
-	      (let* ((var-val (assoc var genv))
-                     (ir-code
-                      (if var-val
-                          (append (list `(comment ("re-def " ,var)))
-                                  (compile-ir ex env)
-                                  (list `(pop_glo ,(cdr var-val))))
-                          (let ((name gcnt))
-                            (append (begin
-                                      (set! genv (cons (cons var gcnt) genv))
-                                      (set! gcnt (+ gcnt 1))
-                                      (compile-ir ex env))
-                                    (list `(comment ("def " ,var))
-                                          `(pop_glo ,name)))))))
-                (begin
-                  (set! fs (- fs 1))
-                  ir-code)))
+              (car "ill-placed define"))
+              ;;(error "ill-placed define"))
+
+             
+	      ;; (let* ((var-val (assoc var genv))
+              ;;        (ir-code
+              ;;         (if var-val
+              ;;             (append (list `(comment ("re-def " ,var)))
+              ;;                     (compile-ir ex env)
+              ;;                     (list `(pop_glo ,(cdr var-val))))
+              ;;             (let ((name gcnt))
+              ;;               (append (begin
+              ;;                         (set! genv (cons (cons var gcnt) genv))
+              ;;                         (set! gcnt (+ gcnt 1))
+              ;;                         (compile-ir ex env))
+              ;;                       (list `(comment ("def " ,var))
+              ;;                             `(pop_glo ,name)))))))
+              ;;   (begin
+              ;;     (set! fs (- fs 1))
+              ;;     ir-code)))
 	     
              ((lambda ,params . ,body)
               (let* ((proc-name (lambda-gensym))
@@ -155,16 +227,17 @@
                       (list '(cdr))))
              
 	     ((set! ,v ,c)
-	      (let ((var (assoc v genv)))
-		(if var
-		    (append (compile-ir `(define ,v ,c) env)
-                            (list `(push_lit #!void)))
-		    (append (compile-ir c env)
-			    (compile-ir v env)
-			    (begin
-			      (set! fs (- fs 1))
-			      (list '(pop_mem)
-                                    `(push_lit #!void)))))))
+              (if (not (variable? v))
+                  (error "identifier expected")
+                  (append (compile-ir c env)
+                          (cond ((assoc v env)
+                                 (list `(pop_loc ,(cdr (assoc v env)))
+                                       `(push_lit #!void)))
+                                ((assoc v genv)
+                                 (list `(pop_glo ,(cdr (assoc v genv)))
+                                       `(push_lit #!void)))
+                                (else
+                                 (error "unbound variable" v))))))
              
 	     (($string-set! ,s ,pos ,c) 
 	      (begin (set! fs (+ 0 fs))
@@ -378,7 +451,7 @@
                      (const-defs
                       (if (null? const-code)
                           '()
-                          (compile-ir-body (reverse const-code) env)))
+                          (compile-ir-program (reverse const-code) env)))
                      (const-ir (compile-ir const env)))
                 (begin
                   ;;(set! fs (+ fs 1))
@@ -393,6 +466,8 @@
                   ;; (display " --> ")
                   ;; (pp lit)
                   ir-code)))
+
+             ;; symbol
 	     ((quote ,lit) when (symbol? lit)
 	      (begin
 		(set! fs (+ fs 1))
@@ -517,7 +592,7 @@
     (if (> start end)
         '()
         (cons start (range (+ start 1) end)))))
-;(trace compile-ir)
+;;(trace compile-ir)
 ;;(trace compile-ir-program)
 ;;(trace gen-const)
 ;;(trace gen-const-helper)

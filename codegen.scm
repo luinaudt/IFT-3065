@@ -168,6 +168,12 @@
                        (set! fs (+ fs 1))
                        (debug fs expr)
                        (list "  push  8*" pos "(%rsp)\n")))
+                    
+                    ((pop_loc ,pos)
+                     (begin
+                       (set! fs (- fs 1))
+                       (debug fs expr)
+                       (list "  pop   8*" pos "(%rsp)\n")))
 
                     ((push_glo ,pos)
                      (begin

@@ -12,9 +12,7 @@ todo Parseur : pour define macro
 -support de `
 
 voir pour transformer les (define (nom var)) en (define nom (lambda (var)...))
-on ne supporte pas totalement les define dans les lambda.
-(lambda () (define println 5))
-ecrase la variable globale println alors que cela ne devrait pas se faire
+
 #todo :
 -read (en cours)
 -parametre reste (test unitaire ajoute)
