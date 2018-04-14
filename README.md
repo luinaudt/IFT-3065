@@ -9,8 +9,6 @@ Francis de Ladurantaye
 -read (en cours)
 -gc (code c du cours disponible)
 -define-macro
--write (reste les vecteurs)
--vecteurs (reste println)
 
 resultat make ut :
 114 3 3
