@@ -130,7 +130,7 @@
 	     ((define ,var ,ex)
               (error "ill-placed define"))
 	     
-             ((lambda ,params . ,body)
+             ((lambda ,params . ,body) when (list? params)
               (let* ((proc-name (lambda-gensym))
                      (nb-params (length params))
                      (ref-ids (range 0 (- nb-params 1)))
@@ -148,7 +148,32 @@
                   (set! fs (+ old-fs 1))
                   (list `(comment ("proc " ,proc-name))
                         `(push_proc ,proc-name)))))
-
+	     ;;lambda avec parametre reste
+	     ((lambda ,param-pair . ,body)
+	      (let* ((proc-name (lambda-gensym))
+		     (params
+		      (let to-list ((lst param-pair))
+			(if (pair? lst)
+			    (cons (car lst) (to-list (cdr lst)))
+			    (cons lst '()))))
+		     (nb-params (length params))
+		     (ref-ids (range 0 (- nb-params 1)))
+                     (proc-env (append (map cons params ref-ids) env))
+                     (old-fs fs))
+                (begin
+                  ;; generate ir-code for lambda-expression
+                  (set! fs (+ nb-params 1))  ;; params + return address
+                  (set! lambda-env (append (list `(proc_reste ,proc-name ,nb-params))
+                                           (list `(comment ("lambda " ,proc-name " " ,fs)))
+;					   ();;generer le parametre reste
+                                           (compile-ir-body body proc-env)
+                                           (list `(ret ,(- fs (+ nb-params 1))))
+                                           lambda-env))
+                  ;; generate ir-code to push lambda-expression address
+                  (set! fs (+ old-fs 1))
+                  (list `(comment ("proc reste " ,proc-name))
+                        `(push_proc ,proc-name)))))
+				 
              ((let ,bindings . ,body)
               (let* ((vars (map car bindings))
                      (vals (map cadr bindings))
