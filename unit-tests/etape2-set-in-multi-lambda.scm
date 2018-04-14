@@ -15,13 +15,13 @@
   (println x)) 22)
 (println x)
 
-((lambda (z)
-   ((lambda (y)
-    (println x)
-    (set! x 44)
-    (println x)) 33)
-  (println x)) 22)
-(println x)
+;; ((lambda (z)
+;;    ((lambda (y)
+;;     (println x)
+;;     (set! x 44)
+;;     (println x)) 33)
+;;   (println x)) 22)
+;; (println x)
 
 ;33
 ;44

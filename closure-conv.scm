@@ -23,68 +23,68 @@
 
   (match expr
 
-    (,c when (constant? c)
-     expr)
+         (,c when (constant? c)
+             expr)
 
-    ((quote ,x)
-     expr)
+         ((quote ,x)
+          expr)
 
-    (,v when (variable? v)
-     (rename v))
+         (,v when (variable? v)
+             (rename v))
 
-    ((set! ,v ,E1)
-     `(set! ,(rename v) ,(ac E1)))
+         ((set! ,v ,E1)
+          `(set! ,(rename v) ,(ac E1)))
 
-    ((define ,v ,E1)
-     `(define ,(rename v) ,(ac E1)))
+         ((define ,v ,E1)
+          `(define ,(rename v) ,(ac E1)))
 
-    ((lambda ,params ,E) when (list? params)
-     (let* ((fresh-params
-             (map (lambda (p) (cons p (gensym)))
-                  params))
-            (new-env
-             (append fresh-params env)))
-       `(lambda ,(map cdr fresh-params)
-          ,(alphac E new-env))))
+         ((lambda ,params . ,E) when (list? params)
+          (let* ((fresh-params
+                  (map (lambda (p) (cons p (gensym)))
+                       params))
+                 (new-env
+                  (append fresh-params env)))
+            `(lambda ,(map cdr fresh-params)
+               ,@(map (lambda (e) (alphac e new-env)) E))))
 
-    ((lambda ,params ,E) when (pair? params)
-     (let* ((fresh-params
-	     (let map ((lst params))
-	       (if (pair? lst)
-		   (cons (cons (car lst) (gensym))
-			   (map (cdr lst)))
-		   (cons (cons lst (gensym)) '()))))
-	    (new-env (append fresh-params env))
-	    (new-params
-	     (let map ((lst fresh-params))
-	       (if (pair?  (cdr lst))
-		   (cons (cdr (car lst)) (map (cdr lst)))
-		   (cdr (car lst))))))
-       `(lambda ,new-params
-	  ,(alphac E new-env))))
-    
-    ((let ,bindings ,E)
-     (let* ((fresh-vars
-             (map (lambda (b) (cons (car b) (gensym)))
-                  bindings))
-            (new-env
-             (append fresh-vars env)))
-       `(let ,(map (lambda (v e) `(,(cdr v) ,(ac (cadr e))))
-                   fresh-vars
-                   bindings)
-          ,(alphac E new-env))))
+         ((lambda ,params . ,E) when (pair? params)
+          (let* ((fresh-params
+                  (let map ((lst params))
+                    (if (pair? lst)
+                        (cons (cons (car lst) (gensym))
+                              (map (cdr lst)))
+                        (cons (cons lst (gensym)) '()))))
+                 (new-env (append fresh-params env))
+                 (new-params
+                  (let map ((lst fresh-params))
+                    (if (pair?  (cdr lst))
+                        (cons (cdr (car lst)) (map (cdr lst)))
+                        (cdr (car lst))))))
+            `(lambda ,new-params
+               ,@(map (lambda (e) (alphac e new-env)) E))))
+         
+         ((let ,bindings . ,E)
+          (let* ((fresh-vars
+                  (map (lambda (b) (cons (car b) (gensym)))
+                       bindings))
+                 (new-env
+                  (append fresh-vars env)))
+            `(let ,(map (lambda (v e) `(,(cdr v) ,(ac (cadr e))))
+                        fresh-vars
+                        bindings)
+               ,@(map (lambda (e) (alphac e new-env)) E))))
 
-    ((if ,E1 ,E2)
-     `(if ,(ac E1) ,(ac E2)))
-    ((if ,E1 ,E2 ,E3)
-     `(if ,(ac E1) ,(ac E2) ,(ac E3)))
+         ((if ,E1 ,E2)
+          `(if ,(ac E1) ,(ac E2)))
+         ((if ,E1 ,E2 ,E3)
+          `(if ,(ac E1) ,(ac E2) ,(ac E3)))
 
-    ((,E0 . ,Es)
-     `(,(if (primitive? E0) E0 (ac E0))
-       ,@(map ac Es)))
+         ((,E0 . ,Es)
+          `(,(if (primitive? E0) E0 (ac E0))
+            ,@(map ac Es)))
 
-    (,_
-     (error "unknown expression" expr))))
+         (,_
+          (error "unknown expression" expr))))
 
 ;;;----------------------------------------------------------------------------
 
@@ -104,105 +104,100 @@
 
   (match expr
 
-    (,c when (constant? c)
-     expr)
+         (,c when (constant? c)
+             expr)
 
-    ((quote ,x)
-     expr)
+         ((quote ,x)
+          expr)
 
-    (,v when (variable? v)
-     (if (mutable? v) `(car ,v) v))
+         (,v when (variable? v)
+             (if (mutable? v) `(car ,v) v))
 
-    ((set! ,v ,E1)
-     (if (mutable? v)
-         `(set-car! ,v ,(ac E1))
-         `(set! ,v ,(ac E1))))
+         ((set! ,v ,E1)
+          (if (mutable? v)
+              `(set-car! ,v ,(ac E1))
+              `(set! ,v ,(ac E1))))
 
-    ((define ,v ,E1)
-     `(define ,v ,(ac E1)))
-    
-    
-    ((lambda ,params ,E) when (list? params)
-     (let* ((mut-params
-             (map (lambda (p) (cons p (gensym)))
-                  (keep mutable? params)))
-            (params2
-             (map (lambda (p)
-                    (if (mutable? p)
-                        (cdr (assq p mut-params))
-                        p))
-                  params)))
-       `(lambda ,params2
-          ,(if (null? mut-params)
-               (ac E)
-               `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
-                           mut-params)
-		  ,(ac E))))))
-    
-    ((lambda ,params-p ,E) when (pair? params-p)
-     (let* ((params
-	     (begin ;;(pp params-p)
-		    (let map ((lst params-p))
-		      (if (pair? lst)
-			  (cons (car lst) (map (cdr lst)))
-			  (cons lst '())))))
-	    (mut-params
-	     (begin
-	       ;;(pp params)
-	       (map (lambda (p) (cons p (gensym)))
-		    (keep mutable? params))))
-            (params2
-             (map (lambda (p)
-                    (if (mutable? p)
-                        (cdr (assq p mut-params))
-                        p))
-                  params))
-	    (new-params
-	     (begin ;;(pp params2)
-	     (let map ((lst params2))
-	       (if (pair?  (cdr lst))
-		   (cons (car lst) (map (cdr lst)))
-		   (car lst))))))
-       (begin ;;(pp new-params)
-       `(lambda ,new-params
-          ,(if (null? mut-params)
-               (ac E)
-               `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
-                           mut-params)
-		  ,(ac E)))))))
+         ((define ,v ,E1)
+          `(define ,v ,(ac E1)))
+         
+         
+         ((lambda ,params . ,E) when (list? params)
+          (let* ((mut-params
+                  (map (lambda (p) (cons p (gensym)))
+                       (keep mutable? params)))
+                 (params2
+                  (map (lambda (p)
+                         (if (mutable? p)
+                             (cdr (assq p mut-params))
+                             p))
+                       params)))
+            `(lambda ,params2
+               ,(if (null? mut-params)
+                    `(let () ,@(map ac E))
+                    `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
+                                mut-params)
+                       ,@(map ac E))))))
+         
+         ((lambda ,params-p . ,E) when (pair? params-p)
+          (let* ((params
+                  (let map ((lst params-p))
+                    (if (pair? lst)
+                        (cons (car lst) (map (cdr lst)))
+                        (cons lst '()))))
+                 (mut-params
+                  (map (lambda (p) (cons p (gensym)))
+                       (keep mutable? params)))
+                 (params2
+                  (map (lambda (p)
+                         (if (mutable? p)
+                             (cdr (assq p mut-params))
+                             p))
+                       params))
+                 (new-params
+                  (let map ((lst params2))
+                    (if (pair?  (cdr lst))
+                        (cons (car lst) (map (cdr lst)))
+                        (car lst)))))
+            `(lambda ,new-params
+               ,(if (null? mut-params)
+                    `(let () ,@(map ac E))
+                    `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
+                                mut-params)
+                       ,@(map ac E))))))
 
-    ((let ,bindings . ,E)
-     (let* ((vars
-             (map car bindings))
-            (mut-vars
-             (map (lambda (v) (cons v (gensym)))
-                  (keep mutable? vars)))
-            (vars2
-             (map (lambda (v)
-                    (if (mutable? v)
-                        (cdr (assq v mut-vars))
-                        v))
-                  vars)))
-       `(let ,(map (lambda (v e) `(,v ,(ac (cadr e))))
-                   vars2
-                   bindings)
-          ,(if (null? mut-vars)
-               `(let () ,@(map ac E))
-               `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
-                           mut-vars)
-                  ,@(map ac E))))))
+         ((let ,bindings . ,E)
+          (let* ((vars
+                  (map car bindings))
+                 (mut-vars
+                  (map (lambda (v) (cons v (gensym)))
+                       (keep mutable? vars)))
+                 (vars2
+                  (map (lambda (v)
+                         (if (mutable? v)
+                             (cdr (assq v mut-vars))
+                             v))
+                       vars)))
+            `(let ,(map (lambda (v e) `(,v ,(ac (cadr e))))
+                        vars2
+                        bindings)
+               ,(if (null? mut-vars)
+                    `(let () ,@(map ac E))
+                    `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
+                                mut-vars)
+                       ,@(map ac E))))))
 
-    ((if ,E1 ,E2)
-     `(if ,(ac E1) ,(ac E2)))
-    ((if ,E1 ,E2 ,E3)
-     `(if ,(ac E1) ,(ac E2) ,(ac E3)))
+         ((if ,E1 ,E2)
+          `(if ,(ac E1) ,(ac E2)))
+         ((if ,E1 ,E2 ,E3)
+          `(if ,(ac E1) ,(ac E2) ,(ac E3)))
 
-    ((,E0 . ,Es)
-     `(,(if (primitive? E0) E0 (ac E0))
-       ,@(map ac Es)))
+         ((,E0 . ,Es)
+          `(,(if (primitive? E0) E0 (ac E0))
+            ,@(map ac Es)))
 
-    (,_
-     (error "unknown expression" expr))))
+         (,_
+          (error "unknown expression" expr))))
 
 ;;;----------------------------------------------------------------------------
 
@@ -225,51 +220,50 @@
 
   (match expr
 
-    (,c when (constant? c)
-     expr)
+         (,c when (constant? c)
+             expr)
 
-    ((quote ,x)
-     expr)
+         ((quote ,x)
+          expr)
 
-    (,v when (variable? v)
-     (let ((p (pos v)))
-       (if p
-           `(closure-ref $this ,p)
-           v)))
+         (,v when (variable? v)
+             (let ((p (pos v)))
+               (if p
+                   `(closure-ref $this ,p)
+                   v)))
 
-    ((set! ,v ,E1)
-     `(set! ,v ,(cc E1)))
+         ((set! ,v ,E1)
+          `(set! ,v ,(cc E1)))
 
-    ((define ,v ,E1)
-     `(define ,v ,(cc E1)))
+         ((define ,v ,E1)
+          `(define ,v ,(cc E1)))
 
-    ((lambda ,params . ,E)
-     (let ((new-cenv (difference (fv expr) globals)))
-       `(make-closure
-         (lambda ($this ,@params)
-	   ,@(map (lambda (b) (closurec b new-cenv globals)) E))
-           ;,(closurec E new-cenv globals))
-         ,@(map cc new-cenv))))
+         ((lambda ,params . ,E)
+          (let ((new-cenv (difference (fv expr) globals)))
+            `(make-closure
+              (lambda ($this ,@params)
+                ,@(map (lambda (e) (closurec e new-cenv globals)) E))
+              ,@(map cc new-cenv))))
 
-    ((let ,bindings . ,E)
-     `(let ,(map (lambda (b) `(,(car b) ,(cc (cadr b)))) bindings)
-        ,@(map cc E)))
+         ((let ,bindings . ,E)
+          `(let ,(map (lambda (b) `(,(car b) ,(cc (cadr b)))) bindings)
+             ,@(map cc E)))
 
-    ((if ,E1 ,E2)
-     `(if ,(cc E1) ,(cc E2)))
-    ((if ,E1 ,E2 ,E3)
-     `(if ,(cc E1) ,(cc E2) ,(cc E3)))
+         ((if ,E1 ,E2)
+          `(if ,(cc E1) ,(cc E2)))
+         ((if ,E1 ,E2 ,E3)
+          `(if ,(cc E1) ,(cc E2) ,(cc E3)))
 
-    ((,E0 . ,Es)
-     (if (primitive? E0)
-         `(,E0 ,@(map cc Es))
-         `(let (($clo ,(cc E0)))
-            ((closure-code $clo)
-             $clo
-             ,@(map cc Es)))))
+         ((,E0 . ,Es)
+          (if (primitive? E0)
+              `(,E0 ,@(map cc Es))
+              `(let (($clo ,(cc E0)))
+                 ((closure-code $clo)
+                  $clo
+                  ,@(map cc Es)))))
 
-    (,_
-     (error "unknown expression" expr))))
+         (,_
+          (error "unknown expression" expr))))
 
 ;;;----------------------------------------------------------------------------
 
@@ -278,86 +272,86 @@
 (define (fv expr)
   (match expr
 
-    (,c when (constant? c)
-     '())
+         (,c when (constant? c)
+             '())
 
-    ((quote ,x)
-     `())
+         ((quote ,x)
+          `())
 
-    (,v when (variable? v)
-     (list v))
+         (,v when (variable? v)
+             (list v))
 
-    ((set! ,v ,E1)
-     (union (list v) (fv E1)))
+         ((set! ,v ,E1)
+          (union (list v) (fv E1)))
 
-    ((define ,v ,E1)
-     (union (list v) (fv E1)))
+         ((define ,v ,E1)
+          (union (list v) (fv E1)))
 
-    ((lambda ,params ,E) when (list? params)
-     (difference (fv E) params))
-    
-    ((lambda ,params ,E) when (pair? params)
-     (difference (fv E)
-		 (let map ((lst params))
-		   (if (pair? lst)
-		       (cons (cons (car lst) (gensym))
-			     (map (cdr lst)))
-		       (cons (cons lst (gensym)) '())))))
+         ((lambda ,params . ,E) when (list? params)
+          (difference `,@(map fv E) params))
+         
+         ((lambda ,params . ,E) when (pair? params)
+          (difference `,@(map fv E)
+                      (let map ((lst params))
+                        (if (pair? lst)
+                            (cons (cons (car lst) (gensym))
+                                  (map (cdr lst)))
+                            (cons (cons lst (gensym)) '())))))
 
-    ((let ,bindings . ,E)
-     (union (apply union (map (lambda (b) (fv (cadr b))) bindings))
-            (difference (apply union (map fv E)) (map car bindings))))
+         ((let ,bindings . ,E)
+          (union (apply union (map (lambda (b) (fv (cadr b))) bindings))
+                 (difference (apply union (map fv E)) (map car bindings))))
 
-    ((if ,E1 ,E2)
-     (union (fv E1) (fv E2)))
-    ((if ,E1 ,E2 ,E3)
-     (union (fv E1) (fv E2) (fv E3)))
+         ((if ,E1 ,E2)
+          (union (fv E1) (fv E2)))
+         ((if ,E1 ,E2 ,E3)
+          (union (fv E1) (fv E2) (fv E3)))
 
-    ((,E0 . ,Es)
-     (union (if (primitive? E0)
-                '()
-                (fv E0))
-            (apply union (map fv Es))))
+         ((,E0 . ,Es)
+          (union (if (primitive? E0)
+                     '()
+                     (fv E0))
+                 (apply union (map fv Es))))
 
-    (,_
-     (error "unknown expression" expr))))
+         (,_
+          (error "unknown expression" expr))))
 
 (define (mv expr)
   (match expr
 
-    (,c when (constant? c)
-     '())
+         (,c when (constant? c)
+             '())
 
-    ((quote ,x)
-     `())
+         ((quote ,x)
+          `())
 
-    (,v when (variable? v)
-     '())
+         (,v when (variable? v)
+             '())
 
-    ((set! ,v ,E1)
-     (union (list v) (mv E1)))
+         ((set! ,v ,E1)
+          (union (list v) (mv E1)))
 
-    ((define ,v ,E1)
-     (union (list v) (mv E1)))
+         ((define ,v ,E1)
+          (union (list v) (mv E1)))
 
-    ((lambda ,params ,E)
-     (mv E))
+         ((lambda ,params ,E)
+          (mv E))
 
-    ((let ,bindings ,E)
-     (union (apply union (map (lambda (b) (mv (cadr b))) bindings))
-            (mv E)))
+         ((let ,bindings ,E)
+          (union (apply union (map (lambda (b) (mv (cadr b))) bindings))
+                 (mv E)))
 
-    ((if ,E1 ,E2)
-     (union (mv E1) (mv E2)))
-    ((if ,E1 ,E2 ,E3)
-     (union (mv E1) (mv E2) (mv E3)))
+         ((if ,E1 ,E2)
+          (union (mv E1) (mv E2)))
+         ((if ,E1 ,E2 ,E3)
+          (union (mv E1) (mv E2) (mv E3)))
 
-    ((,E0 . ,Es)
-     (union (if (primitive? E0) '() (mv E0))
-            (apply union (map mv Es))))
+         ((,E0 . ,Es)
+          (union (if (primitive? E0) '() (mv E0))
+                 (apply union (map mv Es))))
 
-    (,_
-     (error "unknown expression" expr))))
+         (,_
+          (error "unknown expression" expr))))
 
 ;;;----------------------------------------------------------------------------
 
@@ -413,5 +407,5 @@
 ;;(trace assignc)
 ;;(trace closure-conv)
 ;;(trace closurec)
-;;(trace fv)
+(trace fv)
 ;;(trace mv)
