@@ -288,7 +288,61 @@
               (append (compile-ir e env)
                       (list `(push_tag 2)
                             `(add))))
-
+	     (($make-vector ,len)
+	      (append (compile-ir len env)
+		      (list `(get_heap)
+			    `(pop_mem);;on assigne la taille
+			    `(get_heap);;on retourne la position du heap
+			    `(push_tag 5)
+			    `(add)
+			    `(get_heap)
+			    `(push_mem);;on recupere la taille
+			    `(push_lit 1)
+			    `(add);;on ajoute 1 a la taille
+			    `(get_heap)
+			    `(add);;on calcul la nouvelle position du heap
+			    `(set_heap);;on positionne le heap
+			    )))
+	     (($vector-length ,v)
+	      (append (compile-ir v env)
+		      (list '(push_tag 5)
+			    '(sub)
+			    '(push_mem))))
+	     
+	     (($vector-ref ,v ,pos)
+	      (begin (set! fs (+ 0 fs))
+		     (append (compile-ir v env)
+			     (compile-ir pos env)
+			     (begin
+			       (set! fs (- fs 1))
+			       (list '(push_lit 1)
+				     '(add)
+				     '(push_tag 5)
+				     '(sub)
+				     '(add)
+				     '(push_mem))))))
+	     (($vector-set! ,v ,pos ,val)
+	       (begin (set! fs (+ 0 fs))
+		     (append ;;(list `(comment ,(string-append "string set " (string c))))
+		      (compile-ir val env)
+		      (compile-ir v env);;on récupère la position de str
+		      (compile-ir pos env);;on calcul la position du caractère a modifier
+		      (begin
+			(set! fs (- fs 2))
+			(list '(push_lit 1)
+			      '(add)
+			      '(push_tag 5)
+			      '(sub)
+			      '(add) ;;on détermine l'adresse (la représentation nous la garde
+			      '(pop_mem)
+                              `(push_lit #!void)))))) ;;on doit mettre dans le tas à la position
+	     (($vector? ,v)
+	       (append (compile-ir v env)
+		       (list '(get_tag))
+		       (list '(push_tag 5))
+		       (list '(cmp))
+		       (list '(equal?))))
+	     
              (($char->integer ,e)
               (append (compile-ir e env)
                       (list `(push_tag 2)
