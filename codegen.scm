@@ -400,28 +400,34 @@
                              "  push  %rax\n")))
 
                     ((car)
-                     (list "  pop   %rax\n"
-                           "  push  -6(%rax)\n"))
+                     (begin
+                       (debut fs expr)
+                       (list "  pop   %rax\n"
+                             "  push  -6(%rax)\n")))
 
                     ((cdr)
-                     (list "  pop   %rax\n"
-                           "  push  2(%rax)\n"))
+                     (begin
+                       (debut fs expr)
+                       (list "  pop   %rax\n"
+                             "  push  2(%rax)\n")))
 
                     ((set-car!)
                      (begin
                        (set! fs (- fs 2))
+                       (debut fs expr)
                        (list "  pop   %rdi\n"
                              "  pop   -6(%rdi)\n")))
 
                     ((set-cdr!)
                      (begin
                        (set! fs (- fs 2))
+                       (debut fs expr)
                        (list "  pop   %rdi\n"
                              "  pop   2(%rdi)\n")))
                     
 		    ((comment ,val)
-		     ;;(list "")
-                     (list "\n# fs = " fs " (" val ")\n")
+		     (list "")
+                     ;;(list "\n# fs = " fs " (" val ")\n")
 		     ))))
 
         (append code (compile-bloc (cdr expr))))))
@@ -471,10 +477,10 @@
 	  (map compile-env genv))))
 
 (define (debug fs expr)
-                                        ;  (display fs)
-                                        ;  (display "   ")
-                                        ;  (pp (car expr)))
-  #!void)
+  (display fs)
+  (display "   ")
+  (pp (car expr)))
+  ;;#!void)
 
 (define (get-fv i)
   (if (>= i 0)

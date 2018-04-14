@@ -4,7 +4,7 @@
 
 ;; Primitive functions
 
-(define println   (lambda (x)   ($println x)))
+(define println   (lambda (x)   ($println x)))  ;; glob_0
 (define +         (lambda (x y) ($+ x y)))
 (define -         (lambda (x y) ($- x y)))
 (define *         (lambda (x y) ($* x y)))
@@ -15,19 +15,19 @@
 (define <         (lambda (x y) ($< x y)))
 (define number?   (lambda (x)   ($number? x)))
 
-(define read-char     (lambda ()  ($read-char)))
+(define read-char     (lambda ()  ($read-char)))  ;; glob_10
 (define write-char    (lambda (x) ($write-char x)))
 (define integer->char (lambda (x) ($integer->char x)))
 (define char->integer (lambda (x) ($char->integer x)))
 (define char?         (lambda (x) ($char? x)))
 
-(define make-string   (lambda (x)     ($make-string x)))
+(define make-string   (lambda (x)     ($make-string x)))  ;; glob_15
 (define string-ref    (lambda (x y)   ($string-ref x y)))
 (define string-set!   (lambda (x y z) ($string-set! x y z)))
 (define string-length (lambda (x)     ($string-length x)))
 (define string?       (lambda (x)     ($string? x)))
 
-(define cons     (lambda (x y) ($cons x y)))
+(define cons     (lambda (x y) ($cons x y)))  ;; glob_20
 (define car      (lambda (x)   ($car x)))
 (define cdr      (lambda (x)   ($cdr x)))
 (define set-car! (lambda (x y) ($set-car! x y)))

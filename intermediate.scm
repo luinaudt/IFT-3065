@@ -489,6 +489,7 @@
 	     (($read-char)
 	      (begin (set! fs (+ fs 1))
 		     (list '(getchar))))
+             
 	     (($string-ref ,s ,pos)
 	      (begin (set! fs (+ 0 fs))
 		     (append (compile-ir s env)
