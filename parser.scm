@@ -36,10 +36,17 @@
 	   (read-char port)
 	   (list 'quote (read port)))
 	  ((char=? c #\`)
-	   (error "quasiquote not supported yet")) ;;quasiquote
+	   (read-char port)
+	   (list 'quasiquote (read port)))
  	  ((char=? c #\,)
-	    (error ", not supported yet")) ;; , et , @
-	  )))
+	   (read-char port)
+	   (let ((c (peek-char port)))
+	     (if (char=? c #\@)
+		 (begin
+		   (read-char port)
+		   (list 'unquote-splicing (read port)))
+		 (list 'unquote (read port)))))
+	   )))
 
 ; (define (read-list port)
 ;   (let ((c (peek-char-non-whitespace port)))
