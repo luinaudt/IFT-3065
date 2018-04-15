@@ -9,3 +9,4 @@
 (include "codegen.scm")
 (include "parser.scm")
 (include "compiler.scm")
+(include "cps.scm")

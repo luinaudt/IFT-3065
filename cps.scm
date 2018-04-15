@@ -1,5 +1,28 @@
 (include "match.scm")
 
+(define (desugar expr)
+  (match expr
+         ;; define
+         ((define ,f-params . ,body) when (list? f-params)
+          (desugar
+           `(define ,(car f-params)
+              (lambda ,(cdr f-params)
+                ,@body))))
+
+         ;; lambda
+         ((lambda ,params . ,body) when (> (length body) 1)
+          `(lambda ,(map desugar params)
+             (begin
+               ,@(map desugar body))))
+
+         ;; procedure call
+         ((,E0 . ,Es)
+          `(,(desugar E0) ,@(map desugar Es)))
+         
+         ;; anything else
+         (,x
+          x)))
+
 (define (cps E K)
   (match E
     (,c when (or (number? c) (string? c) (boolean? c))
@@ -51,8 +74,8 @@
   (pp (cps expr cont))
   (newline))
 
-(begin (test '(write (+ 1 2))
-         '(lambda (r) (halt r))))
+;; (begin (test '(write (+ 1 2))
+;;          '(lambda (r) (halt r))))
 
 ;(begin (test '(lambda (x) (+ x x))
 ;         '(lambda (r) (halt r))))
