@@ -19,9 +19,12 @@
                   ,@body))))
 
          ;; lambda
-         ((lambda ,params . ,body) when (> (length body) 1)
-          `(lambda ,params
-             ,@(insert-begin (map desugar body) '())))
+         ((lambda ,params . ,body)
+          (if (> (length body) 1)
+              `(lambda ,params
+                 ,@(insert-begin (map desugar body) '()))
+              `(lambda ,params
+                 ,@body)))
          
          ;; lists and pairs
          ((quote ,lit)
