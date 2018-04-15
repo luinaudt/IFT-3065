@@ -41,7 +41,7 @@
                  const)
          (,var when (variable? var)
                var)
-         ((quote ,p) when (pair? p)
+         ((quote ,p) when (or (pair? p) (null? p))
           p)
          ((set! ,var ,E1)
           `(set! ,var ,(simple-cps E1)))
