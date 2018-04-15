@@ -1,6 +1,15 @@
 (include "match.scm")
 
 (define (desugar expr)
+
+  (define (insert-begin exprs acc)
+    (let ((first (car exprs))
+          (rest (cdr exprs)))
+      (if (and (pair? first)
+               (eq? (car first) 'define))
+          (insert-begin rest (cons first acc))
+          (append (reverse acc) `((begin ,@exprs))))))
+  
   (match expr
          ;; define
          ((define ,f-params . ,body) when (list? f-params)
@@ -12,8 +21,7 @@
          ;; lambda
          ((lambda ,params . ,body) when (> (length body) 1)
           `(lambda ,params
-             (begin
-               ,@(map desugar body))))
+             ,@(insert-begin (map desugar body) '())))
          
          ;; lists and pairs
          ((quote ,lit)

@@ -74,6 +74,7 @@
            (append (compile-ir-define (car exprs) (append body-defs env))
                    (compile-ir-body-defs (cdr exprs) (append body-defs env))))
           (else
+           ;; compile body expressions with extended environment
            (compile-ir-body-exprs exprs (append body-defs env)))))
   
   (define (compile-ir-define expr env)
@@ -86,9 +87,8 @@
                  (error "duplicate definition of a variable"))
                 (var-pos
                  (begin
-                   (set! body-defs (cons (cons var (cdr var-pos)) body-defs))
-                   (append (list `(comment "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))
-                           (compile-ir val env)
+                   (set! body-defs (cons var-pos body-defs))
+                   (append (compile-ir val env)
                            (begin
                              ;;(set! fs (+ fs 1))
                              (list `(push_loc ,(- fs (cdr var-pos)))))
@@ -97,10 +97,10 @@
                              (list `(set-car!))))))
                 (else
                  (begin
-                   (set! fs (+ fs 1))
-                   (set! body-defs (cons (cons var fs) body-defs))
-                   (append (list `(comment "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"))
-                           (compile-ir val env))))))))
+                   (let ((ir-code (compile-ir val env)))
+                     (set! fs (+ fs 1))
+                     (set! body-defs (cons (cons var fs) body-defs))
+                     ir-code)))))))
   
   (define (compile-ir-body-exprs exprs env)
     (if (null? (cdr exprs))
@@ -681,6 +681,7 @@
     (if (> start end)
         '()
         (cons start (range (+ start 1) end)))))
+
 ;;(trace compile-ir)
 ;;(trace compile-ir-program)
 ;;(trace gen-const)
