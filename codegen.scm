@@ -455,7 +455,11 @@
                        (set! fs (+ fs 1))
                        (debug fs expr)
                        (list "  push   %r10\n")))
-                    
+
+		    ((alloc ,s)
+		     (begin
+		       (set! fs (- fs 0))
+		       (list "")))
                     ((cons)
                      (begin
                        (set! fs (- fs 1))
@@ -526,7 +530,7 @@
 	  "push %rbp \n"
 	  "mov %rsp, %rbp\n"
 	  ;; "  call  print_rsp\n"
-          "  push  $20*1024*1024\n"
+          "  push  $10*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
 	  (compile-bloc exprs)

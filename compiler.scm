@@ -98,6 +98,7 @@
                     exe-filename
                     (path-expand "stdio.o" root-dir)
 		    (path-expand "mmap.o" root-dir)
+		    (path-expand "gc.o" root-dir)
                     asm-filename)))
 
         ;; return exit status
