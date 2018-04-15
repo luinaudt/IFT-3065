@@ -21,7 +21,9 @@ word* scan;
 word *glob_base;
 word *glob_end;
 const word BH = 33;
-const int debug = 0;
+const int debug=0;
+const int debugstack = 0;
+const int debugheap = 1;
 word mark (word obj){
   unsigned int type = (obj & 7);
   if (type <= 2) {
@@ -44,7 +46,6 @@ word mark (word obj){
   int len=0;
   switch (type){
   case 7:
-    printf("len f : %d \n", x[0]>>3);
     len = (x[0]>>3)+2;
     break;
   case 6:
@@ -76,7 +77,7 @@ word* gc(word n){
   copy = tospace;
   word *ptr=stack_ptr;
   while (ptr<stack_base) {
-    if(debug){
+    if(debugstack){
       printf("ptr stack %d,  %#010x\n", i ,ptr);
       printf("val stack %d,  %#010x\n",i,*((word*)((word)ptr & ~7)));
     }
@@ -84,18 +85,14 @@ word* gc(word n){
     ptr++;
     i++;
   }
-  ptr=glob_base;
   i=0;
+  ptr=glob_base;
   while (ptr < glob_end){
-    if(debug){
-      printf("ptr glob %d,  %#010x\n", i ,ptr);
-      printf("val glob %d, %d\n",i,*ptr);
-    }
     *ptr=mark(*ptr);
-    i++;
     ptr++;
+
   }
-  /* mm chose pour les var globales*/
+  
   while (scan < copy){
     *scan = mark(*scan);
     scan++;
@@ -104,7 +101,7 @@ word* gc(word n){
   word *tmp = fromspace;
   fromspace=tospace;
   tospace=tmp;
-
+  
   return scan;
   //mettre r10 a jour
   //tests de debordement 

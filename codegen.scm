@@ -465,7 +465,8 @@
 			 ;;(list "")))
 			 (list "mov $" s ",%rdi\n"
 			       "add %r10, %rdi\n" ;;test necessite
-			       "mov _fromspace(%rip), %rbx\n"
+			       "lea _fromspace(%rip), %rbx\n"
+			       "mov (%rbx), %rbx\n"
 			       "add $10*1024*1024,%rbx\n"
 			       "cmp %rbx,%rdi\n"
 			       "jbe " lab "\n"
@@ -473,7 +474,10 @@
 			       "mov %rsp, _stack_ptr(%rip)\n"
 			       "call _gc\n"
 			       "mov %rax, %r10\n"
-			   ;;   "jmp nargs_error\n"
+			       "lea _fromspace(%rip), %rbx\n"
+			       "mov (%rbx), %rbx\n"
+			       "add $10*1024*1024,%rbx\n"
+			       "sub %rax, %rbx\n"
 			       lab ":\n"
 			       ))))
                     ((cons)
@@ -555,14 +559,12 @@
 	  "  push  $10*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, _tospace(%rip)\n" ;;gc tospace
+
 	  "  lea   glob_var_base(%rip), %rbx\n"
 	  "  mov   %rbx,_glob_base(%rip)\n"
+	  
 	  "  lea   glob_var_end(%rip), %rcx\n"
-	  "  mov   %rbx,_glob_end(%rip)\n"
-	  "  sub   %rbx, %rcx\n"
-;;	  " call print_rcx\n"
-;;	  "call print_rax\n"
-;;	  "call print_r10\n"
+	  "  mov   %rcx,_glob_end(%rip)\n"
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
 	  ;; "  call  print_rsp\n"
