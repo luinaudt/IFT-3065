@@ -159,6 +159,7 @@
                                "  lea   " retLab "(%rip), %rax\n"
                                "  push  %rax\n"
                                "  mov   $" nargs ", %rax\n"
+			       "  add   $16,%rdi\n"
                                "  jmp   *-7(%rdi)\n"
                                ".align 8\n"
                                ".quad 0\n"
@@ -239,14 +240,14 @@
                      (begin
                        (debug fs expr)
                        (list "  pop   %rdi\n"
-                             "  push  8*" (+ pos 1) "-7(%rdi)\n")))
+                             "  push  8*" (+ pos 3) "-7(%rdi)\n")))
 
                     ((pop_free ,pos)
                      (begin
                        (set! fs (- fs 2))
                        (debug fs expr)
                        (list "  pop   %rdi\n"
-                             "  pop   8*" (+ pos 1) "-7(%rdi)\n")))
+                             "  pop   8*" (+ pos 3) "-7(%rdi)\n")))
 
                     ((close ,nfree)
                      (begin
@@ -259,7 +260,8 @@
                              "  push  $8*" (+ nfree 1) "\n"
                              "  pop   8*0(%r10)  # longueur\n"
                              "  push  %r10\n"
-                             "  add   $8*2+7, (%rsp)\n"
+			     "  add   $7, (%rsp)\n"
+;;                             "  add   $8*2+7, (%rsp)\n"
                              "  add   $8*" (+ nfree 3) ", %r10\n")))
 
                     ((push_this ,offset)
@@ -469,10 +471,9 @@
 			       "jbe " lab "\n"
 			       "mov $" s",%rdi\n"
 			       "mov %rsp, _stack_ptr(%rip)\n"
-			       "call print_rsp\n"
 			       "call _gc\n"
-			       "call print_rax\n"
-			       "jmp nargs_error\n"
+			       "mov %rax, %r10\n"
+			   ;;   "jmp nargs_error\n"
 			       lab ":\n"
 			       ))))
                     ((cons)
@@ -554,6 +555,14 @@
 	  "  push  $10*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, _tospace(%rip)\n" ;;gc tospace
+	  "  lea   glob_var_base(%rip), %rbx\n"
+	  "  mov   %rbx,_glob_base(%rip)\n"
+	  "  lea   glob_var_end(%rip), %rcx\n"
+	  "  mov   %rbx,_glob_end(%rip)\n"
+	  "  sub   %rbx, %rcx\n"
+;;	  " call print_rcx\n"
+;;	  "call print_rax\n"
+;;	  "call print_r10\n"
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
 	  ;; "  call  print_rsp\n"
@@ -566,7 +575,9 @@
 	  "\n\n"
           ".data\n"
           ".align 8\n"
-	  (map compile-env genv))))
+	  "glob_var_base:\n"
+	  (map compile-env genv)
+	  "glob_var_end:\n")))
 
 (define (debug fs expr)
   ;; (display fs)
