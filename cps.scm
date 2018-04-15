@@ -4,24 +4,36 @@
   (match expr
          ;; define
          ((define ,f-params . ,body) when (list? f-params)
-          (desugar
-           `(define ,(car f-params)
-              (lambda ,(cdr f-params)
-                ,@body))))
+          `(define ,(car f-params)
+             ,(desugar
+               `(lambda ,(cdr f-params)
+                  ,@body))))
 
          ;; lambda
          ((lambda ,params . ,body) when (> (length body) 1)
           `(lambda ,params
              (begin
                ,@(map desugar body))))
-
+         
+         ;; lists and pairs
+         ((quote ,lit)
+          `(quote ,lit))
+         
+         ;; constants and symbols
+         (,c when (or (constant? c) (symbol? c))
+             c)
+         
          ;; procedure call
          ((,E0 . ,Es)
           `(,(desugar E0) ,@(map desugar Es)))
          
          ;; anything else
-         (,x
-          x)))
+         (,_
+          (error "unknown expression"))))
+
+(define special?
+  (lambda (x)
+    (member x '(define lambda let if))))
 
 (define (simple-cps expr)
   (match expr
@@ -29,6 +41,8 @@
                  const)
          (,var when (variable? var)
                var)
+         ((quote ,p) when (pair? p)
+          p)
          ((set! ,var ,E1)
           `(set! ,var ,(simple-cps E1)))
          ((,op . ,Es) when (primitive? op)
@@ -58,6 +72,8 @@
                  #t)
          (,var when (variable? var)
                #t)
+         ((quote ,p)
+          #t)
          ((lambda ,params ,E0)
           #t)
          ((set! ,var ,E1)
@@ -79,6 +95,10 @@
           (multi-cps (list E1)
                      (lambda (sexprs)
                        `(,K (set! ,v ,@sexprs)))))
+         ((define ,v ,E1)
+          (if (simple? E1)
+              `(define ,v ,E1)
+              `(define ,v ,(cps E1 K))))
          ((if ,E1 ,E2 ,E3)
           (multi-cps (list E1)
                      (lambda (sexprs)
@@ -104,7 +124,10 @@
          (,_
           (error "unknown expression"))))
 
+;; (trace desugar)
 ;; (trace cps)
+;; (trace simple-cps)
+;; (trace multi-cps)
 
 ;; (define (cps E K)
 ;;   (match E
