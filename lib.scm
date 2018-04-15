@@ -37,13 +37,13 @@
 (define procedure? (lambda (x)   ($procedure? x)))
 (define eq?        (lambda (x y) ($eq? x y)))
 
-(define make-vector (lambda (len val) ($make-vector len val)))
-(define vector-length (lambda (x) ($vector-length x)))
-(define	vector-ref (lambda (vec pos) ($vector-ref vec pos)))
-(define	vector-set! (lambda (vec pos obj) ($vector-set! vec pos obj)))
-(define	vector? (lambda (x) ($vector? x)))
+(define make-vector   (lambda (len val)     ($make-vector len val)))
+(define vector-length (lambda (x)           ($vector-length x)))
+(define	vector-ref    (lambda (vec pos)     ($vector-ref vec pos)))
+(define	vector-set!   (lambda (vec pos obj) ($vector-set! vec pos obj)))
+(define	vector?       (lambda (x)           ($vector? x)))
 
-(define symbol? (lambda (x) ($symbol? x)))
+(define symbol?        (lambda (x) ($symbol? x)))
 (define symbol->string (lambda (x) ($symbol->string x)))
 ;;;============================================================================
 
@@ -283,9 +283,9 @@
 	       (if ($< pos ($vector-length x))
 		   (begin
 		     (write ($vector-ref x pos))
-		     (if ($< pos (- ($vector-length x) 1))
+		     (if ($< pos ($- ($vector-length x) 1))
 			 ($write-char #\space))
-		     (write-vec x (+ 1 pos)))))
+		     (write-vec x ($+ 1 pos)))))
 	     ($write-char #\))))
 	  (($pair? x)
            (begin
