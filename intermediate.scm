@@ -76,22 +76,74 @@
           (else
            (compile-ir-body-exprs exprs (append body-defs env)))))
 
+  
+  ;; (set! body-defs (cons (cons var (+ fs 1)) body-defs))
+  ;; (append (compile-ir (caddr expr) (append body-defs env))
+  ;;         (if (assoc var env)
+  ;;             (list `(pop_loc ,(cdr (assoc var env))))
+  
   (define (compile-ir-define expr env)
-    (let ((var (cadr expr)))
-      (cond ((not (= (length expr) 3))
-             (error "ill-formed special form: define"))
-            ((assoc var body-defs)
-             (error "duplicate definition of a variable"))
-            (else
-             (begin
-               (set! body-defs (cons (cons var (+ fs 1)) body-defs))
-               (compile-ir (caddr expr) env))))))
+    (if (not (= (length expr) 3))
+        (error "ill-formed special form: define")
+        (let* ((var (cadr expr))
+               (val (caddr expr))
+               (var-pos (assoc var env)))
+          (cond ((assoc var body-defs)
+                 (error "duplicate definition of a variable"))
+                (var-pos
+                 (begin
+                   (set! body-defs (cons (cons var (cdr var-pos)) body-defs))
+                   ;; (pp "-----------------")
+                   ;; (pp expr)
+                   ;; (pp var)
+                   ;; (pp val)
+                   ;; (pp var-pos)
+                   ;; (pp env)
+                   ;; (pp "-----------------")
+                   (append (list `(comment "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))
+                           (compile-ir val (append body-defs env))
+                           (begin
+                             (set! fs (+ fs 1))
+                             (list `(push_loc ,(- fs (cdr var-pos)))))
+                           (begin
+                             (set! fs (- fs 1))
+                             (list `(set-car!))))))
+                (else
+                 (begin
+                   (set! fs (+ fs 1))
+                   (set! body-defs (cons (cons var fs) body-defs))
+                   ;; (pp "-----------------")
+                   ;; (pp expr)
+                   ;; (pp var)
+                   ;; (pp val)
+                   ;; (pp var-pos)
+                   ;; (pp env)
+                   ;; (pp body-defs)
+                   ;; (pp "-----------------")
+                   (append (list `(comment "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"))
+                           (compile-ir val (append body-defs env)))))))))
+
+  ;; (($set-car! ,p ,e)
+  ;;  (let ((ir-code
+  ;;         (append (compile-ir e env)
+  ;;                 (compile-ir p env)
+  ;;                 (list `(set-car!)
+  ;;                       `(push_lit #!void)))))
+  ;;    (begin
+  ;;      (set! fs (- fs 1))
+  ;;      ir-code)))
   
   (define (compile-ir-body-exprs exprs env)
     (if (null? (cdr exprs))
         (compile-ir (car exprs) env)
-        (append (compile-ir (car exprs) env)
-                (compile-ir-body-exprs (cdr exprs) env))))
+        (let* ((fs-save fs)
+               (ir-code
+                (append (compile-ir (car exprs) env)
+                        (compile-ir-body-exprs (cdr exprs) env))))
+          (begin
+            (set! fs fs-save)
+            (list `(check-stack-integrity ,fs-save))
+            ir-code))))
   
   ;; (display fs)
   ;; (display "   ")
@@ -165,7 +217,7 @@
                   (set! fs (+ nb-params 1))  ;; params + return address
                   (set! lambda-env (append (list `(proc_reste ,proc-name ,nb-params))
                                            (list `(comment ("lambda " ,proc-name " " ,fs)))
-;					   ();;generer le parametre reste
+                                        ;					   ();;generer le parametre reste
                                            (compile-ir-body body proc-env)
                                            (list `(ret ,(- fs (+ nb-params 1))))
                                            lambda-env))
@@ -173,7 +225,7 @@
                   (set! fs (+ old-fs 1))
                   (list `(comment ("proc reste " ,proc-name))
                         `(push_proc ,proc-name)))))
-				 
+             
              ((let ,bindings . ,body)
               (let* ((vars (map car bindings))
                      (vals (map cadr bindings))
