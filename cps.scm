@@ -1,69 +1,4 @@
-
-(define-macro (match sujet . clauses)
-
-  (define (if-equal? var gab oui non)
-    (cond ((and (pair? gab)
-                (eq? (car gab) 'unquote)
-                (pair? (cdr gab))
-                (null? (cddr gab)))
-           `(let ((,(cadr gab) ,var))
-              ,oui))
-          ((null? gab)
-           `(if (null? ,var) ,oui ,non))
-          ((symbol? gab)
-           `(if (eq? ,var ',gab) ,oui ,non))
-          ((or (boolean? gab)
-               (char? gab))
-           `(if (eq? ,var ,gab) ,oui ,non))
-          ((number? gab)
-           `(if (eqv? ,var ,gab) ,oui ,non))
-          ((pair? gab)
-           (let ((carvar (gensym))
-                 (cdrvar (gensym)))
-             `(if (pair? ,var)
-                  (let ((,carvar (car ,var)))
-                    ,(if-equal?
-                      carvar
-                      (car gab)
-                      `(let ((,cdrvar (cdr ,var)))
-                         ,(if-equal?
-                           cdrvar
-                           (cdr gab)
-                           oui
-                           non))
-                      non))
-                  ,non)))
-          (else
-           (error "unknown pattern"))))
-
-  (let* ((var
-          (gensym))
-         (fns
-          (map (lambda (x) (gensym))
-               clauses))
-         (err
-          (gensym)))
-    `(let ((,var ,sujet))
-       ,@(map (lambda (fn1 fn2 clause)
-                `(define (,fn1)
-                   ,(if-equal? var
-                               (car clause)
-                               (if (and (eq? (cadr clause) 'when)
-                                        (pair? (cddr clause)))
-                                   `(if ,(caddr clause)
-                                        ,(cadddr clause)
-                                        (,fn2))
-                                   (cadr clause))
-                               `(,fn2))))
-              fns
-              (append (cdr fns) (list err))
-              clauses)
-       (define (,err) (error "match failed"))
-       (,(car fns)))))
-
-(define count 0)
-
-(define (gensym) (set! count (+ count 1)) (string->symbol (string-append "g" (number->string count))))
+(include "match.scm")
 
 (define (cps E K)
   (match E
@@ -119,21 +54,21 @@
 (begin (test '(write (+ 1 2))
          '(lambda (r) (halt r))))
 
-(begin (test '(lambda (x) (+ x x))
-         '(lambda (r) (halt r))))
+;(begin (test '(lambda (x) (+ x x))
+;         '(lambda (r) (halt r))))
 
-(begin (test '(set! append
-                (lambda (lst1 lst2)
-                  (if (null? lst1)
-                      lst2
-                      (cons (car lst1)
-                            (append (cdr lst1) lst2)))))
-         '(lambda (r) (halt r))))
+;(begin (test '(set! append
+;                (lambda (lst1 lst2)
+;                  (if (null? lst1)
+;                      lst2
+;                      (cons (car lst1)
+;                            (append (cdr lst1) lst2)))))
+;         '(lambda (r) (halt r))))
 
-(begin (test '(set! somme
-                (lambda (n lst)
-                  (if (null? lst)
-                      n
-                      (somme (+ n (car lst))
-                             (cdr lst)))))
-         '(lambda (r) (halt r))))
+;(begin (test '(set! somme
+;                (lambda (n lst)
+;                  (if (null? lst)
+;                      n
+;                      (somme (+ n (car lst))
+;                             (cdr lst)))))
+;         '(lambda (r) (halt r))))
