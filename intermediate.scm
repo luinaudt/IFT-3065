@@ -71,16 +71,10 @@
            (error "body must contain at least one expr"))
           ((and (pair? (car exprs))
                 (eq? (car (car exprs)) 'define))
-           (append (compile-ir-define (car exprs) env)
-                   (compile-ir-body-defs (cdr exprs) env)))
+           (append (compile-ir-define (car exprs) (append body-defs env))
+                   (compile-ir-body-defs (cdr exprs) (append body-defs env))))
           (else
            (compile-ir-body-exprs exprs (append body-defs env)))))
-
-  
-  ;; (set! body-defs (cons (cons var (+ fs 1)) body-defs))
-  ;; (append (compile-ir (caddr expr) (append body-defs env))
-  ;;         (if (assoc var env)
-  ;;             (list `(pop_loc ,(cdr (assoc var env))))
   
   (define (compile-ir-define expr env)
     (if (not (= (length expr) 3))
@@ -93,17 +87,10 @@
                 (var-pos
                  (begin
                    (set! body-defs (cons (cons var (cdr var-pos)) body-defs))
-                   ;; (pp "-----------------")
-                   ;; (pp expr)
-                   ;; (pp var)
-                   ;; (pp val)
-                   ;; (pp var-pos)
-                   ;; (pp env)
-                   ;; (pp "-----------------")
                    (append (list `(comment "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))
-                           (compile-ir val (append body-defs env))
+                           (compile-ir val env)
                            (begin
-                             (set! fs (+ fs 1))
+                             ;;(set! fs (+ fs 1))
                              (list `(push_loc ,(- fs (cdr var-pos)))))
                            (begin
                              (set! fs (- fs 1))
@@ -112,26 +99,8 @@
                  (begin
                    (set! fs (+ fs 1))
                    (set! body-defs (cons (cons var fs) body-defs))
-                   ;; (pp "-----------------")
-                   ;; (pp expr)
-                   ;; (pp var)
-                   ;; (pp val)
-                   ;; (pp var-pos)
-                   ;; (pp env)
-                   ;; (pp body-defs)
-                   ;; (pp "-----------------")
                    (append (list `(comment "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"))
-                           (compile-ir val (append body-defs env)))))))))
-
-  ;; (($set-car! ,p ,e)
-  ;;  (let ((ir-code
-  ;;         (append (compile-ir e env)
-  ;;                 (compile-ir p env)
-  ;;                 (list `(set-car!)
-  ;;                       `(push_lit #!void)))))
-  ;;    (begin
-  ;;      (set! fs (- fs 1))
-  ;;      ir-code)))
+                           (compile-ir val env))))))))
   
   (define (compile-ir-body-exprs exprs env)
     (if (null? (cdr exprs))
@@ -200,6 +169,7 @@
                   (set! fs (+ old-fs 1))
                   (list `(comment ("proc " ,proc-name))
                         `(push_proc ,proc-name)))))
+             
 	     ;;lambda avec parametre reste
 	     ((lambda ,param-pair . ,body)
 	      (let* ((proc-name (lambda-gensym))
