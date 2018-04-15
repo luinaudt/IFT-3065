@@ -2,7 +2,14 @@
 #include <stdio.h>
 typedef long word;
 #ifdef __linux__
+#define stack_base _stack_base
+#define stack_ptr _stack_ptr
+#define fromspace _fromspace
+#define tospace _tospace
+#define gc _gc
+#define mark _mark
 #endif
+
 
 word *stack_base;
 word *stack_ptr;
@@ -26,29 +33,27 @@ word mark (word obj){
 }
 
 /**
-\param n : taille du bloc que l'on veut ajouter
- */
-word* gc(int n){
-  scan = tospace;
-  copy = fromspace;
-  word *ptr=stack_ptr;
-  while (ptr<stack_base) {
+   \param n : taille du bloc que l'on veut ajouter
+*/
+word* gc(word n){
+  /*scan = tospace;
+    copy = fromspace;
+    word *ptr=stack_ptr;
+    while (ptr<stack_base) {
     *ptr=mark(*ptr);
     ptr++;
-  }
+    }*/
   /* mm chose pour les var globales*/
-  while (scan < copy){
-    *scan = mark(*scan);
-    scan++;
-  }
-
-  word *tmp = fromspace;
-  fromspace=tospace;
-  tospace=tmp;
-
-  return fromspace;
+  /*  while (scan < copy){
+   *scan = mark(*scan);
+   scan++;
+    }*/
+  
+  /* word *tmp = fromspace;
+     fromspace=tospace;
+     tospace=tmp;
+  */
+  return stack_ptr;
   //mettre r10 a jour
-  //tests de debordement
-  
-  
+  //tests de debordement 
 }

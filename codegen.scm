@@ -459,7 +459,13 @@
 		    ((alloc ,s)
 		     (begin
 		       (set! fs (- fs 0))
-		       (list "")))
+		       (list "mov $" s ",%rdi\n"
+			     ""
+			     "mov %rsp, _stack_ptr(%rip)\n"
+			     "call print_rsp\n"
+			     "call _gc\n"
+			     "call print_rax\n"
+			     )))
                     ((cons)
                      (begin
                        (set! fs (- fs 1))
@@ -529,10 +535,16 @@
 	  "main:\n"
 	  "push %rbp \n"
 	  "mov %rsp, %rbp\n"
+	  "mov %rsp, _stack_base(%rip)\n" ;;gc stack base
 	  ;; "  call  print_rsp\n"
           "  push  $10*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
+	  "  mov   %rax, _fromspace(%rip)\n" ;;gc fromspace
+	  ;;allocation pour gc
+	  "  push  $10*1024*1024\n"
+	  "  call  mmap\n"
+	  "  mov   %rax, _tospace(%rip)\n" ;;gc tospace
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
 	  ;; "  call  print_rsp\n"

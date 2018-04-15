@@ -240,7 +240,8 @@
               (let ((ir-code
                      (append (compile-ir e1 env)
                              (compile-ir e2 env)
-                             (list '(cons)))))
+                             (list '(alloc 16)
+				   '(cons)))))
                 (begin
                   (set! fs (- fs 1))
                   ir-code)))
