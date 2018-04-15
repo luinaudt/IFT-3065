@@ -1,8 +1,8 @@
-(let loop2 ((y 14))
-  (if (< y 15)
+(let loop2 ((y 1))
+  (if (< 15 y)
       (println "fin")
       (begin
-	(println (let somme ((y (let loop ((x (* 50000 y)))
+	(println (let somme ((y (let loop ((x  100000))
 				  (if (= x 0)
 				      '()
 				      (cons x (loop (- x 1)))))))

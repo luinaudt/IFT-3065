@@ -526,7 +526,7 @@
 	  "push %rbp \n"
 	  "mov %rsp, %rbp\n"
 	  ;; "  call  print_rsp\n"
-          "  push  $100*1024*1024\n"
+          "  push  $20*1024*1024\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
 	  (compile-bloc exprs)
