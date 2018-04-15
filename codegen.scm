@@ -97,7 +97,7 @@
                              ".align 8\n"
                              ".quad 0\n"
                              ".quad 0\n"
-                             ".byte 0\n"
+                             ".byte 7\n"
                              name ":\n"
                              "  cmp   $" nb-params ", %rax\n"
                              "  jnz   nargs_error\n")))
@@ -192,7 +192,8 @@
                        (cond ((equal? val #!void)
 			      (list "  push $25\n"))
 			     ((symbol? val)
-			      (append (list "push %r10\n"
+			      (append (compile-bloc `((push_lit ,(+ 1 (string-length (symbol->string val)))) (alloc)))
+				      (list "push %r10\n"
                                             "add $4, (%rsp)\n"
 					    "# symbole  " (symbol->string val) "\n")
                                       (list (push-string (symbol->string val)))))
@@ -203,7 +204,8 @@
                              ((char? val)
                               (list "  push  $2+8*" (char->integer val) "\n"))
 			     ((string? val)
-                              (append (list "push %r10\n"
+                              (append (compile-bloc `((push_lit ,(+ 1 (string-length val))) (alloc)))
+			              (list "push %r10\n"
                                             "add $3, (%rsp)\n")
 				      ;;"# string  " val "\n")
                                       (list (push-string val))))
@@ -458,26 +460,26 @@
                        (debug fs expr)
                        (list "  push   %r10\n")))
 
-		    ((alloc ,s)
+		    ((alloc)
 		     (let ((lab (spec-lab-gensym)))
 		       (begin
-			 (set! fs (- fs 0))
-			 ;;(list "")))
-			 (list "mov $" s ",%rdi\n"
-			       "add %r10, %rdi\n" ;;test necessite
+			 (set! fs (- fs 1))
+			 (list "pop %rdi# allocation \n"
+			       "mov %rdi, %rcx\n"
+			       "add %r10, %rcx\n" ;;test necessite
 			       "lea _fromspace(%rip), %rbx\n"
 			       "mov (%rbx), %rbx\n"
 			       "add $10*1024*1024,%rbx\n"
-			       "cmp %rbx,%rdi\n"
+			       "cmp %rbx,%rcx\n"
 			       "jbe " lab "\n"
-			       "mov $" s",%rdi\n"
 			       "mov %rsp, _stack_ptr(%rip)\n"
 			       "call _gc\n"
 			       "mov %rax, %r10\n"
-			       "lea _fromspace(%rip), %rbx\n"
-			       "mov (%rbx), %rbx\n"
-			       "add $10*1024*1024,%rbx\n"
-			       "sub %rax, %rbx\n"
+;			       "lea _fromspace(%rip), %rbx\n"
+;			       "mov (%rbx), %rbx\n"
+;			       "add $10*1024*1024,%rbx\n"
+;			       "sub %rax, %rbx\n"
+;			       "call print_rbx\n"
 			       lab ":\n"
 			       ))))
                     ((cons)
@@ -535,6 +537,14 @@
         "nargs_error:\n"
 	"  mov %rbp, %rsp\n"
 	"  pop %rbp\n"
+	"  push $'a'\n"
+	"  call putchar\n"
+	"  push $'r'\n"
+	"  call putchar\n"
+	"  push $'g'\n"
+	"  call putchar\n"
+	"  push $10\n"
+	"  call putchar\n"
 	"  mov   $1, %rax\n"
 	"  ret\n"))
 

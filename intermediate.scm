@@ -216,6 +216,8 @@
                      (ir-code
                       (append (compile-ir code env)
 			      (push-on-stack-ir fv env)
+			      (list `(push_lit ,(+ 3 fv-cnt))
+				    `(alloc))
 			      (list `(comment "make closure"))
 			      (list `(close ,fv-cnt)))))
                 (begin
@@ -240,7 +242,8 @@
               (let ((ir-code
                      (append (compile-ir e1 env)
                              (compile-ir e2 env)
-                             (list '(alloc 16)
+                             (list '(push_lit 16)
+			           '(alloc)
 				   '(cons)))))
                 (begin
                   (set! fs (- fs 1))
@@ -315,19 +318,23 @@
                             `(add))))
 	     (($make-vector ,len ,val)
 	      (append (compile-ir len env)
-		      (list `(get_heap)
-			    `(pop_mem);;on assigne la taille
-			    `(get_heap);;on retourne la position du heap
-			    `(push_tag 5)
-			    `(add)
-			    `(get_heap)
-			    `(push_mem);;on recupere la taille
-			    `(push_lit 1)
-			    `(add);;on ajoute 1 a la taille
-			    `(get_heap)
-			    `(add);;on calcul la nouvelle position du heap
-			    `(set_heap);;on positionne le heap
-			    )
+		      (compile-ir len env)
+		      (begin
+			(set! fs (- fs 1))
+			(list `(alloc)
+			      `(get_heap)
+			      `(pop_mem);;on assigne la taille
+			      `(get_heap);;on retourne la position du heap
+			      `(push_tag 5)
+			      `(add)
+			      `(get_heap)
+			      `(push_mem);;on recupere la taille
+			      `(push_lit 1)
+			      `(add);;on ajoute 1 a la taille
+			      `(get_heap)
+			      `(add);;on calcul la nouvelle position du heap
+			      `(set_heap);;on positionne le heap
+			      ))
 		      (compile-ir val env)
 		      (begin
 			(set! fs (- fs 1))
@@ -564,21 +571,24 @@
 	     
              (($make-string ,size)
 	      (append (compile-ir size env) ;;on calcul la taille
-		      (list '(comment "debut make-string ")
-			    `(get_heap)
-			    `(pop_mem);;on assigne la taille
-			    `(get_heap);;on retourne la position du heap
-			    `(push_tag 3)
-			    `(add)
-			    `(get_heap)
-			    `(push_mem);;on recupere la taille
-			    `(push_lit 1)
-			    `(add);;on ajoute 1 a la taille
-			    `(get_heap)
-			    `(add);;on calcul la nouvelle position du heap
-			    `(set_heap);;on positionne le heap
-			    '(comment "fin make-string")
-			    ))) ;;on crée la chaîne
+		      (compile-ir size env) ;;pour allocation
+		      (begin (set! fs (- fs 1))
+			     (list '(comment "debut make-string ")
+				   '(alloc);;allocation
+				   `(get_heap)
+				   `(pop_mem);;on assigne la taille
+				   `(get_heap);;on retourne la position du heap
+				   `(push_tag 3)
+				   `(add)
+				   `(get_heap)
+				   `(push_mem);;on recupere la taille
+				   `(push_lit 1)
+				   `(add);;on ajoute 1 a la taille
+				   `(get_heap)
+				   `(add);;on calcul la nouvelle position du heap
+				   `(set_heap);;on positionne le heap
+				   '(comment "fin make-string")
+				   )))) ;;on crée la chaîne
              
 	     (($string-length ,s)
 	      (begin (set! fs (+ 0 fs))
@@ -613,12 +623,12 @@
              ;; other litterals
              (,lit when (constant? lit)
                    (let ((ir-code (list `(push_lit ,lit))))
-                     (begin
-                       (set! fs (+ fs 1))
-                       ;; (display fs)
-                       ;; (display " --> ")
-                       ;; (pp lit)
-                       ir-code)))
+		     (begin
+		       (set! fs (+ fs 1))
+		       ;; (display fs)
+		       ;; (display " --> ")
+		       ;; (pp lit)
+		       ir-code)))
 
              ;; variables
              (,var when (variable? var)

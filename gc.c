@@ -23,7 +23,7 @@ word *glob_end;
 const word BH = 33;
 const int debug=0;
 const int debugstack = 0;
-const int debugheap = 1;
+const int debugheap = 0;
 word mark (word obj){
   unsigned int type = (obj & 7);
   if (type <= 2) {
@@ -33,6 +33,13 @@ word mark (word obj){
   if (debug){
     printf("obj %d\n", type);
     switch (type){
+    case 3:
+    case 4:
+      printf("valeur s ou s : %d, %d\n",x[0], x[1]);
+      break;
+    case 5:
+      printf("valeur vec : %d, %d\n",x[0], x[1]);
+      break;
     case 6:
       printf("valeur l : %d, %d\n",x[0], x[1]);
       break;

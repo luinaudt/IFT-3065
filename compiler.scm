@@ -69,7 +69,7 @@
 				
          (ir-code       (begin
 			  ;; (display "hoisted ast \n")
-			  ;; (pp hoisted-ast)
+			  ;;(pp hoisted-ast)
 			  ;; (display "\n")
 			  (compile-ir-program hoisted-ast '())))
          (code          (begin
