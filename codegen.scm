@@ -457,15 +457,24 @@
                        (list "  push   %r10\n")))
 
 		    ((alloc ,s)
-		     (begin
-		       (set! fs (- fs 0))
-		       (list "mov $" s ",%rdi\n"
-			     ""
-			     "mov %rsp, _stack_ptr(%rip)\n"
-			     "call print_rsp\n"
-			     "call _gc\n"
-			     "call print_rax\n"
-			     )))
+		     (let ((lab (spec-lab-gensym)))
+		       (begin
+			 (set! fs (- fs 0))
+			 ;;(list "")))
+			 (list "mov $" s ",%rdi\n"
+			       "add %r10, %rdi\n" ;;test necessite
+			       "mov _fromspace(%rip), %rbx\n"
+			       "add $10*1024*1024,%rbx\n"
+			       "cmp %rbx,%rdi\n"
+			       "jbe " lab "\n"
+			       "mov $" s",%rdi\n"
+			       "mov %rsp, _stack_ptr(%rip)\n"
+			       "call print_rsp\n"
+			       "call _gc\n"
+			       "call print_rax\n"
+			       "jmp nargs_error\n"
+			       lab ":\n"
+			       ))))
                     ((cons)
                      (begin
                        (set! fs (- fs 1))
