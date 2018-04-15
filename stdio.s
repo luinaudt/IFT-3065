@@ -315,6 +315,8 @@ print_ln:
 	jz	print_str
 	cmp	$4, %rbx
 	jz	print_sym
+	cmp	$5, %rbx
+	jz	print_vec
 	cmp	$6,%rbx	
 	jz	print_list
 	cmp	$7,%rbx
@@ -396,7 +398,31 @@ print_sym_tmp:
 	cmp	%rcx, %rdx
 	jne	print_sym_tmp
 	jmp	print_ln_end
-	
+print_vec:
+	add	$-5, %rax
+	mov	(%rax), %rcx
+	add	%rax, %rcx
+	mov	%rax, %rdx
+	mov	$0, %rbx
+	push 	$'#'
+	call 	putchar
+	push 	$'('
+	call 	putchar
+	cmp	%rcx, %rdx
+	je	print_vec_end
+print_vec_tmp:
+	add	$8,%rdx
+	push	(%rdx)
+	call	print_ln
+	cmp	%rcx, %rdx
+	je	print_vec_end
+	push	$' '
+	call	putchar
+	jmp	print_vec_tmp
+print_vec_end:
+	push 	$')'
+	call 	putchar
+	jmp	print_ln_end
 print_char:
 	push	%rax
 	call 	putchar

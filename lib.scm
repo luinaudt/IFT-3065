@@ -37,6 +37,12 @@
 (define procedure? (lambda (x)   ($procedure? x)))
 (define eq?        (lambda (x y) ($eq? x y)))
 
+(define make-vector (lambda (len val) ($make-vector len val)))
+(define vector-length (lambda (x) ($vector-length x)))
+(define	vector-ref (lambda (vec pos) ($vector-ref vec pos)))
+(define	vector-set! (lambda (vec pos obj) ($vector-set! vec pos obj)))
+(define	vector? (lambda (x) ($vector? x)))
+
 (define symbol? (lambda (x) ($symbol? x)))
 (define symbol->string (lambda (x) ($symbol->string x)))
 ;;;============================================================================
@@ -269,23 +275,35 @@
            (begin
              ($write-char #\()
              ($write-char #\))))
+	  (($vector? x)
+	   (begin
+	     ($write-char #\#)
+	     ($write-char #\()
+	     (let write-vec ((x x) (pos 0))
+	       (if ($< pos ($vector-length x))
+		   (begin
+		     (write ($vector-ref x pos))
+		     (if ($< pos (- ($vector-length x) 1))
+			 ($write-char #\space))
+		     (write-vec x (+ 1 pos)))))
+	     ($write-char #\))))
 	  (($pair? x)
            (begin
              ($write-char #\()
              (write ($car x))
              (let write-pair ((cdr-x ($cdr x)))
                (cond (($eq? cdr-x '())
-                      ($write-char #\)))
+                      ($write-char #\) ))
                      (($pair? cdr-x)
                       (begin
-                        ($write-char #\ )
+                        ($write-char #\space )
                         (write ($car cdr-x))
                         (write-pair ($cdr cdr-x))))
                      (else
                       (begin
-                        ($write-char #\ )
+                        ($write-char #\space )
                         ($write-char #\.)
-                        ($write-char #\ )
+                        ($write-char #\space )
                         (write cdr-x)
                         ($write-char #\))))))))
 	  (($procedure? x)

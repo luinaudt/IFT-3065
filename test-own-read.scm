@@ -1,0 +1,6 @@
+;(write (char->integer (read-char)))
+;(write (char->integer (read-char)))
+;(write (char->integer (read-char)))
+;(write (char->integer (read-char)))
+(write (read))
+(println "")

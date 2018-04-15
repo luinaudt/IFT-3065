@@ -282,7 +282,25 @@
                        (debug fs expr)
                        (list "  pop   %rax\n"
                              "  add   %rax, (%rsp)\n")))
-                    
+                    ((assign_vec)
+		     (begin
+		       (set! fs (- fs 1))
+		       (let ((lab (spec-lab-gensym))
+			     (labf (spec-lab-gensym)))
+			 (list "  mov 8(%rsp), %rax\n #vecteur creation \n" ;;vector
+			       "  mov (%rsp), %rbx\n" ;; val
+			       "  add $-5, %rax\n"
+			       "  mov (%rax), %rcx\n" ;; length
+			       "  cmp $0, %rcx\n"    ;; 0 pas d'assignation
+			       "  je " labf "\n"
+			       "  add %rax, %rcx\n" ;;addr fin
+			       lab ":\n"
+			       "  mov %rbx, (%rcx)\n"
+			       "  sub $8, %rcx\n"
+			       "  cmp %rcx, %rax\n"
+			       "  jne " lab "\n"
+			       labf ":\n"
+			       "  add $8, %rsp\n"))))
                     ((sub)
                      (begin
                        (set! fs (- fs 1))
@@ -429,6 +447,7 @@
 		     (begin
 		       (set! fs (- fs 2))
 		       (list "pop %rax \n"
+			     "mov (%rax), %rbx\n"
 			     "pop (%rax)\n")))
 		    
                     ((get_heap)
