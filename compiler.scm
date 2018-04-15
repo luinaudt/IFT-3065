@@ -48,16 +48,22 @@
   (let* ((ast           (append (parse-program "lib.scm")
                                 (parse-program filename)))
          (desugared-ast (begin
-                          (map desugar ast)))
-         ;; (cps-ast       (begin
-         ;;                  (cps-conv desugared-ast)))
-         (expanded-ast  (begin
 			  ;; (display "ast \n")
 			  ;; (pp ast)
 			  ;; (display "\n")
+                          (map desugar ast)))
+         (expanded-ast  (begin
+			  ;; (display "desugared-ast \n")
+			  ;; (pp desugared-ast)
+			  ;; (display "\n")
                           (expand-macros desugared-ast)))
+         (cps-ast       (begin
+			  ;; (display "expanded-ast \n")
+			  ;; (pp expanded-ast)
+			  ;; (display "\n")
+                          (map (lambda (e) (cps e '(lambda (r) r))) expanded-ast)))
 	 (closed-ast    (begin
-			  ;; (display "expanded ast \n")
+			  ;; (display "cps-ast \n")
 			  ;; (pp expanded-ast)
 			  ;; (display "\n")
 			  (map closure-conv
