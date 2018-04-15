@@ -1,5 +1,5 @@
 (println 123)
-(define k "write devrait etre la procedure")
+(define k "write devrait être la procédure")
 (define l 698)
 ((lambda ()
    (define write 5)
@@ -23,5 +23,6 @@
 ;5
 ;128
 ;698
+;"write devrait être la procédure"
 ;"write devrait être une procédure ici"
 ;15
