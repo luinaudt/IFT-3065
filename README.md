@@ -13,7 +13,7 @@ Francis de Ladurantaye
 -autogene ?
 
 resultat make ut :
-114 3 3
+117 3 1
 
 
 tag :
