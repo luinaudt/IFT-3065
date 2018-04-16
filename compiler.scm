@@ -46,21 +46,29 @@
 (define (compile filename)
 
   (let* ((ast           (append (parse-program "lib.scm")
-                                ;; (list '(comment "debut"))
                                 (parse-program filename)))
-
-         (expanded-ast  (begin
+         (desugared-ast (begin
 ;			  (display "ast \n")
 ;			  (pp ast)
 ;			  (display "\n")
-                          (expand-macros ast)))
+                          (desugar ast)))
+         (expanded-ast  (begin
+;			  (display "ast \n")
+;			  (pp desugared-ast)
+;			  (display "\n")
+                          (expand-macros desugared-ast)))
+         (cps-ast  (begin
+;			  (display "ast \n")
+;			  (pp expanded-ast)
+;			  (display "\n")
+                          (map (lambda (e) (cps e '(lambda(r) r))) expanded-ast)))
 	 (closed-ast    (begin
 ;			  (display "expanded ast \n")
-;			  (pp expanded-ast)
+;			  (pp cps-ast)
 ;			  (display "\n")
 			  (map closure-conv
 			       (map assign-conv
-                                    (map alpha-conv expanded-ast)))))
+                                    (map alpha-conv cps-ast)))))
 	 (hoisted-ast (begin
 ;			(display "closed-ast \n")
 ;			(pp closed-ast)
