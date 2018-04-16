@@ -63,16 +63,16 @@
 			  ;; (display "\n")
                           (map (lambda (e) (cps e '(lambda(r) r))) expanded-ast)))
 	 (closed-ast    (begin
-			  (display "cps-ast \n")
-			  (pp cps-ast)
-			  (display "\n")
+			  ;; (display "cps-ast \n")
+			  ;; (pp cps-ast)
+			  ;; (display "\n")
 			  (map closure-conv
 			       (map assign-conv
                                     (map alpha-conv cps-ast)))))
 	 (hoisted-ast (begin
-			(display "closed-ast \n")
-			(pp closed-ast)
-			(display "\n")
+			;; (display "closed-ast \n")
+			;; (pp closed-ast)
+			;; (display "\n")
                         (hoist-closure-2 closed-ast)))
 				
          (ir-code       (begin
