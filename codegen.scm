@@ -477,7 +477,7 @@
 			       "jbe " lab "\n"
 			       labd ":\n"
 			       "mov heap_size(%rip),%rax\n"
-			       "sub old_heap(%rip),%rax\n"
+			       "sub old_heap_size(%rip),%rax\n"
 			       "jz " labf "\n"
 			       "mov heap_size(%rip),%rax\n"
 			       "push %rax\n"
@@ -612,8 +612,8 @@
 	  "\n\n"
           ".data\n"
           ".align 8\n"
-	  "heap_size: .quad 1024*1024*10\n"
-	  "old_heap_size: .quad 1024*1024*10\n"
+	  "heap_size: .quad 1024*1024 \n"
+	  "old_heap_size: .quad 1024*1024 \n"
 	  "glob_var_base:\n"
 	  (map compile-env genv)
 	  "glob_var_end:\n")))

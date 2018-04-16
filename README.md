@@ -7,13 +7,12 @@ Francis de Ladurantaye
 
 #todo :
 -read (en cours)
--gc (code c du cours disponible)
 -define-macro
 -appel terminal
 -autogene ?
 
 resultat make ut :
-117 3 1
+123 3 1
 
 
 tag :
