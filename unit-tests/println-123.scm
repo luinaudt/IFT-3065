@@ -1,4 +1,5 @@
 ;;(define e (cons 5 6))
 ;;(println e)
-(println 123)
+(let ((e 5))
+	(println ((lambda () (+ 123 e)))))
 ;123
