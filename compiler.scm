@@ -77,7 +77,7 @@
          
          (ir-code       (begin
 			  ;; (display "hoisted ast \n")
-			  ;; (pp hoisted-ast)
+			  ;;(pp hoisted-ast)
 			  ;; (display "\n")
 			  (compile-ir-program hoisted-ast '())))
          (code          (begin
@@ -106,6 +106,7 @@
                     exe-filename
                     (path-expand "stdio.o" root-dir)
 		    (path-expand "mmap.o" root-dir)
+		    (path-expand "gc.o" root-dir)
                     asm-filename)))
 
         ;; return exit status

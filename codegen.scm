@@ -97,7 +97,7 @@
                              ".align 8\n"
                              ".quad 0\n"
                              ".quad 0\n"
-                             ".byte 0\n"
+                             ".byte 7\n"
                              name ":\n"
                              "  cmp   $" nb-params ", %rax\n"
                              "  jnz   nargs_error\n")))
@@ -159,6 +159,7 @@
                                "  lea   " retLab "(%rip), %rax\n"
                                "  push  %rax\n"
                                "  mov   $" nargs ", %rax\n"
+			       "  add   $16,%rdi\n"
                                "  jmp   *-7(%rdi)\n"
                                ".align 8\n"
                                ".quad 0\n"
@@ -191,7 +192,8 @@
                        (cond ((equal? val #!void)
 			      (list "  push $25\n"))
 			     ((symbol? val)
-			      (append (list "push %r10\n"
+			      (append (compile-bloc `((push_lit ,(+ 1 (string-length (symbol->string val)))) (alloc)))
+				      (list "push %r10\n"
                                             "add $4, (%rsp)\n"
 					    "# symbole  " (symbol->string val) "\n")
                                       (list (push-string (symbol->string val)))))
@@ -202,7 +204,8 @@
                              ((char? val)
                               (list "  push  $2+8*" (char->integer val) "\n"))
 			     ((string? val)
-                              (append (list "push %r10\n"
+                              (append (compile-bloc `((push_lit ,(+ 1 (string-length val))) (alloc)))
+			              (list "push %r10\n"
                                             "add $3, (%rsp)\n")
 				      ;;"# string  " val "\n")
                                       (list (push-string val))))
@@ -239,14 +242,14 @@
                      (begin
                        (debug fs expr)
                        (list "  pop   %rdi\n"
-                             "  push  8*" (+ pos 1) "-7(%rdi)\n")))
+                             "  push  8*" (+ pos 3) "-7(%rdi)\n")))
 
                     ((pop_free ,pos)
                      (begin
                        (set! fs (- fs 2))
                        (debug fs expr)
                        (list "  pop   %rdi\n"
-                             "  pop   8*" (+ pos 1) "-7(%rdi)\n")))
+                             "  pop   8*" (+ pos 3) "-7(%rdi)\n")))
 
                     ((close ,nfree)
                      (begin
@@ -259,7 +262,8 @@
                              "  push  $8*" (+ nfree 1) "\n"
                              "  pop   8*0(%r10)  # longueur\n"
                              "  push  %r10\n"
-                             "  add   $8*2+7, (%rsp)\n"
+			     "  add   $7, (%rsp)\n"
+;;                             "  add   $8*2+7, (%rsp)\n"
                              "  add   $8*" (+ nfree 3) ", %r10\n")))
 
                     ((push_this ,offset)
@@ -455,7 +459,56 @@
                        (set! fs (+ fs 1))
                        (debug fs expr)
                        (list "  push   %r10\n")))
-                    
+
+		    ((alloc)
+		     (let ((lab (spec-lab-gensym))
+			   (labd (spec-lab-gensym))
+			   (labf (spec-lab-gensym)))	
+		       (begin
+			 (set! fs (- fs 1))
+			 (list "mov (%rsp),  %rdi# allocation \n"
+			       "mov %rdi, %rcx\n"
+			       "add %r10, %rcx\n" ;;test necessite
+			       "lea _fromspace(%rip), %rbx\n"
+			       "mov (%rbx), %rbx\n"
+			       "mov heap_size(%rip), %rdx\n"
+			       "add %rdx,%rbx\n"
+			       "cmp %rbx,%rcx\n"
+			       "jbe " lab "\n"
+			       labd ":\n"
+			       "mov heap_size(%rip),%rax\n";;to space suffisament grand
+			       "sub old_heap_size(%rip),%rax\n"
+			       "jl " labf "\n"
+			       "mov heap_size(%rip),%rax\n"
+			       "push %rax\n"
+			       "call mmap\n"
+			       "mov %rax, _tospace(%rip)\n"
+			       "mov heap_size(%rip),%rax\n"
+			       "mov %rax, old_heap_size(%rip)\n"
+			       labf ":\n"
+			       "mov %rsp, _stack_ptr(%rip)\n"
+			       "mov (%rsp),%rdi\n"
+			       "call _gc\n"
+			       "mov %rax, %r10\n"
+			       "lea _fromspace(%rip), %rbx\n"
+			       "mov (%rbx), %rbx\n"
+			       "add heap_size(%rip),%rbx\n"
+			       "add (%rsp), %rax\n"
+			       "cmp %rax, %rbx\n"
+			       "jae  " lab "\n"
+			       "mov heap_size(%rip), %rax\n"
+			       "sal $1, %rax\n"
+			       "push %rax\n"
+			       "mov %rax, heap_size(%rip)\n"
+			       "call mmap\n"
+			       "mov %rax, _tospace(%rip)\n"
+			       "jmp " labd "\n"
+			       lab ":\n"
+      			   ;;    "call print_rbx\n"
+			       "pop %rdi\n"
+
+
+			       ))))
                     ((cons)
                      (begin
                        (set! fs (- fs 1))
@@ -511,6 +564,14 @@
         "nargs_error:\n"
 	"  mov %rbp, %rsp\n"
 	"  pop %rbp\n"
+	"  push $'a'\n"
+	"  call putchar\n"
+	"  push $'r'\n"
+	"  call putchar\n"
+	"  push $'g'\n"
+	"  call putchar\n"
+	"  push $10\n"
+	"  call putchar\n"
 	"  mov   $1, %rax\n"
 	"  ret\n"))
 
@@ -525,10 +586,18 @@
 	  "main:\n"
 	  "push %rbp \n"
 	  "mov %rsp, %rbp\n"
+	  "mov %rsp, _stack_base(%rip)\n" ;;gc stack base
 	  ;; "  call  print_rsp\n"
-          "  push  $100*1024*1024\n"
+          "  push  heap_size(%rip)\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
+	  "  mov   %rax, _fromspace(%rip)\n" ;;gc fromspace
+	
+	  "  lea   glob_var_base(%rip), %rbx\n"
+	  "  mov   %rbx,_glob_base(%rip)\n"
+	  
+	  "  lea   glob_var_end(%rip), %rcx\n"
+	  "  mov   %rcx,_glob_end(%rip)\n"
 	  (compile-bloc exprs)
 	  "  mov   $0, %rax\n"
 	  ;; "  call  print_rsp\n"
@@ -541,7 +610,11 @@
 	  "\n\n"
           ".data\n"
           ".align 8\n"
-	  (map compile-env genv))))
+	  "heap_size: .quad 1024*1024*10 \n"
+	  "old_heap_size: .quad  \n"
+	  "glob_var_base:\n"
+	  (map compile-env genv)
+	  "glob_var_end:\n")))
 
 (define (debug fs expr)
   ;; (display fs)

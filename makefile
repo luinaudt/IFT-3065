@@ -1,9 +1,13 @@
 # File: makefile
 
 .SUFFIXES:
-.SUFFIXES: .scm .s .o .exe
+.SUFFIXES: .scm .s .o .exe .c
 
-all: stdio.o mmap.o
+all: stdio.o mmap.o gc.o
+
+
+.c.s:
+	gcc -O0 -S -o $*.s $*.c
 
 .s.o:
 	gcc -c -o $*.o $*.s
@@ -14,4 +18,4 @@ ut: all
 	./run-unit-tests.scm
 
 clean:
-	rm -f *.o *.exe *~ unit-tests/*.s unit-tests/*.exe unit-tests/*~
+	rm -f gc.s *.o *.exe *~ unit-tests/*.s unit-tests/*.exe unit-tests/*~
