@@ -35,16 +35,16 @@ word mark (word obj){
     switch (type){
     case 3:
     case 4:
-      printf("valeur s ou s : %d, %d\n",x[0], x[1]);
+      printf("valeur s ou s : %d, %d\n",(int)x[0], (int)x[1]);
       break;
     case 5:
-      printf("valeur vec : %d, %d\n",x[0], x[1]);
+      printf("valeur vec : %d, %d\n",(int)x[0], (int)x[1]);
       break;
     case 6:
-      printf("valeur l : %d, %d\n",x[0], x[1]);
+      printf("valeur l : %d, %d\n",(int)x[0], (int)x[1]);
       break;
     case 7:
-      printf("valeur f : %d,%d,%d,%d\n",x[0], x[1], x[2], x[3]);
+      printf("valeur f : %d,%d,%d,%d\n",(int)x[0], (int)x[1], (int)x[2], (int)x[3]);
       break;
     
     }
@@ -86,7 +86,7 @@ word* gc(){
   while (ptr<stack_base) {
     if(debugstack){
       printf("ptr stack %d,  %#010x\n", i ,ptr);
-      printf("val stack %d,  %#010x\n",i,*((word*)((word)ptr & ~7)));
+      printf("val stack %d,  %#010x\n",i,*((unsigned int*)((word)ptr & ~7)));
     }
     *ptr=mark(*ptr);
     ptr++;
