@@ -42,9 +42,7 @@
          (,_
           (error "unknown expression"))))
 
-(define special?
-  (lambda (x)
-    (member x '(define lambda let if))))
+
 
 (define (simple-cps expr)
   (match expr
@@ -52,15 +50,15 @@
                  const)
          (,var when (variable? var)
                var)
-         ((quote ,p) when (or (pair? p) (null? p) (symbol? p))
-          p)
+         ((quote ,c)
+          expr)
          ((set! ,var ,E1)
           `(set! ,var ,(simple-cps E1)))
          ((,op . ,Es) when (primitive? op)
           `(,op ,@(map simple-cps Es)))
-         ((lambda ,params ,E0)
+         ((lambda ,params . ,Es)
           (let ((k (gensym)))
-            `(lambda (,k ,@params) ,(cps E0 k))))))
+            `(lambda (,k ,@params) ,@(map (lambda (e) (cps e k)) Es))))))
 
 (define (multi-cps exprs body)
   (define (inner sexpr)
@@ -83,9 +81,9 @@
                  #t)
          (,var when (variable? var)
                #t)
-         ((quote ,p)
+         ((quote ,c)
           #t)
-         ((lambda ,params ,E0)
+         ((lambda ,params . ,E0)
           #t)
          ((set! ,var ,E1)
           (simple? E1))

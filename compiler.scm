@@ -53,26 +53,26 @@
 ;			  (display "\n")
                           (desugar ast)))
          (expanded-ast  (begin
-;			  (display "ast \n")
+;			  (display "desugared-ast \n")
 ;			  (pp desugared-ast)
 ;			  (display "\n")
                           (expand-macros desugared-ast)))
-         (cps-ast  (begin
-;			  (display "ast \n")
-;			  (pp expanded-ast)
-;			  (display "\n")
+         (cps-ast       (begin
+			  ;; (display "expanded-ast \n")
+			  ;; (pp expanded-ast)
+			  ;; (display "\n")
                           (map (lambda (e) (cps e '(lambda(r) r))) expanded-ast)))
 	 (closed-ast    (begin
-;			  (display "expanded ast \n")
-;			  (pp cps-ast)
-;			  (display "\n")
+			  (display "cps-ast \n")
+			  (pp cps-ast)
+			  (display "\n")
 			  (map closure-conv
 			       (map assign-conv
                                     (map alpha-conv cps-ast)))))
 	 (hoisted-ast (begin
-;			(display "closed-ast \n")
-;			(pp closed-ast)
-;			(display "\n")
+			(display "closed-ast \n")
+			(pp closed-ast)
+			(display "\n")
                         (hoist-closure-2 closed-ast)))
 				
          (ir-code       (begin
