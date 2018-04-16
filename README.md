@@ -13,9 +13,10 @@ Francis de Ladurantaye
 
 resultat make ut :
 123 3 1
-
-86.4
-
+539.9
+86.7
+86.3
+85.4
 
 tag :
 000 entiers

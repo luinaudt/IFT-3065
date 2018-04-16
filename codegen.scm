@@ -476,9 +476,9 @@
 			       "cmp %rbx,%rcx\n"
 			       "jbe " lab "\n"
 			       labd ":\n"
-			       "mov heap_size(%rip),%rax\n"
+			       "mov heap_size(%rip),%rax\n";;to space suffisament grand
 			       "sub old_heap_size(%rip),%rax\n"
-			       "jz " labf "\n"
+			       "jl " labf "\n"
 			       "mov heap_size(%rip),%rax\n"
 			       "push %rax\n"
 			       "call mmap\n"
@@ -592,11 +592,7 @@
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
 	  "  mov   %rax, _fromspace(%rip)\n" ;;gc fromspace
-	  ;;allocation pour gc
-	  "  push  heap_size(%rip)\n"
-	  "  call  mmap\n"
-	  "  mov   %rax, _tospace(%rip)\n" ;;gc tospace
-
+	
 	  "  lea   glob_var_base(%rip), %rbx\n"
 	  "  mov   %rbx,_glob_base(%rip)\n"
 	  
@@ -614,8 +610,8 @@
 	  "\n\n"
           ".data\n"
           ".align 8\n"
-	  "heap_size: .quad 1024 \n"
-	  "old_heap_size: .quad 0 \n"
+	  "heap_size: .quad 1024*1024*10 \n"
+	  "old_heap_size: .quad  \n"
 	  "glob_var_base:\n"
 	  (map compile-env genv)
 	  "glob_var_end:\n")))
