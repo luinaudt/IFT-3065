@@ -78,7 +78,7 @@ word mark (word obj){
 /**
    \param n : taille du bloc que l'on veut ajouter
 */
-word* gc(word n){
+word* gc(){
   int i=0;
   scan = tospace;
   copy = tospace;
