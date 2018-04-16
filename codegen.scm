@@ -611,7 +611,7 @@
           ".data\n"
           ".align 8\n"
 	  "heap_size: .quad 1024*1024*10 \n"
-	  "old_heap_size: .quad  \n"
+	  "old_heap_size: .quad  0\n"
 	  "glob_var_base:\n"
 	  (map compile-env genv)
 	  "glob_var_end:\n")))
