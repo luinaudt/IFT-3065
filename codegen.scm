@@ -461,26 +461,51 @@
                        (list "  push   %r10\n")))
 
 		    ((alloc)
-		     (let ((lab (spec-lab-gensym)))
+		     (let ((lab (spec-lab-gensym))
+			   (labd (spec-lab-gensym))
+			   (labf (spec-lab-gensym)))	
 		       (begin
 			 (set! fs (- fs 1))
-			 (list "pop %rdi# allocation \n"
+			 (list "mov (%rsp),  %rdi# allocation \n"
 			       "mov %rdi, %rcx\n"
 			       "add %r10, %rcx\n" ;;test necessite
 			       "lea _fromspace(%rip), %rbx\n"
 			       "mov (%rbx), %rbx\n"
-			       "add $10*1024*1024,%rbx\n"
+			       "mov heap_size(%rip), %rdx\n"
+			       "add %rdx,%rbx\n"
 			       "cmp %rbx,%rcx\n"
 			       "jbe " lab "\n"
+			       labd ":\n"
+			       "mov heap_size(%rip),%rax\n"
+			       "sub old_heap_size(%rip),%rax\n"
+			       "jz " labf "\n"
+			       "mov heap_size(%rip),%rax\n"
+			       "push %rax\n"
+			       "call mmap\n"
+			       "mov %rax, _tospace(%rip)\n"
+			       labf ":\n"
 			       "mov %rsp, _stack_ptr(%rip)\n"
+			       "mov (%rsp),%rdi\n"
 			       "call _gc\n"
 			       "mov %rax, %r10\n"
-;			       "lea _fromspace(%rip), %rbx\n"
-;			       "mov (%rbx), %rbx\n"
-;			       "add $10*1024*1024,%rbx\n"
-;			       "sub %rax, %rbx\n"
-;			       "call print_rbx\n"
+			       "lea _fromspace(%rip), %rbx\n"
+			       "mov (%rbx), %rbx\n"
+			       "add heap_size(%rip),%rbx\n"
+			       "add (%rsp), %rax\n"
+			       "cmp %rax, %rbx\n"
+			       "jae  " lab "\n"
+			       "mov heap_size(%rip), %rax\n"
+			       "sal $1, %rax\n"
+			       "push %rax\n"
+			       "mov %rax, heap_size(%rip)\n"
+			       "call mmap\n"
+			       "mov %rax, _tospace(%rip)\n"
+			       "jmp " labd "\n"
 			       lab ":\n"
+      			   ;;    "call print_rbx\n"
+			       "pop %rdi\n"
+
+
 			       ))))
                     ((cons)
                      (begin
@@ -561,12 +586,12 @@
 	  "mov %rsp, %rbp\n"
 	  "mov %rsp, _stack_base(%rip)\n" ;;gc stack base
 	  ;; "  call  print_rsp\n"
-          "  push  $10*1024*1024\n"
+          "  push  heap_size(%rip)\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, %r10\n"  ;;registre pour les variable globales
 	  "  mov   %rax, _fromspace(%rip)\n" ;;gc fromspace
 	  ;;allocation pour gc
-	  "  push  $10*1024*1024\n"
+	  "  push  heap_size(%rip)\n"
 	  "  call  mmap\n"
 	  "  mov   %rax, _tospace(%rip)\n" ;;gc tospace
 
@@ -587,6 +612,8 @@
 	  "\n\n"
           ".data\n"
           ".align 8\n"
+	  "heap_size: .quad 1024\n"
+	  "old_heap_size: .quad 1024\n"
 	  "glob_var_base:\n"
 	  (map compile-env genv)
 	  "glob_var_end:\n")))
