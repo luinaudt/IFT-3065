@@ -1,6 +1,7 @@
 #! /usr/bin/env gsi
 ;;(include "macros.scm")
 (include "match.scm")
+(include "appel-term.scm")
 (include "prims.scm")
 (include "environnement.scm")
 (include "closure-conv.scm")

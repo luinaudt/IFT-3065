@@ -111,11 +111,11 @@
           expr)
 
          (,v when (variable? v)
-             (if (mutable? v) `(car ,v) v))
+             (if (mutable? v) `($car ,v) v))
 
          ((set! ,v ,E1)
           (if (mutable? v)
-              `(set-car! ,v ,(ac E1))
+              `($set-car! ,v ,(ac E1))
               `(set! ,v ,(ac E1))))
 
          ((define ,v ,E1)
@@ -135,7 +135,7 @@
             `(lambda ,params2
                ,(if (null? mut-params)
                     `(let () ,@(map ac E))
-                    `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
+                    `(let ,(map (lambda (x) `(,(car x) ($cons ,(cdr x) '())))
                                 mut-params)
                        ,@(map ac E))))))
          
@@ -162,7 +162,7 @@
             `(lambda ,new-params
                ,(if (null? mut-params)
                     `(let () ,@(map ac E))
-                    `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
+                    `(let ,(map (lambda (x) `(,(car x) ($cons ,(cdr x) '())))
                                 mut-params)
                        ,@(map ac E))))))
 
@@ -183,7 +183,7 @@
                         bindings)
                ,(if (null? mut-vars)
                     `(let () ,@(map ac E))
-                    `(let ,(map (lambda (x) `(,(car x) (cons ,(cdr x) '())))
+                    `(let ,(map (lambda (x) `(,(car x) ($cons ,(cdr x) '())))
                                 mut-vars)
                        ,@(map ac E))))))
 
