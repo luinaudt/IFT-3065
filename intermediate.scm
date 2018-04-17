@@ -90,14 +90,14 @@
                    (append (list `(comment "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))
                            (compile-ir val env)
                            (begin
-                             ;;(set! fs (+ fs 1))
-                             (list `(push_loc ,(- fs (cdr var-pos)))))
+                             (set! fs (+ fs 1))
+                             (list `(push_loc ,(- (- fs 1) (cdr var-pos)))))
                            (begin
-                             (set! fs (- fs 1))
+                             (set! fs (- fs 2))
                              (list `(set-car!))))))
                 (else
                  (begin
-                   (set! fs (+ fs 1))
+                   ;;(set! fs (+ fs 1))
                    (set! body-defs (cons (cons var fs) body-defs))
                    (append (list `(comment "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"))
                            (compile-ir val env))))))))
