@@ -1,6 +1,7 @@
 (println 123)
 (define k "write devrait être la procédure")
 (define l 698)
+(println write)
 ((lambda ()
    (define write 5)
    (let ((x 10) (write 20))

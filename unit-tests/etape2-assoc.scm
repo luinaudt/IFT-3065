@@ -1,3 +1,5 @@
+
+(define liste '((8 9) (11 12)))
 (println (assoc 2 '()))
 (println (assoc 2 '((1 11) (2 22) (3 33))))
 (println (assoc 2 '(((1) 11) ((2) 22) ((3) 33))))

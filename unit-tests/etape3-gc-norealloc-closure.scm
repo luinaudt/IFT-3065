@@ -1,4 +1,4 @@
-(define nit 80000)
+(define nit 8000)
 (let loop2 ((y 1) (z 5) (u 8) (v 10))
   (if (< nit y)
       (println "fin")

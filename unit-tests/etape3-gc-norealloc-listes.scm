@@ -3,7 +3,7 @@
   (if (< 15 y)
       (println "fin")
       (begin
-	(println (let somme ((y (let loop ((x  100000))
+	(println (let somme ((y (let loop ((x  1000))
 				  (if (= x 0)
 				      (begin
 					'())
