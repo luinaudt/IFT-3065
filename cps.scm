@@ -51,14 +51,29 @@
          (,var when (variable? var)
                var)
          ((quote ,c)
-          expr)
+          `(quote ,c));;expr)
          ((set! ,var ,E1)
           `(set! ,var ,(simple-cps E1)))
          ((,op . ,Es) when (primitive? op)
           `(,op ,@(map simple-cps Es)))
-         ((lambda ,params . ,Es)
+	 ((lambda ,params ,Es)
           (let ((k (gensym)))
-            `(lambda (,k ,@params) ,@(map (lambda (e) (cps e k)) Es))))))
+	    `(lambda (,k ,@params) ,(cps Es k))))
+	 ;;	 ))
+	 ((lambda ,params . ,Es)
+	  (let ((k (gensym)))
+	    `(lambda (,k ,@params) ,(cps `(begin ,@Es) k))))))
+
+
+;; ((,E0 . ,Es)
+;;           (multi-cps (cons E0 Es)
+;;                      (lambda (sexprs)
+;;                        `(,(car sexprs)
+;;                          ,K
+;;                          ,@(cdr sexprs)))))
+
+
+;;           `(lambda (,k ,@params) ,@(map (lambda (e) (cps e k)) Es))))))
 
 (define (multi-cps exprs body)
   (define (inner sexpr)
@@ -83,9 +98,11 @@
                #t)
          ((quote ,c)
           #t)
-         ((lambda ,params . ,E0)
+	 
+         ((lambda ,params .  ,E0)
           #t)
-         ((set! ,var ,E1)
+	 
+	 ((set! ,var ,E1)
           (simple? E1))
          ((,op . ,Es) when (primitive? op)
           (all simple? Es))
@@ -106,22 +123,31 @@
                        `(,K (set! ,v ,@sexprs)))))
          ((define ,v ,E1)
 	  `(define ,v ,(cps E1 K)))
-         ((if ,E1 ,E2 ,E3)
+
+	 ((if ,E1 ,E2 ,E3)
           (multi-cps (list E1)
                      (lambda (sexprs)
                        `(if ,@sexprs
                             ,(cps E2 K)
                             ,(cps E3 K)))))
+	 ((if ,E1 ,E2)
+	  (multi-cps (list E1)
+                     (lambda (sexprs)
+                       `(if ,@sexprs
+                            ,(cps E2 K)))))
+
          ((begin ,E1 . ,Es)
           (if (null? Es)
               (cps E1 K)
               (let ((r1 (gensym)))
                 (cps E1 `(lambda (,r1)
                            ,(cps `(begin ,@Es) K))))))
-         ((,op . ,Es) when (primitive? op)
+	 
+	 ((,op . ,Es) when (primitive? op)
           (multi-cps Es
                      (lambda (sexprs)
                        `(,K (,op ,@sexprs)))))
+	
          ((,E0 . ,Es)
           (multi-cps (cons E0 Es)
                      (lambda (sexprs)
