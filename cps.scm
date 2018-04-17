@@ -50,6 +50,7 @@
                  const)
          (,var when (variable? var)
                var)
+	 
          ((quote ,c)
           `(quote ,c));;expr)
          ((set! ,var ,E1)
@@ -99,7 +100,7 @@
          ((quote ,c)
           #t)
 	 
-         ((lambda ,params .  ,E0)
+         ((lambda ,params . ,E0)
           #t)
 	 
 	 ((set! ,var ,E1)
@@ -134,8 +135,8 @@
 	  (multi-cps (list E1)
                      (lambda (sexprs)
                        `(if ,@sexprs
-                            ,(cps E2 K)))))
-
+                            ,(cps E2 K)
+			    ,(cps '(quote ()) K)))))
          ((begin ,E1 . ,Es)
           (if (null? Es)
               (cps E1 K)
